@@ -6,10 +6,8 @@ package com.elixr.apitestutility;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import static java.lang.System.exit;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -353,10 +351,10 @@ public class Screen2 extends javax.swing.JFrame {
                 Logger.getLogger(Screen2.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-//        Screen3 screen3 = new Screen3(screen3TableData,getExtendedState());
-//        screen3.setVisible(true);
-//        setVisible(false);
-//        this.dispose();
+        Screen3 screen3 = new Screen3(screen3TableData,getExtendedState());
+        screen3.setVisible(true);
+        setVisible(false);
+        this.dispose();
     }//GEN-LAST:event_executeTestbtnActionPerformed
 
     private static String beautifyJson(JSONObject json) {
@@ -446,14 +444,11 @@ public class Screen2 extends javax.swing.JFrame {
 
     // Helper method to parse values based on data type
     private static Object parseValue(String dataType, String value) {
-        switch (dataType.toLowerCase()) {
-            case "integer":
-                return Integer.parseInt(value);
-            case "boolean":
-                return Boolean.parseBoolean(value);
-            default:
-                return value; // Default is String
-        }
+        return switch (dataType.toLowerCase()) {
+            case "integer" -> Integer.parseInt(value);
+            case "boolean" -> Boolean.parseBoolean(value);
+            default -> value;
+        }; // Default is String
     }
 
     // Helper method to generate combinations

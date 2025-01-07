@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -36,7 +35,7 @@ public class Screen1 extends javax.swing.JFrame {
         initComponents();
         setUpHeaderComponents();
         jsonScrollPane.setEnabled(false);
-        jsonrequestBody.setEnabled(false);
+        jsonRequestBody.setEnabled(false);
         jsonrequestBody1.setEnabled(false);
         jsonTextLabel.setEnabled(false);
     }
@@ -86,7 +85,7 @@ public class Screen1 extends javax.swing.JFrame {
         resetBtn = new javax.swing.JButton();
         exitBtn = new javax.swing.JButton();
         jsonScrollPane = new javax.swing.JScrollPane();
-        jsonrequestBody = new javax.swing.JTextArea();
+        jsonRequestBody = new javax.swing.JTextArea();
         jsonrequestBody1 = new javax.swing.JTextArea();
         jsonTextLabel = new javax.swing.JLabel();
         deleteHeaderBtn = new javax.swing.JButton();
@@ -134,9 +133,9 @@ public class Screen1 extends javax.swing.JFrame {
         });
         bottomPanel.add(exitBtn);
 
-        jsonrequestBody.setColumns(20);
-        jsonrequestBody.setRows(5);
-        jsonScrollPane.setViewportView(jsonrequestBody);
+        jsonRequestBody.setColumns(20);
+        jsonRequestBody.setRows(5);
+        jsonScrollPane.setViewportView(jsonRequestBody);
 
         jsonrequestBody1.setColumns(20);
         jsonrequestBody1.setRows(5);
@@ -298,20 +297,6 @@ public class Screen1 extends javax.swing.JFrame {
         }
     }
 
-    private void printDataInTable(Map<String, Object> fieldKeyAndvalueMap) {
-        JFrame frame = new JFrame("JSON Data Table");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(500, 500);
-        DefaultTableModel table = new DefaultTableModel();
-        table.setColumnIdentifiers(new String[]{"Key Path", "value"});
-        fieldKeyAndvalueMap.forEach((key, value) -> table.addRow(new Object[]{key, value}));
-        JTable jTable = new JTable(table);
-        JScrollPane scroll = new JScrollPane(jTable);
-        frame.add(scroll);
-        frame.setVisible(true);
-    }
-
-
     private void SubmitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SubmitBtnActionPerformed
         String baseUrlInput = baseUrl.getText();
         String methodInput = (String) methodDropDown.getSelectedItem();
@@ -344,8 +329,8 @@ public class Screen1 extends javax.swing.JFrame {
             } else {
                 jsonRequestBodyTableData = null;
             }
-//            Screen2 screen2 = new Screen2(jsonRequestBodyTableData, baseUrlInput, methodInput, pathInput, nameInput, tableModel,getExtendedState());
-//            screen2.setVisible(true);
+            Screen2 screen2 = new Screen2(jsonRequestBodyTableData, baseUrlInput, methodInput, pathInput, nameInput, tableModel,getExtendedState());
+            screen2.setVisible(true);
             setVisible(false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -407,48 +392,6 @@ public class Screen1 extends javax.swing.JFrame {
         return tableDataList.toArray(new Object[0][]);
     }
 
-    private static String determineDataType(Object value) {
-        if (value instanceof Integer) {
-            return "Integer";
-        } else if (value instanceof Double || value instanceof Float) {
-            return "Decimal";
-        } else if (value instanceof Boolean) {
-            return "Boolean"; //check for boolean type
-        } else if (value instanceof String) {
-            String stringValue = value.toString();
-            if (stringValue.matches("^[0-9a-fA-F\\-]{36}$")) {
-                return "UUID";
-            } else if (stringValue.matches("\\d+")) {
-                return "Integer";
-            } else if (stringValue.matches("\\d+\\.\\d+")) {
-                return "Decimal";
-            } else {
-                return "String";
-            }
-        } else {
-            return "Unknown"; // Unsupported type
-        }
-    }
-
-    private static boolean validateDataType(Object value, String expectedType) {
-        if (expectedType.equals("Integer") && value instanceof Integer) {
-            return true;
-        }
-        if (expectedType.equals("Decimal") && (value instanceof Double || value instanceof Float)) {
-            return true;
-        }
-        if (expectedType.equals("String") && value instanceof String) {
-            return true;
-        }
-        if (expectedType.equals("UUID") && value instanceof String) {
-            return value.toString().matches("^[0-9a-fA-F\\-]{36}$");
-        }
-        if (expectedType.equals("Boolean") && value instanceof Boolean) {
-            return true;
-        }
-        return false;
-    }
-
     /**
      * @param args the command line arguments
      */
@@ -466,24 +409,11 @@ public class Screen1 extends javax.swing.JFrame {
 
                 }
             }
-        } catch (ClassNotFoundException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(Screen1.class
                     .getName()).log(java.util.logging.Level.SEVERE, null, ex);
 
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Screen1.class
-                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
-
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Screen1.class
-                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
-
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Screen1.class
-                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
-        //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -503,9 +433,9 @@ public class Screen1 extends javax.swing.JFrame {
     private javax.swing.JButton exitBtn;
     private javax.swing.JScrollPane headersJScrollPane;
     private javax.swing.JPanel headersPanel;
+    private javax.swing.JTextArea jsonRequestBody;
     private javax.swing.JScrollPane jsonScrollPane;
     private javax.swing.JLabel jsonTextLabel;
-    private javax.swing.JTextArea jsonrequestBody;
     private javax.swing.JTextArea jsonrequestBody1;
     private javax.swing.JComboBox<String> methodDropDown;
     private javax.swing.JLabel methodLabel;

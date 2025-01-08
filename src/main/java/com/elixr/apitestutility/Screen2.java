@@ -20,8 +20,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -40,7 +40,7 @@ public class Screen2 extends javax.swing.JFrame {
 //        setupFrame();
     }
 
-    public Screen2(Object[][] jsonRequestBodyTableData, String baseUrl, String method, String path, String name, DefaultTableModel headersTableModel,int previousState) {
+    public Screen2(Object[][] jsonRequestBodyTableData, String baseUrl, String method, String path, String name, DefaultTableModel headersTableModel, int previousState) {
 //        setExtendedState(previousState);
         this.name = name;
         initComponents();
@@ -70,7 +70,7 @@ public class Screen2 extends javax.swing.JFrame {
                 }
             });
             customizeTable();
-        }else{
+        } else {
             jsonTable.setEnabled(false);
         }
         urlValueLabel.setText(baseUrl);
@@ -82,7 +82,7 @@ public class Screen2 extends javax.swing.JFrame {
                 String headerName = (String) headersTableModel.getValueAt(i, 0);
                 String headerValue = (String) headersTableModel.getValueAt(i, 1);
                 headersText.append(headerName).append(": ").append(headerValue);
-                if(i<headersTableModel.getRowCount()-1){
+                if (i < headersTableModel.getRowCount() - 1) {
                     headersText.append(" , ").append("\n");
                 }
             }
@@ -90,87 +90,6 @@ public class Screen2 extends javax.swing.JFrame {
         } else {
             headersValueLabel.setText("No headers available");
         }
-    }
-
-    private JSONObject convertTableToJson(Object[][] jsonRequestBodyTableData) {
-        JSONObject rootJson = new JSONObject(); // Root JSON object
-        for (Object[] row : jsonRequestBodyTableData) {
-            String field = (String) row[0];  // Field name (e.g., "customErrors[0].customErrorText")
-            String dataType = (String) row[1];  // Data type (e.g., "String")
-            Object data = row[2];  // Data (can be any type)
-
-            // Split field by dot notation to find the hierarchy
-            String[] keys = field.split("\\.");
-
-            JSONObject currentJson = rootJson; // Start at the root
-            for (int i = 0; i < keys.length - 1; i++) {
-                String key = keys[i];
-
-                // Check if it's an array (e.g., "customErrors[0]")
-                if (key.matches(".*\\[\\d+\\]")) {
-                    String arrayName = key.substring(0, key.indexOf("["));
-                    int index = Integer.parseInt(key.substring(key.indexOf("[") + 1, key.indexOf("]")));
-
-                    // Create or retrieve the JSONArray
-                    if (!currentJson.has(arrayName)) {
-                        currentJson.put(arrayName, new JSONArray());
-                    }
-                    JSONArray jsonArray = currentJson.getJSONArray(arrayName);
-
-                    // Ensure the array has enough elements
-                    while (jsonArray.length() <= index) {
-                        jsonArray.put(new JSONObject());
-                    }
-
-                    currentJson = jsonArray.getJSONObject(index); // Move to the array element
-                } else {
-                    // Create or retrieve the nested object
-                    if (!currentJson.has(key)) {
-                        currentJson.put(key, new JSONObject());
-                    }
-                    currentJson = currentJson.getJSONObject(key); // Move to the nested object
-                }
-            }
-            String finalKey = keys[keys.length - 1];
-            if (dataType.equalsIgnoreCase("String")) {
-                currentJson.put(finalKey, data.toString());
-            } else if (dataType.equalsIgnoreCase("Integer")) {
-                // Handle both integer and floating-point numbers
-                if (data instanceof Integer) {
-                    currentJson.put(finalKey, data);
-                } else if (data.toString().contains(".")) {
-                    currentJson.put(finalKey, Double.parseDouble(data.toString().trim()));
-                } else {
-                    currentJson.put(finalKey, Integer.parseInt(data.toString().trim()));
-                }
-            } else if (dataType.equalsIgnoreCase("Boolean")) {
-                // Handle Boolean
-                if (data instanceof Boolean) {
-                    currentJson.put(finalKey, data);
-                } else {
-                    currentJson.put(finalKey, Boolean.parseBoolean(data.toString().trim().toLowerCase()));
-                }
-            } else {
-                currentJson.put(finalKey, data.toString()); // Default to String if unrecognized
-            }
-        }
-        return rootJson;
-    }
-
-    private static Object[][] extractTableData(JTable table) {
-        DefaultTableModel model = (DefaultTableModel) table.getModel();
-        int rowCount = model.getRowCount();
-        int colCount = model.getColumnCount();
-
-        Object[][] data = new Object[rowCount][colCount];
-
-        // Extract data from the table model
-        for (int row = 0; row < rowCount; row++) {
-            for (int col = 0; col < colCount; col++) {
-                data[row][col] = model.getValueAt(row, col);
-            }
-        }
-        return data;
     }
 
     // to ensure the frame opens maximized, Allow resizing, and set a default close operation
@@ -337,36 +256,22 @@ public class Screen2 extends javax.swing.JFrame {
     private void executeTestbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_executeTestbtnActionPerformed
         // TODO add your handling code here:
         Object[][] screen3TableData = null;
-        System.out.println("Table row count: "+jsonTable.getRowCount());
-        printTableData(jsonTable);
-        
-        if(jsonTable.getRowCount()== 0){
+
+        if (jsonTable.getRowCount() == 0) {
             screen3TableData = null;
         } else {
-            Object[][] requestJson = extractTableData(jsonTable);
             try {
                 screen3TableData = generateRequestBodies(name, jsonTable);
-                System.out.println("Screen 3 row count = "+screen3TableData.length);
+                System.out.println("Screen 3 row count = " + screen3TableData.length);
             } catch (Exception ex) {
                 Logger.getLogger(Screen2.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        Screen3 screen3 = new Screen3(screen3TableData,getExtendedState());
+        Screen3Frame screen3 = new Screen3Frame(screen3TableData, getExtendedState());
         screen3.setVisible(true);
         setVisible(false);
         this.dispose();
     }//GEN-LAST:event_executeTestbtnActionPerformed
-
-    private static String beautifyJson(JSONObject json) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
-            Map<String, Object> map = jsonObjectToMap(json);
-            return writer.writeValueAsString(map);
-        } catch (Exception e) {
-            return json.toString(); // Return the original string if it fails
-        }
-    }
 
     private static Map<String, Object> jsonObjectToMap(JSONObject jsonObject) {
         Map<String, Object> map = new HashMap<>();
@@ -398,7 +303,7 @@ public class Screen2 extends javax.swing.JFrame {
         return list;
     }
 
-     public static Object[][] generateRequestBodies(String name, JTable table) {
+    public static Object[][] generateRequestBodies(String name, JTable table) {
         List<Object[]> requestBodies = new ArrayList<>();
 
         // Step 1: Extract fields and their values from the JTable
@@ -411,12 +316,21 @@ public class Screen2 extends javax.swing.JFrame {
         for (int row = 0; row < rowCount; row++) {
             String fieldName = table.getValueAt(row, 0).toString(); // Field name
             String dataType = table.getValueAt(row, 1).toString(); // Data type (String, Integer, Boolean)
-            String valuesStr = table.getValueAt(row, 2).toString(); // Positive values (comma-separated)
+            String positiveValuesStr = table.getValueAt(row, 2).toString(); // Positive values (comma-separated)
+            String negativevalueStr = table.getValueAt(row, 3).toString();
+            String[] values = positiveValuesStr.split(",");
+            String[] negativeValues = negativevalueStr.split(",");
 
-            String[] values = valuesStr.split(",");
             List<Object> parsedValues = new ArrayList<>();
+
             for (String value : values) {
                 parsedValues.add(parseValue(dataType, value.trim()));
+            }
+
+            for (String value : negativeValues) {
+                if (!value.equals("")) {
+                    parsedValues.add(parseValue(dataType, value.trim()));
+                }
             }
 
             // Add default value (first value in the list) to the request body
@@ -445,15 +359,18 @@ public class Screen2 extends javax.swing.JFrame {
     // Helper method to parse values based on data type
     private static Object parseValue(String dataType, String value) {
         return switch (dataType.toLowerCase()) {
-            case "integer" -> Integer.parseInt(value);
-            case "boolean" -> Boolean.parseBoolean(value);
-            default -> value;
+            case "integer" ->
+                Integer.parseInt(value);
+            case "boolean" ->
+                Boolean.parseBoolean(value);
+            default ->
+                value;
         }; // Default is String
     }
 
     // Helper method to generate combinations
     private static void generateCombinations(List<String> fields, List<List<Object>> valueCombinations,
-                                             JSONObject baseRequestBody, String name, List<Object[]> requestBodies) {
+            JSONObject baseRequestBody, String name, List<Object[]> requestBodies) {
         int[] indices = new int[fields.size()];
         int totalCombinations = 1;
 
@@ -477,7 +394,7 @@ public class Screen2 extends javax.swing.JFrame {
                 testName += String.format(" with %s value %s", fieldName, value);
             }
 
-            requestBodies.add(new Object[]{testName, requestBody.toString()});
+            requestBodies.add(new Object[]{testName, formatJsonObject(requestBody)});
 
             // Update indices for the next combination
             for (int j = fields.size() - 1; j >= 0; j--) {
@@ -491,33 +408,77 @@ public class Screen2 extends javax.swing.JFrame {
         }
     }
 
-    public static void printTableData(JTable table) {
-        // Get the TableModel (this is where the data is stored)
-        TableModel model = table.getModel();
+    public static JSONObject formatJsonObject(JSONObject input) throws JSONException {
+        JSONObject result = new JSONObject();
 
-        // Get the number of rows and columns
-        int rowCount = model.getRowCount();
-        int columnCount = model.getColumnCount();
+        for (String key : input.keySet()) {
+            String[] parts = key.split("\\.");
+            addNestedKeys(result, parts, input.get(key));
+        }
+        return result;
+    }
 
-        // Loop through the rows and columns to print the data
-        for (int row = 0; row < rowCount; row++) {
-            for (int col = 0; col < columnCount; col++) {
-                // Get the value from the model
-                Object value = model.getValueAt(row, col);
-                System.out.print(value + "\t");  // Print the value in the table
+    private static void addNestedKeys(JSONObject current, String[] keys, Object value) throws JSONException {
+        for (int i = 0; i < keys.length; i++) {
+            String key = keys[i];
+
+            // Check if this is the last key in the array
+            if (i == keys.length - 1) {
+                if (key.matches(".*\\[\\d+\\]$")) { // Handle array indices
+                    String baseKey = key.substring(0, key.indexOf("["));
+                    int index = Integer.parseInt(key.substring(key.indexOf("[") + 1, key.indexOf("]")));
+
+                    if (!current.has(baseKey)) {
+                        current.put(baseKey, new JSONArray());
+                    }
+
+                    JSONArray array = current.getJSONArray(baseKey);
+                    ensureCapacity(array, index);
+                    array.put(index, value);
+                } else {
+                    current.put(key, value);
+                }
+            } else {
+                if (key.matches(".*\\[\\d+\\]$")) { // Handle nested array keys
+                    String baseKey = key.substring(0, key.indexOf("["));
+                    int index = Integer.parseInt(key.substring(key.indexOf("[") + 1, key.indexOf("]")));
+
+                    if (!current.has(baseKey)) {
+                        current.put(baseKey, new JSONArray());
+                    }
+
+                    JSONArray array = current.getJSONArray(baseKey);
+                    ensureCapacity(array, index);
+
+                    if (array.isNull(index)) {
+                        array.put(index, new JSONObject());
+                    }
+
+                    current = array.getJSONObject(index);
+                } else {
+                    if (!current.has(key)) {
+                        current.put(key, new JSONObject());
+                    }
+                    current = current.getJSONObject(key);
+                }
             }
-            System.out.println();  // Move to the next line after each row
         }
     }
-    
+
+    private static void ensureCapacity(JSONArray array, int index) {
+        while (array.length() <= index) {
+            array.put(JSONObject.NULL);
+        }
+    }
+
     private void jsonTablePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jsonTablePropertyChange
         // TODO add your handling code here:
     }//GEN-LAST:event_jsonTablePropertyChange
 
     private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
         // TODO add your handling code here:
-        int confirm = JOptionPane.showConfirmDialog(null,"Are you sure want to exit?");
-        if(confirm==0){
+        int confirm = JOptionPane.showConfirmDialog(null, "Are you sure want to exit?");
+        if (confirm == 0) {
             exit(0);
         }
     }//GEN-LAST:event_exitBtnActionPerformed
@@ -526,11 +487,7 @@ public class Screen2 extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        Object[][] tableData = {
-            {"Field1", "String", "123", "", ""},
-            {"Field2", "String", "abc", "", ""},
-            {"Field3", "String", "", "", ""}
-        };
+
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -552,13 +509,6 @@ public class Screen2 extends javax.swing.JFrame {
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(Screen2.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */

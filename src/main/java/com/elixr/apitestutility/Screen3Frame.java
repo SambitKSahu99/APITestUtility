@@ -38,6 +38,7 @@ public class Screen3Frame extends javax.swing.JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
+
     private void populateResultTable(Object[][] tableData) {
 
         // Add an "SL" column to the table data

@@ -256,7 +256,6 @@ public class Screen2 extends javax.swing.JFrame {
     private void executeTestbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_executeTestbtnActionPerformed
         // TODO add your handling code here:
         Object[][] screen3TableData = null;
-
         if (jsonTable.getRowCount() == 0) {
             screen3TableData = null;
         } else {
@@ -272,36 +271,6 @@ public class Screen2 extends javax.swing.JFrame {
         setVisible(false);
         this.dispose();
     }//GEN-LAST:event_executeTestbtnActionPerformed
-
-    private static Map<String, Object> jsonObjectToMap(JSONObject jsonObject) {
-        Map<String, Object> map = new HashMap<>();
-        for (Object key : jsonObject.keySet()) {
-            Object value = jsonObject.get((String) key);
-            // Recursively handle nested JSONObjects
-            if (value instanceof JSONObject) {
-                value = jsonObjectToMap((JSONObject) value);
-            } else if (value instanceof JSONArray) {
-                value = jsonArrayToList((JSONArray) value);
-            }
-            map.put((String) key, value);
-        }
-        return map;
-    }
-
-    private static List<Object> jsonArrayToList(JSONArray jsonArray) {
-        List<Object> list = new ArrayList<>();
-        for (int i = 0; i < jsonArray.length(); i++) {
-            Object value = jsonArray.get(i);
-            // Recursively handle nested JSONObjects
-            if (value instanceof JSONObject) {
-                value = jsonObjectToMap((JSONObject) value);
-            } else if (value instanceof JSONArray) {
-                value = jsonArrayToList((JSONArray) value);
-            }
-            list.add(value);
-        }
-        return list;
-    }
 
     public static Object[][] generateRequestBodies(String name, JTable table) {
         List<Object[]> requestBodies = new ArrayList<>();
@@ -347,7 +316,7 @@ public class Screen2 extends javax.swing.JFrame {
         if (fieldsWithMultipleValues.isEmpty()) {
             // If no field has multiple values, generate a single request body
             String testName = "Verify " + name + " with all default values";
-            requestBodies.add(new Object[]{testName, defaultRequestBody.toString()});
+            requestBodies.add(new Object[]{testName, formatJsonObject(defaultRequestBody)});
         } else {
             generateCombinations(fieldsWithMultipleValues, valueCombinations, defaultRequestBody, name, requestBodies);
         }
@@ -410,7 +379,6 @@ public class Screen2 extends javax.swing.JFrame {
 
     public static JSONObject formatJsonObject(JSONObject input) throws JSONException {
         JSONObject result = new JSONObject();
-
         for (String key : input.keySet()) {
             String[] parts = key.split("\\.");
             addNestedKeys(result, parts, input.get(key));

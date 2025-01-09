@@ -5,10 +5,7 @@
 package com.elixr.apitestutility;
 
 import java.awt.Component;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
+import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -64,13 +61,19 @@ public class Screen3Frame extends javax.swing.JFrame {
 
         resultTable.setModel(model);
         resultTable.getColumnModel().getColumn(2).setCellRenderer(new JsonCellRenderer());
-//        resultTable.getColumnModel().getColumn(2).setCellEditor(new TextAreaEditor());
+
+        // Set vertical alignment to top for the "SL" and "Test Name" columns
+        DefaultTableCellRenderer topAlignRenderer = new DefaultTableCellRenderer();
+        topAlignRenderer.setVerticalAlignment(SwingConstants.TOP);
+
+        resultTable.getColumnModel().getColumn(0).setCellRenderer(topAlignRenderer); // SL Column
+        resultTable.getColumnModel().getColumn(1).setCellRenderer(topAlignRenderer); // Test Name Column
+
         for (int row = 0; row < resultTable.getRowCount(); row++) {
             adjustRowHeight(resultTable, row, 2); // Adjust for column 2 ("Request Body")
         }
         resultTableScrollPane.revalidate();
         resultTableScrollPane.repaint();
-//      resultTable.getColumnModel().getColumn(2).setCellRenderer(new BeautifiedJsonCellRenderer());
     }
 
     private static void adjustRowHeight(JTable table, int row, int column) {

@@ -35,7 +35,7 @@ public class Screen3Frame extends javax.swing.JFrame {
         setExtendedState(state);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
-    
+   
     private void populateResultTable(Object[][] tableData) {
         DefaultTableModel model = new DefaultTableModel(
                 tableData,
@@ -46,7 +46,7 @@ public class Screen3Frame extends javax.swing.JFrame {
                 return true; // Make the table cells non-editable.
             }
         };
-
+        
         resultTable.setModel(model);
         resultTable.getColumnModel().getColumn(1).setCellRenderer(new TextAreaRenderer());
 //        resultTable.getColumnModel().getColumn(2).setCellEditor(new TextAreaEditor());

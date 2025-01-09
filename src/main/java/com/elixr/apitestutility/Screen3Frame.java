@@ -11,6 +11,7 @@ import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
+import org.json.JSONObject;
 
 /**
  *
@@ -59,7 +60,7 @@ public class Screen3Frame extends javax.swing.JFrame {
         };
 
         resultTable.setModel(model);
-        resultTable.getColumnModel().getColumn(2).setCellRenderer(new TextAreaRenderer());
+        resultTable.getColumnModel().getColumn(2).setCellRenderer(new JsonCellRenderer());
 //        resultTable.getColumnModel().getColumn(2).setCellEditor(new TextAreaEditor());
         for (int row = 0; row < resultTable.getRowCount(); row++) {
             adjustRowHeight(resultTable, row, 2); // Adjust for column 2 ("Request Body")
@@ -76,20 +77,35 @@ public class Screen3Frame extends javax.swing.JFrame {
         table.setRowHeight(row, Math.max(table.getRowHeight(row), preferredHeight));
     }
 
-    class TextAreaRenderer extends DefaultTableCellRenderer {
+    class JsonCellRenderer extends DefaultTableCellRenderer {
 
         private final JTextArea textArea = new JTextArea();
 
-        public TextAreaRenderer() {
+        public JsonCellRenderer() {
             textArea.setLineWrap(true);
             textArea.setWrapStyleWord(true);
         }
 
         @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            textArea.setText(value != null ? value.toString() : "");
+        public Component getTableCellRendererComponent(
+                JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+            if (value != null) {
+                try {
+                    // Format the JSON value
+                    String formattedJson = new JSONObject(value.toString()).toString(4); // Indent with 4 spaces
+                    textArea.setText(formattedJson);
+                } catch (Exception e) {
+                    // If value is not valid JSON, display as is
+                    textArea.setText(value.toString());
+                }
+            } else {
+                textArea.setText("");
+            }
+
             textArea.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
             textArea.setForeground(isSelected ? table.getSelectionForeground() : table.getForeground());
+
             return textArea;
         }
     }

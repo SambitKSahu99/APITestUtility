@@ -316,7 +316,8 @@ public class Screen2 extends javax.swing.JFrame {
         if (fieldsWithMultipleValues.isEmpty()) {
             // If no field has multiple values, generate a single request body
             String testName = "Verify " + name + " with all default values";
-            requestBodies.add(new Object[]{testName, formatJsonObject(defaultRequestBody)});
+            requestBodies.add(new Object[]{testName, defaultRequestBody.toString(4)});
+
         } else {
             generateCombinations(fieldsWithMultipleValues, valueCombinations, defaultRequestBody, name, requestBodies);
         }

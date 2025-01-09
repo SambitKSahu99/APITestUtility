@@ -18,7 +18,6 @@ import javax.swing.table.DefaultTableModel;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-
 /**
  *
  * @author sambit.sahu
@@ -329,7 +328,7 @@ public class Screen1 extends javax.swing.JFrame {
             } else {
                 jsonRequestBodyTableData = null;
             }
-            Screen2 screen2 = new Screen2(jsonRequestBodyTableData, baseUrlInput, methodInput, pathInput, nameInput, tableModel,getExtendedState());
+            Screen2 screen2 = new Screen2(this, jsonRequestBodyTableData, baseUrlInput, methodInput, pathInput, nameInput, tableModel, getExtendedState());
             screen2.setVisible(true);
             setVisible(false);
         } catch (Exception e) {
@@ -365,8 +364,8 @@ public class Screen1 extends javax.swing.JFrame {
 
     private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
         // TODO add your handling code here:
-        int confirm = JOptionPane.showConfirmDialog(null,"Are you sure want to exit?");
-        if(confirm==0){
+        int confirm = JOptionPane.showConfirmDialog(null, "Are you sure want to exit?");
+        if (confirm == 0) {
             exit(0);
         }
     }//GEN-LAST:event_exitBtnActionPerformed

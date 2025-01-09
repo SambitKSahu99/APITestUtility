@@ -20,6 +20,7 @@ public class Screen3Frame extends javax.swing.JFrame {
 
     /**
      * Creates new form Screen3Frame
+     *
      * @param tableData
      * @param state
      */
@@ -28,30 +29,40 @@ public class Screen3Frame extends javax.swing.JFrame {
         setupFrame(state);
         populateResultTable(tableData);
     }
-    
-    public Screen3Frame(){}
-    
+
+    public Screen3Frame() {
+    }
+
     private void setupFrame(int state) {
         setExtendedState(state);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
-   
+
+
     private void populateResultTable(Object[][] tableData) {
+
+        // Add an "SL" column to the table data
+        Object[][] updatedTableData = new Object[tableData.length][6]; // 6 columns now
+        for (int i = 0; i < tableData.length; i++) {
+            updatedTableData[i][0] = i + 1; // SL column with serial numbers starting from 1
+            System.arraycopy(tableData[i], 0, updatedTableData[i], 1, tableData[i].length);
+        }
+
         DefaultTableModel model = new DefaultTableModel(
-                tableData,
-                new String[]{"Test Name", "Request Body", "Response Code", "Response Body", "Test Result"}
+                updatedTableData,
+                new String[]{"SL", "Test Name", "Request Body", "Response Code", "Response Body", "Test Result"}
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return true; // Make the table cells non-editable.
             }
         };
-        
+
         resultTable.setModel(model);
-        resultTable.getColumnModel().getColumn(1).setCellRenderer(new TextAreaRenderer());
+        resultTable.getColumnModel().getColumn(2).setCellRenderer(new TextAreaRenderer());
 //        resultTable.getColumnModel().getColumn(2).setCellEditor(new TextAreaEditor());
         for (int row = 0; row < resultTable.getRowCount(); row++) {
-            adjustRowHeight(resultTable, row, 1); // Adjust for column 1
+            adjustRowHeight(resultTable, row, 2); // Adjust for column 2 ("Request Body")
         }
         resultTableScrollPane.revalidate();
         resultTableScrollPane.repaint();
@@ -64,8 +75,9 @@ public class Screen3Frame extends javax.swing.JFrame {
         int preferredHeight = comp.getPreferredSize().height;
         table.setRowHeight(row, Math.max(table.getRowHeight(row), preferredHeight));
     }
-    
+
     class TextAreaRenderer extends DefaultTableCellRenderer {
+
         private final JTextArea textArea = new JTextArea();
 
         public TextAreaRenderer() {

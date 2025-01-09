@@ -302,7 +302,8 @@ public class Screen1 extends javax.swing.JFrame {
         String methodInput = (String) methodDropDown.getSelectedItem();
         String nameInput = nameField.getText();
         String pathInput = path.getText();
-        Object[][] jsonRequestBodyTableData;
+        JSONObject jsonRequestBodyObject = null;
+        Object[][] jsonRequestBodyTableData = null;
         if (baseUrlInput.isBlank()) {
             JOptionPane.showMessageDialog(this, "Base URL is mandatory", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
             return;
@@ -322,14 +323,12 @@ public class Screen1 extends javax.swing.JFrame {
         String jsonInput = jsonrequestBody1.getText();
         try {
             if (methodInput.equalsIgnoreCase("post") || methodInput.equalsIgnoreCase("put") || methodInput.equalsIgnoreCase("patch")) {
-                JSONObject jsonObject = new JSONObject(jsonInput);
+                jsonRequestBodyObject = new JSONObject(jsonInput);
                 jsonFieldsAndValues.clear(); // Clear previous data
-                extractFieldsAndValues(jsonObject, "");
+                extractFieldsAndValues(jsonRequestBodyObject, "");
                 jsonRequestBodyTableData = prepareTableData(jsonFieldsAndValues);
-            } else {
-                jsonRequestBodyTableData = null;
-            }
-            Screen2 screen2 = new Screen2(jsonRequestBodyTableData, baseUrlInput, methodInput, pathInput, nameInput, tableModel,getExtendedState());
+            } 
+            Screen2 screen2 = new Screen2(jsonRequestBodyObject,jsonRequestBodyTableData, baseUrlInput, methodInput, pathInput, nameInput, tableModel,getExtendedState());
             screen2.setVisible(true);
             setVisible(false);
         } catch (Exception e) {

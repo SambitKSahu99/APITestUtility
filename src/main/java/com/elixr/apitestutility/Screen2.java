@@ -4,13 +4,10 @@
  */
 package com.elixr.apitestutility;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
+
 import static java.lang.System.exit;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultCellEditor;
@@ -40,11 +37,15 @@ public class Screen2 extends javax.swing.JFrame {
 //        setupFrame();
     }
 
-    public Screen2(Object[][] jsonRequestBodyTableData, String baseUrl, String method, String path, String name, DefaultTableModel headersTableModel, int previousState) {
+    public Screen2(JSONObject jsonRequestBodyObject,Object[][] jsonRequestBodyTableData, String baseUrl, String method, String path, String name, DefaultTableModel headersTableModel, int previousState) {
 //        setExtendedState(previousState);
         this.name = name;
         initComponents();
         setupFrame(previousState);
+        setUpComponents(jsonRequestBodyTableData,baseUrl,method,headersTableModel);     
+    }
+    
+    private void setUpComponents(Object[][] jsonRequestBodyTableData, String baseUrl, String method, DefaultTableModel headersTableModel){
         if (jsonRequestBodyTableData != null) {
             for (Object[] row : jsonRequestBodyTableData) {
                 if (row[1] == "String") {
@@ -52,10 +53,10 @@ public class Screen2 extends javax.swing.JFrame {
                 }
             }
             jsonTable.setModel(new DefaultTableModel(jsonRequestBodyTableData, new String[]{
-                "Field", "Data Type", "Positive Data", "Negative Data", "Error Message"
+                "Field", "Data Type", "Default Data","Positive Data", "Negative Data", "Error Message"
             }) {
                 Class[] types = new Class[]{
-                    java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                    java.lang.String.class, java.lang.String.class,java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
                 };
 
                 @Override
@@ -66,7 +67,7 @@ public class Screen2 extends javax.swing.JFrame {
                 @Override
                 public boolean isCellEditable(int row, int column) {
 
-                    return column == 1 || column == 2 || column == 3 || column == 4; // Allow edits for relevant columns
+                    return  column == 1 || column == 5; // Allow edits for relevant columns
                 }
             });
             customizeTable();
@@ -94,6 +95,7 @@ public class Screen2 extends javax.swing.JFrame {
 
     // to ensure the frame opens maximized, Allow resizing, and set a default close operation
     private void setupFrame(int state) {
+        jsonTable.getTableHeader().setReorderingAllowed(false);
         setExtendedState(state);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
@@ -128,6 +130,8 @@ public class Screen2 extends javax.swing.JFrame {
         urlValueLabel = new javax.swing.JLabel();
         methodValueLabel = new javax.swing.JLabel();
         headersValueLabel = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -138,7 +142,7 @@ public class Screen2 extends javax.swing.JFrame {
             new Object [][] {
             },
             new String [] {
-                "Field", "Datatype", "Positive Data", "Negative Data", "Error Message"
+                "Field", "Datatype","Default Value", "Positive Data", "Negative Data", "Error Message"
             }
         ));
         jsonTable.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
@@ -215,6 +219,24 @@ public class Screen2 extends javax.swing.JFrame {
                 .addContainerGap(23, Short.MAX_VALUE))
         );
 
+        jButton1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButton1.setText("Add Value");
+        jButton1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        jButton2.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButton2.setText("Delete Value");
+        jButton2.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -222,16 +244,21 @@ public class Screen2 extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(requestBodyScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 598, Short.MAX_VALUE)
+                    .addComponent(otherComponentsPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(requestBodyScrollPane)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel4)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(executeTestbtn, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
-                                .addComponent(exitBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(otherComponentsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(exitBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel4))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -241,9 +268,17 @@ public class Screen2 extends javax.swing.JFrame {
                 .addComponent(otherComponentsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel4)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(requestBodyScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(requestBodyScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(107, 107, 107)
+                        .addComponent(jButton1)
+                        .addGap(27, 27, 27)
+                        .addComponent(jButton2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(executeTestbtn, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(exitBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -452,6 +487,37 @@ public class Screen2 extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_exitBtnActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        if(jsonTable.getSelectedRow()!=-1){
+            AddValuePopUp popUp = new AddValuePopUp(this, true);
+            popUp.setVisible(true);
+        }else{
+            JOptionPane.showMessageDialog(this, "Please Selected a field", "Error", JOptionPane.ERROR_MESSAGE);
+        }  
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    public void addFieldValues(String type,String value){
+        int selectedRow = jsonTable.getSelectedRow();
+        int selectedColumn = 0;
+        if(type.equalsIgnoreCase("positive data")){
+            selectedColumn = 3;
+        }else if(type.equalsIgnoreCase("negative data")){
+            selectedColumn = 4;
+        }
+        String existedValue = (String) jsonTable.getValueAt(selectedRow, selectedColumn);
+        if(!existedValue.equals("")){
+            String newValue = existedValue+","+value;
+            jsonTable.setValueAt(newValue, selectedRow, selectedColumn);
+        }else{
+            jsonTable.setValueAt(value, selectedRow, selectedColumn);
+        }
+    }
+    
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton2ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -491,6 +557,8 @@ public class Screen2 extends javax.swing.JFrame {
     private javax.swing.JButton exitBtn;
     private javax.swing.JLabel headersLabel;
     private javax.swing.JLabel headersValueLabel;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JTable jsonTable;
     private javax.swing.JLabel methodLabel;

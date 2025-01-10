@@ -130,8 +130,8 @@ public class Screen2 extends javax.swing.JFrame {
         urlValueLabel = new javax.swing.JLabel();
         methodValueLabel = new javax.swing.JLabel();
         headersValueLabel = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        addValueBtn = new javax.swing.JButton();
+        deleteValueBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -219,21 +219,21 @@ public class Screen2 extends javax.swing.JFrame {
                 .addContainerGap(23, Short.MAX_VALUE))
         );
 
-        jButton1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButton1.setText("Add Value");
-        jButton1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        addValueBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        addValueBtn.setText("Add Value");
+        addValueBtn.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        addValueBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                addValueBtnActionPerformed(evt);
             }
         });
 
-        jButton2.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButton2.setText("Delete Value");
-        jButton2.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        deleteValueBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        deleteValueBtn.setText("Delete Value");
+        deleteValueBtn.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        deleteValueBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                deleteValueBtnActionPerformed(evt);
             }
         });
 
@@ -249,8 +249,8 @@ public class Screen2 extends javax.swing.JFrame {
                         .addComponent(requestBodyScrollPane)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(deleteValueBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(addValueBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -275,9 +275,9 @@ public class Screen2 extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(107, 107, 107)
-                        .addComponent(jButton1)
+                        .addComponent(addValueBtn)
                         .addGap(27, 27, 27)
-                        .addComponent(jButton2)
+                        .addComponent(deleteValueBtn)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(executeTestbtn, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -487,7 +487,7 @@ public class Screen2 extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_exitBtnActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void addValueBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addValueBtnActionPerformed
         // TODO add your handling code here:
         if(jsonTable.getSelectedRow()!=-1){
             AddValuePopUp popUp = new AddValuePopUp(this, true);
@@ -495,7 +495,7 @@ public class Screen2 extends javax.swing.JFrame {
         }else{
             JOptionPane.showMessageDialog(this, "Please Selected a field", "Error", JOptionPane.ERROR_MESSAGE);
         }  
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_addValueBtnActionPerformed
 
     public void addFieldValues(String type,String value){
         int selectedRow = jsonTable.getSelectedRow();
@@ -514,9 +514,20 @@ public class Screen2 extends javax.swing.JFrame {
         }
     }
     
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void deleteValueBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteValueBtnActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
+        int selectedRow = jsonTable.getSelectedRow();
+        if(selectedRow==-1){
+            String positiveValue = (String) jsonTable.getValueAt(selectedRow, 3);
+            String negativeValue = (String) jsonTable.getValueAt(selectedRow, 4);
+            String[] postiveValueAr = positiveValue.split(",");
+            String[] negativeValueAr = negativeValue.split(",");
+            DeleteValuePopUp popUp = new DeleteValuePopUp(this,true,postiveValueAr, negativeValueAr);
+            popUp.setVisible(true);
+        }else{
+            JOptionPane.showMessageDialog(this, "Please Selected a field", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_deleteValueBtnActionPerformed
 
     /**
      * @param args the command line arguments
@@ -553,12 +564,12 @@ public class Screen2 extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton addValueBtn;
+    private javax.swing.JButton deleteValueBtn;
     private javax.swing.JButton executeTestbtn;
     private javax.swing.JButton exitBtn;
     private javax.swing.JLabel headersLabel;
     private javax.swing.JLabel headersValueLabel;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JTable jsonTable;
     private javax.swing.JLabel methodLabel;

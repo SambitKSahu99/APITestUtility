@@ -19,8 +19,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
- *
- * @author sambit.sahu
+ * The Screen1 class represents the first screen in the application's workflow.
+ * This JFrame handles the input of request details, including headers, method,
+ * base URL, path, and request body. It allows the user to configure these
+ * details and navigate to the next screen.
  */
 public class Screen1 extends javax.swing.JFrame {
 
@@ -28,7 +30,9 @@ public class Screen1 extends javax.swing.JFrame {
     private JTable headersTable;
 
     /**
-     * Creates new form Screen1
+     * Default constructor for Screen1. Initializes the UI components and sets
+     * up the headers table. Disables JSON-related fields until a method that
+     * supports a request body is selected.
      */
     public Screen1() {
         initComponents();
@@ -39,12 +43,16 @@ public class Screen1 extends javax.swing.JFrame {
         jsonTextLabel.setEnabled(false);
     }
 
+    /**
+     * Sets up the table for HTTP headers, including the column names ("Header
+     * Name" and "Header Value"). Embeds the table inside a JScrollPane and
+     * integrates it into the headers panel.
+     */
     private void setUpHeaderComponents() {
         // Initialize table model and table
         String[] columnNames = {"Header Name", "Header Value"};
         tableModel = new DefaultTableModel(columnNames, 0);
         headersTable = new JTable(tableModel);
-
         JScrollPane scrollPane = new JScrollPane(headersTable);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -59,6 +67,10 @@ public class Screen1 extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Deletes the selected row from the headers table. Displays a warning if no
+     * row is selected.
+     */
     private void deleteSelectedRow() {
         int selectedRow = headersTable.getSelectedRow();
         if (selectedRow != -1) {
@@ -263,6 +275,13 @@ public class Screen1 extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Resets all input fields, including the base URL, method dropdown, path,
+     * name, headers, and JSON request body. Prompts the user for confirmation
+     * before clearing the fields.
+     *
+     * @param evt Action event triggered by the reset button.
+     */
     private void resetBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetBtnActionPerformed
         // TODO add your handling code here:
         if (baseUrl.getText().isBlank() && methodDropDown.getSelectedItem() == null && path.getText().isBlank() && nameField.getText().isBlank() && tableModel.getRowCount() == 0 && jsonrequestBody1.getText().isBlank()) {
@@ -281,6 +300,14 @@ public class Screen1 extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_resetBtnActionPerformed
 
+    /**
+     * Recursively extracts fields and their values from a JSON object or array.
+     * Populates the `jsonFieldsAndValues` map with field paths as keys and
+     * their values.
+     *
+     * @param requestObject The JSON object or array to process.
+     * @param path The current JSON path (used to maintain field hierarchy).
+     */
     private static void extractFieldsAndValues(Object requestObject, String path) {
         if (requestObject instanceof JSONObject jsonObject) {
             for (Object key : jsonObject.keySet()) {
@@ -296,6 +323,13 @@ public class Screen1 extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Handles the submission of the request details. Validates the user inputs
+     * and parses the JSON request body if applicable. Navigates to the next
+     * screen (Screen2) with the captured data.
+     *
+     * @param evt Action event triggered by the submit button.
+     */
     private void SubmitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SubmitBtnActionPerformed
         String baseUrlInput = baseUrl.getText();
         String methodInput = (String) methodDropDown.getSelectedItem();
@@ -339,17 +373,34 @@ public class Screen1 extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_SubmitBtnActionPerformed
 
+    /**
+     * Opens a dialog for adding a new HTTP header.
+     *
+     * @param evt Action event triggered by the "Add Header" button.
+     */
     private void addHeaderBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addHeaderBtnActionPerformed
         // TODO add your handling code here:
         OpenHeaderDialog dialog = new OpenHeaderDialog(this, true);
         dialog.setVisible(true);
     }//GEN-LAST:event_addHeaderBtnActionPerformed
 
+    /**
+     * Deletes the selected HTTP header from the headers table.
+     *
+     * @param evt Action event triggered by the "Delete Header" button.
+     */
     private void deleteHeaderBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteHeaderBtnActionPerformed
         // TODO add your handling code here:
         deleteSelectedRow();
     }//GEN-LAST:event_deleteHeaderBtnActionPerformed
 
+    /**
+     * Toggles the visibility and enablement of JSON-related fields based on the
+     * selected HTTP method. Enables JSON fields for methods that support a
+     * request body (e.g., POST, PUT, PATCH).
+     *
+     * @param evt Action event triggered by the method dropdown selection.
+     */
     private void methodDropDownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_methodDropDownActionPerformed
         // TODO add your handling code here:
         String method = (String) methodDropDown.getSelectedItem();
@@ -364,6 +415,12 @@ public class Screen1 extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_methodDropDownActionPerformed
 
+    /**
+     * Confirms with the user before exiting the application. If confirmed, the
+     * application is terminated.
+     *
+     * @param evt Action event triggered by the "Exit" button.
+     */
     private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
         // TODO add your handling code here:
         int confirm = JOptionPane.showConfirmDialog(null, "Are you sure want to exit?");
@@ -372,15 +429,28 @@ public class Screen1 extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_exitBtnActionPerformed
 
+    /**
+     * Adds a new header to the headers table.
+     *
+     * @param name The name of the header.
+     * @param value The value of the header.
+     */
     public void addHeader(String name, String value) {
         if (tableModel != null) {
             tableModel.addRow(new Object[]{name, value});
         }
     }
 
+    /**
+     * Prepares table data for the JSON request body by converting the
+     * field-value map into a 2D array. Each row contains the field name, its
+     * data type, value, and placeholders for additional fields.
+     *
+     * @param fieldKeyAndValueMap The map of JSON fields and their values.
+     * @return A 2D array representing the table data.
+     */
     private static Object[][] prepareTableData(Map<String, Object> fieldKeyAndValueMap) {
         List<Object[]> tableDataList = new ArrayList<>();
-
         for (Map.Entry<String, Object> entry : fieldKeyAndValueMap.entrySet()) {
             String field = entry.getKey();  // Field name
             Object value = entry.getValue(); // Field value
@@ -389,7 +459,6 @@ public class Screen1 extends javax.swing.JFrame {
             // Prepare table row with default values
             tableDataList.add(new Object[]{field, dataType, value, "", ""});
         }
-
         return tableDataList.toArray(new Object[0][]);
     }
 
@@ -446,5 +515,4 @@ public class Screen1 extends javax.swing.JFrame {
     private javax.swing.JLabel pathLabel;
     private javax.swing.JButton resetBtn;
     // End of variables declaration//GEN-END:variables
-
 }

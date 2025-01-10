@@ -10,7 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -29,17 +32,20 @@ public class Screen2 extends javax.swing.JFrame {
 
     private String name;
     private Screen1 previousFrame;
+    private int deleteValueSelectedRow;
 
     /**
      * Creates new form Screen2
      */
     public Screen2() {
+        this.deleteValueSelectedRow = -1;
         initComponents();
 //        setupFrame();
     }
 
-    public Screen2(Screen1 previousFrame, Object[][] jsonRequestBodyTableData, String baseUrl, String method, String path, String name, DefaultTableModel headersTableModel, int previousState) {
-    public Screen2(JSONObject jsonRequestBodyObject,Object[][] jsonRequestBodyTableData, String baseUrl, String method, String path, String name, DefaultTableModel headersTableModel, int previousState) {
+
+    public Screen2(Screen1 previousFrame, JSONObject jsonRequestBodyObject,Object[][] jsonRequestBodyTableData, String baseUrl, String method, String path, String name, DefaultTableModel headersTableModel, int previousState) {
+        this.deleteValueSelectedRow = -1;
 //        setExtendedState(previousState);
         this.previousFrame = previousFrame;
         this.name = name;
@@ -97,6 +103,7 @@ public class Screen2 extends javax.swing.JFrame {
     }
 
     public Screen2(Screen1 previousFrame) {
+        this.deleteValueSelectedRow = -1;
 
     }
 
@@ -142,6 +149,7 @@ public class Screen2 extends javax.swing.JFrame {
         backBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(689, 476));
 
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel4.setText("Request Field Data and Validations");
@@ -207,7 +215,7 @@ public class Screen2 extends javax.swing.JFrame {
                         .addComponent(methodLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(methodValueLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap(53, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         otherComponentsPanelLayout.setVerticalGroup(
             otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -224,16 +232,8 @@ public class Screen2 extends javax.swing.JFrame {
                 .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(headersLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(headersValueLabel))
-                .addContainerGap(23, Short.MAX_VALUE))
+                .addContainerGap(26, Short.MAX_VALUE))
         );
-
-        backBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        backBtn.setText("Back");
-        backBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                backBtnActionPerformed(evt);
-            }
-        });
 
         addValueBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         addValueBtn.setText("Add Value");
@@ -253,6 +253,14 @@ public class Screen2 extends javax.swing.JFrame {
             }
         });
 
+        backBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        backBtn.setText("Back");
+        backBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                backBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -260,11 +268,9 @@ public class Screen2 extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(requestBodyScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 598, Short.MAX_VALUE)
                     .addComponent(otherComponentsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(otherComponentsPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(requestBodyScrollPane)
+                        .addComponent(requestBodyScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 515, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(deleteValueBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -273,13 +279,11 @@ public class Screen2 extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(executeTestbtn, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(exitBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jLabel4))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(exitBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(backBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(backBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel4))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -288,24 +292,24 @@ public class Screen2 extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(otherComponentsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel4)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(requestBodyScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(requestBodyScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(107, 107, 107)
+                        .addGap(102, 102, 102)
                         .addComponent(addValueBtn)
-                        .addGap(27, 27, 27)
+                        .addGap(33, 33, 33)
                         .addComponent(deleteValueBtn)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(executeTestbtn, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(exitBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(backBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(14, 14, 14))
+                .addGap(11, 11, 11))
         );
 
         pack();
@@ -546,12 +550,16 @@ public class Screen2 extends javax.swing.JFrame {
 
     private void deleteValueBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteValueBtnActionPerformed
         // TODO add your handling code here:
-        int selectedRow = jsonTable.getSelectedRow();
-        if(selectedRow==-1){
-            String positiveValue = (String) jsonTable.getValueAt(selectedRow, 3);
-            String negativeValue = (String) jsonTable.getValueAt(selectedRow, 4);
+        deleteValueSelectedRow = jsonTable.getSelectedRow();
+        if(deleteValueSelectedRow!=-1){    
+            String positiveValue = (String) jsonTable.getValueAt(deleteValueSelectedRow, 3);
+            String negativeValue = (String) jsonTable.getValueAt(deleteValueSelectedRow, 4);
             String[] postiveValueAr = positiveValue.split(",");
             String[] negativeValueAr = negativeValue.split(",");
+            if(positiveValue.equals("") && negativeValue.equals("")){
+                JOptionPane.showMessageDialog(this, "No positive or negative value is present for selected field", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             DeleteValuePopUp popUp = new DeleteValuePopUp(this,true,postiveValueAr, negativeValueAr);
             popUp.setVisible(true);
         }else{
@@ -559,6 +567,24 @@ public class Screen2 extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_deleteValueBtnActionPerformed
 
+    public void updaTableValues(DefaultListModel<String> positiveValue,DefaultListModel<String> negativeValue){
+        deleteValueSelectedRow = jsonTable.getSelectedRow();
+        String positiveValues = "";
+        if(!positiveValue.isEmpty()){
+            positiveValues = IntStream.range(0, positiveValue.getSize())
+                                 .mapToObj(positiveValue::getElementAt)
+                                 .collect(Collectors.joining(", "));
+        }
+        String negativeValues = "";
+        if(!negativeValue.isEmpty()){
+            negativeValues = IntStream.range(0, negativeValue.getSize())
+                                 .mapToObj(negativeValue::getElementAt)
+                                 .collect(Collectors.joining(", "));
+        }
+        jsonTable.setValueAt(positiveValues, deleteValueSelectedRow, 3);
+        jsonTable.setValueAt(negativeValues, deleteValueSelectedRow, 4);
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -595,8 +621,8 @@ public class Screen2 extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addValueBtn;
-    private javax.swing.JButton deleteValueBtn;
     private javax.swing.JButton backBtn;
+    private javax.swing.JButton deleteValueBtn;
     private javax.swing.JButton executeTestbtn;
     private javax.swing.JButton exitBtn;
     private javax.swing.JLabel headersLabel;

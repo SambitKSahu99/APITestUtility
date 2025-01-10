@@ -4,33 +4,72 @@
  */
 package com.elixr.apitestutility;
 
+import javax.swing.DefaultListModel;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
 
 /**
  *
  * @author sambit.sahu
  */
 public class DeleteValuePopUp extends javax.swing.JDialog {
-
+    
+    private final DefaultListModel<String> positiveList = new DefaultListModel<>();
+    private final DefaultListModel<String> negativeList = new DefaultListModel<>();
     /**
      * Creates new form OpenHeaderDialog
      */
-    
     public DeleteValuePopUp(java.awt.Frame parent, boolean modal,
-            String[] positiveValues,String[] negativeValues){
+            String[] positiveValues, String[] negativeValues) {
         super(parent, modal);
         initComponents();
-        deleteValuesFromTable(positiveValues,negativeValues);
+        setUpFrame();
+        setUpList(positiveValues,negativeValues);
     }
 
     private DeleteValuePopUp(JFrame jFrame, boolean b) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
-    private void deleteValuesFromTable(String[] positiveValues,String[] negativeValues){
-        
+    private void setUpFrame() {
+        positiveScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        negativeScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
     }
+
+    private void setUpList(String[] positiveValues, String[] negativeValues){
+        
+        for(String items: positiveValues){
+              positiveList.addElement(items);
+          }
+        positiveValueList.setModel(positiveList);
+        positiveValueList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        
+          for(String items: negativeValues){
+              negativeList.addElement(items);
+         }
+        negativeValueList.setModel(negativeList);
+        negativeValueList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+    }
+    
+     private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) { 
+        int[] selectedPositiveIndex  = positiveValueList.getSelectedIndices();
+        for(int i:selectedPositiveIndex){
+            System.out.println("selected indx :"+i);
+        }
+        for(int i=selectedPositiveIndex.length-1;i>=0;i--){
+            positiveList.remove(selectedPositiveIndex[i]);
+        }
+        int[] selectedNegativeIndex  = negativeValueList.getSelectedIndices();
+        for(int i=selectedNegativeIndex.length-1;i>=0;i--){
+            negativeList.remove(selectedNegativeIndex[i]);
+        } 
+        Screen2 screen2 = (Screen2) this.getParent();
+        screen2.updaTableValues(positiveList, negativeList);
+        this.dispose();
+    }  
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -43,8 +82,14 @@ public class DeleteValuePopUp extends javax.swing.JDialog {
 
         headerPanel = new javax.swing.JPanel();
         deleteValueHeader = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jScrollPane2 = new javax.swing.JScrollPane();
+        positiveScrollPane = new javax.swing.JScrollPane();
+        positiveValueList = new javax.swing.JList<>();
+        negativeScrollPane = new javax.swing.JScrollPane();
+        negativeValueList = new javax.swing.JList<>();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        deleteButton = new javax.swing.JButton();
+        exitBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -58,7 +103,7 @@ public class DeleteValuePopUp extends javax.swing.JDialog {
             .addGroup(headerPanelLayout.createSequentialGroup()
                 .addGap(154, 154, 154)
                 .addComponent(deleteValueHeader)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(167, Short.MAX_VALUE))
         );
         headerPanelLayout.setVerticalGroup(
             headerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -67,21 +112,66 @@ public class DeleteValuePopUp extends javax.swing.JDialog {
                 .addComponent(deleteValueHeader))
         );
 
+        positiveValueList.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        positiveScrollPane.setViewportView(positiveValueList);
+
+        negativeValueList.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        negativeScrollPane.setViewportView(negativeValueList);
+
+        jLabel1.setText("Positive Values");
+
+        jLabel2.setText("Negative Values");
+
+        deleteButton.setText("Delete");
+        deleteButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteButtonActionPerformed(evt);
+            }
+        });
+
+        exitBtn.setText("Exit");
+        exitBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exitBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(6, 6, 6)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(headerPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(headerPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(deleteButton)
+                                .addGap(0, 0, Short.MAX_VALUE)))
                         .addContainerGap())
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(6, 6, 6)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 68, Short.MAX_VALUE)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel2)
+                        .addGap(104, 104, 104))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(exitBtn))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(positiveScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(negativeScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(15, 15, 15))))
         );
         layout.setVerticalGroup(
@@ -89,15 +179,29 @@ public class DeleteValuePopUp extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(headerPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(13, 13, 13)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel2))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(positiveScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 218, Short.MAX_VALUE)
+                    .addComponent(negativeScrollPane))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 268, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1))
-                .addContainerGap(14, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(deleteButton)
+                    .addComponent(exitBtn))
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
+        // TODO add your handling code here:
+        dispose();
+    }//GEN-LAST:event_exitBtnActionPerformed
+                                          
 
     /**
      * @param args the command line arguments
@@ -157,9 +261,15 @@ public class DeleteValuePopUp extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton deleteButton;
     private javax.swing.JLabel deleteValueHeader;
+    private javax.swing.JButton exitBtn;
     private javax.swing.JPanel headerPanel;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JScrollPane negativeScrollPane;
+    private javax.swing.JList<String> negativeValueList;
+    private javax.swing.JScrollPane positiveScrollPane;
+    private javax.swing.JList<String> positiveValueList;
     // End of variables declaration//GEN-END:variables
 }

@@ -21,8 +21,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- *
- * @author chandrakanth.shaji
+ * The Screen2 class represents a secondary frame in the application, providing
+ * functionality for displaying and managing JSON request bodies, HTTP headers,
+ * and other details. It allows users to customize request data, view headers,
+ * and execute tests.
  */
 public class Screen2 extends javax.swing.JFrame {
 
@@ -30,15 +32,26 @@ public class Screen2 extends javax.swing.JFrame {
     private Screen1 previousFrame;
 
     /**
-     * Creates new form Screen2
+     * Default constructor for Screen2. Initializes the components of the frame.
      */
     public Screen2() {
         initComponents();
-//        setupFrame();
     }
 
+    /**
+     * Constructor for Screen2 with parameters to set up the frame.
+     *
+     * @param previousFrame The parent Screen1 instance for navigation purposes.
+     * @param jsonRequestBodyTableData A 2D array of data representing JSON
+     * request bodies.
+     * @param baseUrl The base URL of the request.
+     * @param method The HTTP method (e.g., GET, POST).
+     * @param path The request path.
+     * @param name The name or identifier for the current screen.
+     * @param headersTableModel The table model containing HTTP headers.
+     * @param previousState The previous frame state (e.g., maximized).
+     */
     public Screen2(Screen1 previousFrame, Object[][] jsonRequestBodyTableData, String baseUrl, String method, String path, String name, DefaultTableModel headersTableModel, int previousState) {
-//        setExtendedState(previousState);
         this.previousFrame = previousFrame;
         this.name = name;
         initComponents();
@@ -63,7 +76,6 @@ public class Screen2 extends javax.swing.JFrame {
 
                 @Override
                 public boolean isCellEditable(int row, int column) {
-
                     return column == 1 || column == 2 || column == 3 || column == 4; // Allow edits for relevant columns
                 }
             });
@@ -90,16 +102,28 @@ public class Screen2 extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Constructor for Screen2 with only a reference to the previous frame.
+     *
+     * @param previousFrame The parent Screen1 instance for navigation.
+     */
     public Screen2(Screen1 previousFrame) {
-
     }
 
-    // to ensure the frame opens maximized, Allow resizing, and set a default close operation
+    /**
+     * Configures the frame's initial setup.
+     *
+     * @param state The state of the frame (e.g., maximized, minimized).
+     */
     private void setupFrame(int state) {
         setExtendedState(state);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
+    /**
+     * Customizes the JSON table to use a combo box for selecting data types in
+     * the "Data Type" column.
+     */
     private void customizeTable() {
         // Get the "Data Type" column (index 1)
         TableColumn dataTypeColumn = jsonTable.getColumnModel().getColumn(1);
@@ -267,6 +291,14 @@ public class Screen2 extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Handles the action of the "Execute Test" button.
+     *
+     * - Generates request bodies based on table data. - Navigates to
+     * Screen3Frame with the generated data.
+     *
+     * @param evt The ActionEvent triggered by the button click.
+     */
     private void executeTestbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_executeTestbtnActionPerformed
         // TODO add your handling code here:
         Object[][] screen3TableData = null;
@@ -286,6 +318,17 @@ public class Screen2 extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_executeTestbtnActionPerformed
 
+    /**
+     * Generates combinations of request bodies for testing based on the input
+     * JTable's data. The method extracts field values, handles fields with
+     * multiple values, and creates combinations of request bodies for
+     * comprehensive testing.
+     *
+     * @param name the base name for test case descriptions.
+     * @param table the JTable containing field names, data types, and values.
+     * @return a 2D Object array where each row contains a test case name and
+     * the corresponding JSON request body.
+     */
     public static Object[][] generateRequestBodies(String name, JTable table) {
         List<Object[]> requestBodies = new ArrayList<>();
 
@@ -340,7 +383,14 @@ public class Screen2 extends javax.swing.JFrame {
         return requestBodies.toArray(new Object[0][]);
     }
 
-    // Helper method to parse values based on data type
+    /**
+     * Parses a string value into the specified data type.
+     *
+     * @param dataType the target data type ("String", "Integer", or "Boolean").
+     * @param value the string representation of the value to parse.
+     * @return the parsed value as an Object, matching the specified data type.
+     * Defaults to returning the input as a String if the type is unrecognized.
+     */
     private static Object parseValue(String dataType, String value) {
         return switch (dataType.toLowerCase()) {
             case "integer" ->
@@ -352,7 +402,18 @@ public class Screen2 extends javax.swing.JFrame {
         }; // Default is String
     }
 
-    // Helper method to generate combinations
+    /**
+     * Generates all possible combinations of values for fields with multiple
+     * values and creates corresponding JSON request bodies. Each combination is
+     * added as a test case.
+     *
+     * @param fields a list of field names with multiple values.
+     * @param valueCombinations a list of value combinations for each field.
+     * @param baseRequestBody the default request body to build upon.
+     * @param name the base name for test case descriptions.
+     * @param requestBodies the list to store generated test cases (test name
+     * and JSON body).
+     */
     private static void generateCombinations(List<String> fields, List<List<Object>> valueCombinations,
             JSONObject baseRequestBody, String name, List<Object[]> requestBodies) {
         int[] indices = new int[fields.size()];
@@ -392,6 +453,14 @@ public class Screen2 extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Converts a flat JSON object with dot-separated keys into a nested JSON
+     * structure. Supports handling nested objects and arrays.
+     *
+     * @param input the flat JSON object to format.
+     * @return a nested JSON object based on the dot-separated keys.
+     * @throws JSONException if any JSON operation fails.
+     */
     public static JSONObject formatJsonObject(JSONObject input) throws JSONException {
         JSONObject result = new JSONObject();
         for (String key : input.keySet()) {
@@ -401,6 +470,16 @@ public class Screen2 extends javax.swing.JFrame {
         return result;
     }
 
+    /**
+     * Adds nested keys and values to a JSON object. Handles dot-separated keys
+     * and array indices to create nested objects and arrays dynamically.
+     *
+     * @param current the current JSON object to which keys will be added.
+     * @param keys an array of key segments (split by dots) representing the
+     * nested structure.
+     * @param value the value to assign to the final key in the structure.
+     * @throws JSONException if any JSON operation fails.
+     */
     private static void addNestedKeys(JSONObject current, String[] keys, Object value) throws JSONException {
         for (int i = 0; i < keys.length; i++) {
             String key = keys[i];
@@ -448,6 +527,14 @@ public class Screen2 extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Ensures that a JSONArray has sufficient capacity to accommodate the
+     * specified index. If the array is smaller than the required size, null
+     * placeholders are added.
+     *
+     * @param array the JSONArray to resize.
+     * @param index the index to ensure capacity for.
+     */
     private static void ensureCapacity(JSONArray array, int index) {
         while (array.length() <= index) {
             array.put(JSONObject.NULL);
@@ -458,6 +545,13 @@ public class Screen2 extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jsonTablePropertyChange
 
+    /**
+     * Handles the action of the "Exit" button.
+     *
+     * - Displays a confirmation dialog. - Exits the application if confirmed.
+     *
+     * @param evt The ActionEvent triggered by the button click.
+     */
     private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
         // TODO add your handling code here:
         int confirm = JOptionPane.showConfirmDialog(null, "Are you sure want to exit?");
@@ -466,6 +560,14 @@ public class Screen2 extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_exitBtnActionPerformed
 
+    /**
+     * Handles the action of the "Back" button.
+     *
+     * - Returns to the previous frame if it exists. - Disposes the current
+     * frame.
+     *
+     * @param evt The ActionEvent triggered by the button click.
+     */
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
         if (previousFrame != null) {
             previousFrame.setVisible(true);

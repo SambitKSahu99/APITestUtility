@@ -6,16 +6,22 @@ package com.elixr.apitestutility;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
 
 /**
- *
- * @author sambit.sahu
+ * The OpenHeaderDialog class represents a dialog window that allows the user to
+ * add new HTTP headers by providing a key-value pair. It interacts with the
+ * parent Screen1 frame to update the headers table when a new header is added.
  */
 public class OpenHeaderDialog extends javax.swing.JDialog {
 
     /**
-     * Creates new form OpenHeaderDialog
+     * Constructor to initialize the OpenHeaderDialog. This dialog is modal,
+     * meaning the user must interact with it before returning to the parent
+     * frame.
+     *
+     * @param parent The parent frame that owns this dialog.
+     * @param modal If true, the dialog will be modal, preventing interaction
+     * with other frames until closed.
      */
     public OpenHeaderDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -132,24 +138,44 @@ public class OpenHeaderDialog extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Handles the event when the "Add" button is clicked. It retrieves the
+     * header name and value entered by the user, checks if both fields are
+     * non-empty, and adds the header to the parent Screen1 frame. The dialog is
+     * then closed. If either field is empty, an error message is displayed.
+     *
+     * @param evt Action event triggered by the "Add" button.
+     */
     private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
         String name = nameTextField.getText().trim();
         String value = valueTextField.getText().trim();
-        if(!name.isEmpty() && !value.isEmpty()){
+        if (!name.isEmpty() && !value.isEmpty()) {
             Screen1 parentFrame = (Screen1) this.getParent();
-            parentFrame.addHeader(name,value);
+            parentFrame.addHeader(name, value);
             dispose();
         } else {
             JOptionPane.showMessageDialog(this, "Key and Value cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_addBtnActionPerformed
 
+    /**
+     * Clears the text fields for the header name and value, allowing the user
+     * to enter new values.
+     *
+     * @param evt Action event triggered by the "Clear" button.
+     */
     private void clearBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearBtnActionPerformed
         // TODO add your handling code here:
         nameTextField.setText("");
         valueTextField.setText("");
     }//GEN-LAST:event_clearBtnActionPerformed
 
+    /**
+     * Closes the OpenHeaderDialog when the "Exit" button is clicked, without
+     * making any changes.
+     *
+     * @param evt Action event triggered by the "Exit" button.
+     */
     private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
         // TODO add your handling code here:
         dispose();

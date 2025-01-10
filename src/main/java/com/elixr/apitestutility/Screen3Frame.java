@@ -13,18 +13,20 @@ import javax.swing.table.TableCellRenderer;
 import org.json.JSONObject;
 
 /**
- *
- * @author sambit.sahu
+ * Screen3Frame class represents a JFrame that displays test results in a table
+ * format. It includes functionality to format and display JSON data in table
+ * cells, navigate back to the previous screen, and manage the frame state.
  */
 public class Screen3Frame extends javax.swing.JFrame {
 
     private Screen2 previousFrame;
 
     /**
-     * Creates new form Screen3Frame
+     * Constructs a new Screen3Frame with the given data and state.
      *
-     * @param tableData
-     * @param state
+     * @param previousFrame the previous screen's frame, used for navigation.
+     * @param tableData the data to populate the result table.
+     * @param state the state of the frame (e.g., maximized, normal).
      */
     public Screen3Frame(Screen2 previousFrame, Object[][] tableData, int state) {
         this.previousFrame = previousFrame;
@@ -33,23 +35,37 @@ public class Screen3Frame extends javax.swing.JFrame {
         populateResultTable(tableData);
     }
 
+    /**
+     * Default constructor for Screen3Frame.
+     */
     public Screen3Frame() {
     }
 
+    /**
+     * Configures the frame's state and default close operation.
+     *
+     * @param state the state to set the frame to (e.g., maximized, normal).
+     */
     private void setupFrame(int state) {
         setExtendedState(state);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
+    /**
+     * Populates the result table with the provided data and customizes its
+     * appearance. Adds a serial number (SL) column and sets custom cell
+     * renderers for JSON data.
+     *
+     * @param tableData the data to populate the table, with each row
+     * representing a test case.
+     */
     private void populateResultTable(Object[][] tableData) {
-
         // Add an "SL" column to the table data
         Object[][] updatedTableData = new Object[tableData.length][6]; // 6 columns now
         for (int i = 0; i < tableData.length; i++) {
             updatedTableData[i][0] = i + 1; // SL column with serial numbers starting from 1
             System.arraycopy(tableData[i], 0, updatedTableData[i], 1, tableData[i].length);
         }
-
         DefaultTableModel model = new DefaultTableModel(
                 updatedTableData,
                 new String[]{"SL", "Test Name", "Request Body", "Response Code", "Response Body", "Test Result"}
@@ -59,10 +75,8 @@ public class Screen3Frame extends javax.swing.JFrame {
                 return true; // Make the table cells non-editable.
             }
         };
-
         resultTable.setModel(model);
         resultTable.getColumnModel().getColumn(2).setCellRenderer(new JsonCellRenderer());
-
         DefaultTableCellRenderer borderedCellRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -81,7 +95,6 @@ public class Screen3Frame extends javax.swing.JFrame {
                 resultTable.getColumnModel().getColumn(col).setCellRenderer(borderedCellRenderer);
             }
         }
-
         for (int row = 0; row < resultTable.getRowCount(); row++) {
             adjustRowHeight(resultTable, row, 2); // Adjust for column 2 ("Request Body")
         }
@@ -89,6 +102,14 @@ public class Screen3Frame extends javax.swing.JFrame {
         resultTableScrollPane.repaint();
     }
 
+    /**
+     * Adjusts the row height of a table to fit the content in the specified
+     * column.
+     *
+     * @param table the JTable whose row height needs adjustment.
+     * @param row the row index to adjust.
+     * @param column the column index to consider for height adjustment.
+     */
     private static void adjustRowHeight(JTable table, int row, int column) {
         TableCellRenderer renderer = table.getCellRenderer(row, column);
         Component comp = table.prepareRenderer(renderer, row, column);
@@ -96,6 +117,10 @@ public class Screen3Frame extends javax.swing.JFrame {
         table.setRowHeight(row, Math.max(table.getRowHeight(row), preferredHeight));
     }
 
+    /**
+     * Renders JSON data in a JTable cell with proper formatting and line
+     * wrapping.
+     */
     class JsonCellRenderer extends DefaultTableCellRenderer {
 
         private final JTextArea textArea = new JTextArea();
@@ -108,7 +133,6 @@ public class Screen3Frame extends javax.swing.JFrame {
         @Override
         public Component getTableCellRendererComponent(
                 JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-
             if (value != null) {
                 try {
                     // Format the JSON value
@@ -121,10 +145,8 @@ public class Screen3Frame extends javax.swing.JFrame {
             } else {
                 textArea.setText("");
             }
-
             textArea.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
             textArea.setForeground(isSelected ? table.getSelectionForeground() : table.getForeground());
-
             return textArea;
         }
     }
@@ -200,6 +222,13 @@ public class Screen3Frame extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Handles the action performed when the back button is clicked. Navigates
+     * to the previous screen if available; otherwise, displays an error
+     * message.
+     *
+     * @param evt the action event triggered by the back button click.
+     */
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
         if (previousFrame != null) {
             previousFrame.setVisible(true);

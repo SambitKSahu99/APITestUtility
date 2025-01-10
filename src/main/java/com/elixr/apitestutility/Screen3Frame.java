@@ -4,6 +4,7 @@
  */
 package com.elixr.apitestutility;
 
+import java.awt.Color;
 import java.awt.Component;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -62,12 +63,24 @@ public class Screen3Frame extends javax.swing.JFrame {
         resultTable.setModel(model);
         resultTable.getColumnModel().getColumn(2).setCellRenderer(new JsonCellRenderer());
 
-        // Set vertical alignment to top for the "SL" and "Test Name" columns
-        DefaultTableCellRenderer topAlignRenderer = new DefaultTableCellRenderer();
-        topAlignRenderer.setVerticalAlignment(SwingConstants.TOP);
-
-        resultTable.getColumnModel().getColumn(0).setCellRenderer(topAlignRenderer); // SL Column
-        resultTable.getColumnModel().getColumn(1).setCellRenderer(topAlignRenderer); // Test Name Column
+        DefaultTableCellRenderer borderedCellRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (c instanceof JLabel) {
+                    ((JLabel) c).setVerticalAlignment(SwingConstants.TOP); // Set vertical alignment to top
+                }
+                // Apply border
+                setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+                return c;
+            }
+        };
+        // Apply the bordered renderer to all columns except "Request Body"
+        for (int col = 0; col < resultTable.getColumnCount(); col++) {
+            if (col != 2) { // Skip JSON column to preserve its special rendering
+                resultTable.getColumnModel().getColumn(col).setCellRenderer(borderedCellRenderer);
+            }
+        }
 
         for (int row = 0; row < resultTable.getRowCount(); row++) {
             adjustRowHeight(resultTable, row, 2); // Adjust for column 2 ("Request Body")

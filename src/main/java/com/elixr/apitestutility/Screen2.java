@@ -5,8 +5,6 @@
 package com.elixr.apitestutility;
 
 import static java.lang.System.exit;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -20,7 +18,6 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -60,7 +57,6 @@ public class Screen2 extends javax.swing.JFrame {
      */
     public Screen2(Screen1 previousFrame, JSONObject jsonRequestBodyObject, Object[][] jsonRequestBodyTableData, String baseUrl, String method, String path, String name, DefaultTableModel headersTableModel, int previousState) {
         this.deleteValueSelectedRow = -1;
-//        setExtendedState(previousState);
         this.jsonRequestBodyObject = jsonRequestBodyObject;
         this.previousFrame = previousFrame;
         this.name = name;
@@ -69,6 +65,19 @@ public class Screen2 extends javax.swing.JFrame {
         setUpComponents(jsonRequestBodyTableData, baseUrl, method, headersTableModel);
     }
 
+    /**
+     * Configures and sets up the components of the screen using the provided
+     * data. This includes populating the JSON request body table, displaying
+     * the base URL and method, and formatting headers for display.
+     *
+     * @param jsonRequestBodyTableData An array of objects representing the rows
+     * of the JSON request body table. Each row contains information about a
+     * field and its properties.
+     * @param baseUrl The base URL to be displayed on the screen.
+     * @param method The HTTP method (e.g., GET, POST) to be displayed.
+     * @param headersTableModel A table model containing headers to be displayed
+     * in a formatted way.
+     */
     private void setUpComponents(Object[][] jsonRequestBodyTableData, String baseUrl, String method, DefaultTableModel headersTableModel) {
         if (jsonRequestBodyTableData != null) {
             for (Object[] row : jsonRequestBodyTableData) {
@@ -458,6 +467,18 @@ public class Screen2 extends javax.swing.JFrame {
         }; // Default is String
     }
 
+    /**
+     * Replaces the value of a specified field in a JSON object. Supports nested
+     * keys and array notation for targeting specific elements.
+     *
+     * @param json The JSONObject in which the value needs to be replaced.
+     * @param fieldName The field name whose value should be replaced. Supports
+     * dot notation for nested fields (e.g., "parent.child") and array notation
+     * (e.g., "arrayField[0]").
+     * @param value The new value to set for the specified field.
+     * @throws IllegalArgumentException If the fieldName is invalid or does not
+     * exist in the JSONObject.
+     */
     private void replaceValue(JSONObject json, String fieldName, Object value) {
         if (fieldName.contains(".")) {
             // Handle nested keys
@@ -489,7 +510,7 @@ public class Screen2 extends javax.swing.JFrame {
             json.put(fieldName, value);
         }
     }
-    
+
     private void jsonTablePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jsonTablePropertyChange
         // TODO add your handling code here:
     }//GEN-LAST:event_jsonTablePropertyChange
@@ -524,6 +545,13 @@ public class Screen2 extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_backBtnActionPerformed
 
+    /**
+     * Action handler for the "Add Value" button. Opens a popup dialog to add
+     * positive or negative values to the selected field in the JSON table.
+     * Displays an error message if no field is selected.
+     *
+     * @param evt The ActionEvent triggered by clicking the "Add Value" button.
+     */
     private void addValueBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addValueBtnActionPerformed
         // TODO add your handling code here:
         if (jsonTable.getSelectedRow() != -1) {
@@ -534,6 +562,15 @@ public class Screen2 extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_addValueBtnActionPerformed
 
+    /**
+     * Adds a positive or negative value to the specified column of the selected
+     * row in the JSON table. If values already exist, the new value is appended
+     * to the existing values, separated by a comma.
+     *
+     * @param type The type of value to add ("positive data" or "negative
+     * data").
+     * @param value The value to be added to the JSON table.
+     */
     public void addFieldValues(String type, String value) {
         int selectedRow = jsonTable.getSelectedRow();
         int selectedColumn = 0;
@@ -551,6 +588,15 @@ public class Screen2 extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Action handler for the "Delete Value" button. Opens a popup dialog to
+     * delete selected positive or negative values from the JSON table. Displays
+     * an error message if no field is selected or if there are no values to
+     * delete.
+     *
+     * @param evt The ActionEvent triggered by clicking the "Delete Value"
+     * button.
+     */
     private void deleteValueBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteValueBtnActionPerformed
         // TODO add your handling code here:
         deleteValueSelectedRow = jsonTable.getSelectedRow();
@@ -570,6 +616,16 @@ public class Screen2 extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_deleteValueBtnActionPerformed
 
+    /**
+     * Updates the JSON table with the new positive and negative values for the
+     * selected row. Converts the values in the DefaultListModel into a
+     * comma-separated string before updating the table.
+     *
+     * @param positiveValue The DefaultListModel containing the updated positive
+     * values.
+     * @param negativeValue The DefaultListModel containing the updated negative
+     * values.
+     */
     public void updaTableValues(DefaultListModel<String> positiveValue, DefaultListModel<String> negativeValue) {
         deleteValueSelectedRow = jsonTable.getSelectedRow();
         String positiveValues = "";

@@ -4,7 +4,6 @@
  */
 package com.elixr.apitestutility;
 
-
 import static java.lang.System.exit;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +34,7 @@ public class Screen2 extends javax.swing.JFrame {
     private String name;
     private Screen1 previousFrame;
     private int deleteValueSelectedRow;
+    private JSONObject jsonRequestBodyObject;
 
     /**
      * Default constructor for Screen2. Initializes the components of the frame.
@@ -44,11 +44,11 @@ public class Screen2 extends javax.swing.JFrame {
         initComponents();
     }
 
-
     /**
      * Constructor for Screen2 with parameters to set up the frame.
      *
      * @param previousFrame The parent Screen1 instance for navigation purposes.
+     * @param jsonRequestBodyObject
      * @param jsonRequestBodyTableData A 2D array of data representing JSON
      * request bodies.
      * @param baseUrl The base URL of the request.
@@ -58,18 +58,18 @@ public class Screen2 extends javax.swing.JFrame {
      * @param headersTableModel The table model containing HTTP headers.
      * @param previousState The previous frame state (e.g., maximized).
      */
-    public Screen2(Screen1 previousFrame, JSONObject jsonRequestBodyObject,Object[][] jsonRequestBodyTableData, String baseUrl, String method, String path, String name, DefaultTableModel headersTableModel, int previousState) {
+    public Screen2(Screen1 previousFrame, JSONObject jsonRequestBodyObject, Object[][] jsonRequestBodyTableData, String baseUrl, String method, String path, String name, DefaultTableModel headersTableModel, int previousState) {
         this.deleteValueSelectedRow = -1;
 //        setExtendedState(previousState);
-
+        this.jsonRequestBodyObject = jsonRequestBodyObject;
         this.previousFrame = previousFrame;
         this.name = name;
         initComponents();
         setupFrame(previousState);
-        setUpComponents(jsonRequestBodyTableData,baseUrl,method,headersTableModel);
+        setUpComponents(jsonRequestBodyTableData, baseUrl, method, headersTableModel);
     }
 
-    private void setUpComponents(Object[][] jsonRequestBodyTableData, String baseUrl, String method, DefaultTableModel headersTableModel){
+    private void setUpComponents(Object[][] jsonRequestBodyTableData, String baseUrl, String method, DefaultTableModel headersTableModel) {
         if (jsonRequestBodyTableData != null) {
             for (Object[] row : jsonRequestBodyTableData) {
                 if (row[1] == "String") {
@@ -77,10 +77,10 @@ public class Screen2 extends javax.swing.JFrame {
                 }
             }
             jsonTable.setModel(new DefaultTableModel(jsonRequestBodyTableData, new String[]{
-                "Field", "Data Type", "Default Data","Positive Data", "Negative Data", "Error Message"
+                "Field", "Data Type", "Default Data", "Positive Data", "Negative Data", "Error Message"
             }) {
                 Class[] types = new Class[]{
-                    java.lang.String.class, java.lang.String.class,java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                    java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
                 };
 
                 @Override
@@ -90,7 +90,7 @@ public class Screen2 extends javax.swing.JFrame {
 
                 @Override
                 public boolean isCellEditable(int row, int column) {
-                    return  column == 1 || column == 5; // Allow edits for relevant columns
+                    return column == 1 || column == 5; // Allow edits for relevant columns
                 }
             });
             customizeTable();
@@ -379,58 +379,64 @@ public class Screen2 extends javax.swing.JFrame {
      * @return a 2D Object array where each row contains a test case name and
      * the corresponding JSON request body.
      */
-    public static Object[][] generateRequestBodies(String name, JTable table) {
-        List<Object[]> requestBodies = new ArrayList<>();
-
-        // Step 1: Extract fields and their values from the JTable
-        JSONObject defaultRequestBody = new JSONObject();
-        List<String> fieldsWithMultipleValues = new ArrayList<>();
-        List<List<Object>> valueCombinations = new ArrayList<>();
-
+    public Object[][] generateRequestBodies(String name, JTable table) {
         int rowCount = table.getRowCount();
+        int colCount = 2; // Test Case Name and Request Body
 
-        for (int row = 0; row < rowCount; row++) {
-            String fieldName = table.getValueAt(row, 0).toString(); // Field name
-            String dataType = table.getValueAt(row, 1).toString(); // Data type (String, Integer, Boolean)
-            String positiveValuesStr = table.getValueAt(row, 2).toString(); // Positive values (comma-separated)
-            String negativevalueStr = table.getValueAt(row, 3).toString();
-            String[] values = positiveValuesStr.split(",");
-            String[] negativeValues = negativevalueStr.split(",");
+        JSONObject baseJsonBody = this.jsonRequestBodyObject;
 
-            List<Object> parsedValues = new ArrayList<>();
-
-            for (String value : values) {
-                parsedValues.add(parseValue(dataType, value.trim()));
+        // Calculate the total number of test cases
+        int totalTestCases = 0;
+        for (int i = 0; i < rowCount; i++) {
+            String positiveData = (String) table.getValueAt(i, 3);
+            String negativeData = (String) table.getValueAt(i, 4);
+            if (positiveData != null && !positiveData.isEmpty()) {
+                totalTestCases += positiveData.split(",").length;
             }
+            if (negativeData != null && !negativeData.isEmpty()) {
+                totalTestCases += negativeData.split(",").length;
+            }
+        }
 
-            for (String value : negativeValues) {
-                if (!value.equals("")) {
-                    parsedValues.add(parseValue(dataType, value.trim()));
+        // Initialize the result array
+        Object[][] result = new Object[totalTestCases + 1][colCount];
+        int resultIndex = 0;
+        result[resultIndex][0] = "Verify " + name + " with default values";
+        result[resultIndex][1] = new JSONObject(baseJsonBody.toString());
+        resultIndex++;
+
+        // Generate JSON bodies for positive and negative data
+        for (int i = 0; i < rowCount; i++) {
+            String fieldName = (String) table.getValueAt(i, 0);
+            String dataType = (String) table.getValueAt(i, 1);
+            String positiveData = (String) table.getValueAt(i, 3);
+            String negativeData = (String) table.getValueAt(i, 4);
+
+            // Generate JSONs for positive data
+            if (positiveData != null && !positiveData.isEmpty()) {
+                String[] positiveValues = positiveData.split(",");
+                for (String value : positiveValues) {
+                    JSONObject newJson = new JSONObject(baseJsonBody.toString());
+                    replaceValue(newJson, fieldName, parseValue(dataType, value.trim()));
+                    result[resultIndex][0] = "Verify " + name + " with " + fieldName + " value " + value.trim();
+                    result[resultIndex][1] = newJson;
+                    resultIndex++;
                 }
             }
 
-            // Add default value (first value in the list) to the request body
-            defaultRequestBody.put(fieldName, parsedValues.get(0));
-
-            // Track fields with multiple values for generating combinations
-            if (parsedValues.size() > 1) {
-                fieldsWithMultipleValues.add(fieldName);
-                valueCombinations.add(parsedValues);
+            // Generate JSONs for negative data
+            if (negativeData != null && !negativeData.isEmpty()) {
+                String[] negativeValues = negativeData.split(",");
+                for (String value : negativeValues) {
+                    JSONObject newJson = new JSONObject(baseJsonBody.toString());
+                    replaceValue(newJson, fieldName, parseValue(dataType, value.trim()));
+                    result[resultIndex][0] = "Verify " + name + " with " + fieldName + " value " + value.trim();
+                    result[resultIndex][1] = newJson;
+                    resultIndex++;
+                }
             }
         }
-
-        // Step 2: Generate all combinations of values for fields with multiple values
-        if (fieldsWithMultipleValues.isEmpty()) {
-            // If no field has multiple values, generate a single request body
-            String testName = "Verify " + name + " with all default values";
-            requestBodies.add(new Object[]{testName, defaultRequestBody.toString(4)});
-
-        } else {
-            generateCombinations(fieldsWithMultipleValues, valueCombinations, defaultRequestBody, name, requestBodies);
-        }
-
-        // Convert the list to an array and return
-        return requestBodies.toArray(new Object[0][]);
+        return result;
     }
 
     /**
@@ -452,145 +458,38 @@ public class Screen2 extends javax.swing.JFrame {
         }; // Default is String
     }
 
-    /**
-     * Generates all possible combinations of values for fields with multiple
-     * values and creates corresponding JSON request bodies. Each combination is
-     * added as a test case.
-     *
-     * @param fields a list of field names with multiple values.
-     * @param valueCombinations a list of value combinations for each field.
-     * @param baseRequestBody the default request body to build upon.
-     * @param name the base name for test case descriptions.
-     * @param requestBodies the list to store generated test cases (test name
-     * and JSON body).
-     */
-    private static void generateCombinations(List<String> fields, List<List<Object>> valueCombinations,
-            JSONObject baseRequestBody, String name, List<Object[]> requestBodies) {
-        int[] indices = new int[fields.size()];
-        int totalCombinations = 1;
-
-        for (List<Object> values : valueCombinations) {
-            totalCombinations *= values.size();
-        }
-
-        for (int i = 0; i < totalCombinations; i++) {
-            JSONObject requestBody = new JSONObject(baseRequestBody.toString());
-
-            for (int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
-                String fieldName = fields.get(fieldIndex);
-                Object value = valueCombinations.get(fieldIndex).get(indices[fieldIndex]);
-                requestBody.put(fieldName, value);
-            }
-
-            String testName = "Verify " + name;
-            for (int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
-                String fieldName = fields.get(fieldIndex);
-                Object value = valueCombinations.get(fieldIndex).get(indices[fieldIndex]);
-                testName += String.format(" with %s value %s", fieldName, value);
-            }
-
-            requestBodies.add(new Object[]{testName, formatJsonObject(requestBody)});
-
-            // Update indices for the next combination
-            for (int j = fields.size() - 1; j >= 0; j--) {
-                if (indices[j] < valueCombinations.get(j).size() - 1) {
-                    indices[j]++;
-                    break;
+    private void replaceValue(JSONObject json, String fieldName, Object value) {
+        if (fieldName.contains(".")) {
+            // Handle nested keys
+            String[] keys = fieldName.split("\\.");
+            JSONObject current = json;
+            for (int i = 0; i < keys.length - 1; i++) {
+                String key = keys[i];
+                // Handle array notation (e.g., "customErrors[0]")
+                if (key.contains("[")) {
+                    int arrayIndex = Integer.parseInt(key.substring(key.indexOf("[") + 1, key.indexOf("]")));
+                    key = key.substring(0, key.indexOf("["));
+                    JSONArray array = current.optJSONArray(key);
+                    if (array == null) {
+                        throw new IllegalArgumentException("Invalid key: " + fieldName);
+                    }
+                    current = array.getJSONObject(arrayIndex);
                 } else {
-                    indices[j] = 0;
+                    current = current.optJSONObject(key);
+                    if (current == null) {
+                        throw new IllegalArgumentException("Invalid key: " + fieldName);
+                    }
                 }
             }
+            // Replace the value for the final key
+            String finalKey = keys[keys.length - 1];
+            current.put(finalKey, value);
+        } else {
+            // Simple key, replace directly
+            json.put(fieldName, value);
         }
     }
-
-    /**
-     * Converts a flat JSON object with dot-separated keys into a nested JSON
-     * structure. Supports handling nested objects and arrays.
-     *
-     * @param input the flat JSON object to format.
-     * @return a nested JSON object based on the dot-separated keys.
-     * @throws JSONException if any JSON operation fails.
-     */
-    public static JSONObject formatJsonObject(JSONObject input) throws JSONException {
-        JSONObject result = new JSONObject();
-        for (String key : input.keySet()) {
-            String[] parts = key.split("\\.");
-            addNestedKeys(result, parts, input.get(key));
-        }
-        return result;
-    }
-
-    /**
-     * Adds nested keys and values to a JSON object. Handles dot-separated keys
-     * and array indices to create nested objects and arrays dynamically.
-     *
-     * @param current the current JSON object to which keys will be added.
-     * @param keys an array of key segments (split by dots) representing the
-     * nested structure.
-     * @param value the value to assign to the final key in the structure.
-     * @throws JSONException if any JSON operation fails.
-     */
-    private static void addNestedKeys(JSONObject current, String[] keys, Object value) throws JSONException {
-        for (int i = 0; i < keys.length; i++) {
-            String key = keys[i];
-
-            // Check if this is the last key in the array
-            if (i == keys.length - 1) {
-                if (key.matches(".*\\[\\d+\\]$")) { // Handle array indices
-                    String baseKey = key.substring(0, key.indexOf("["));
-                    int index = Integer.parseInt(key.substring(key.indexOf("[") + 1, key.indexOf("]")));
-
-                    if (!current.has(baseKey)) {
-                        current.put(baseKey, new JSONArray());
-                    }
-
-                    JSONArray array = current.getJSONArray(baseKey);
-                    ensureCapacity(array, index);
-                    array.put(index, value);
-                } else {
-                    current.put(key, value);
-                }
-            } else {
-                if (key.matches(".*\\[\\d+\\]$")) { // Handle nested array keys
-                    String baseKey = key.substring(0, key.indexOf("["));
-                    int index = Integer.parseInt(key.substring(key.indexOf("[") + 1, key.indexOf("]")));
-
-                    if (!current.has(baseKey)) {
-                        current.put(baseKey, new JSONArray());
-                    }
-
-                    JSONArray array = current.getJSONArray(baseKey);
-                    ensureCapacity(array, index);
-
-                    if (array.isNull(index)) {
-                        array.put(index, new JSONObject());
-                    }
-
-                    current = array.getJSONObject(index);
-                } else {
-                    if (!current.has(key)) {
-                        current.put(key, new JSONObject());
-                    }
-                    current = current.getJSONObject(key);
-                }
-            }
-        }
-    }
-
-    /**
-     * Ensures that a JSONArray has sufficient capacity to accommodate the
-     * specified index. If the array is smaller than the required size, null
-     * placeholders are added.
-     *
-     * @param array the JSONArray to resize.
-     * @param index the index to ensure capacity for.
-     */
-    private static void ensureCapacity(JSONArray array, int index) {
-        while (array.length() <= index) {
-            array.put(JSONObject.NULL);
-        }
-    }
-
+    
     private void jsonTablePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jsonTablePropertyChange
         // TODO add your handling code here:
     }//GEN-LAST:event_jsonTablePropertyChange
@@ -627,27 +526,27 @@ public class Screen2 extends javax.swing.JFrame {
 
     private void addValueBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addValueBtnActionPerformed
         // TODO add your handling code here:
-        if(jsonTable.getSelectedRow()!=-1){
+        if (jsonTable.getSelectedRow() != -1) {
             AddValuePopUp popUp = new AddValuePopUp(this, true);
             popUp.setVisible(true);
-        }else{
+        } else {
             JOptionPane.showMessageDialog(this, "Please Selected a field", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_addValueBtnActionPerformed
 
-    public void addFieldValues(String type,String value){
+    public void addFieldValues(String type, String value) {
         int selectedRow = jsonTable.getSelectedRow();
         int selectedColumn = 0;
-        if(type.equalsIgnoreCase("positive data")){
+        if (type.equalsIgnoreCase("positive data")) {
             selectedColumn = 3;
-        }else if(type.equalsIgnoreCase("negative data")){
+        } else if (type.equalsIgnoreCase("negative data")) {
             selectedColumn = 4;
         }
         String existedValue = (String) jsonTable.getValueAt(selectedRow, selectedColumn);
-        if(!existedValue.equals("")){
-            String newValue = existedValue+","+value;
+        if (!existedValue.equals("")) {
+            String newValue = existedValue + "," + value;
             jsonTable.setValueAt(newValue, selectedRow, selectedColumn);
-        }else{
+        } else {
             jsonTable.setValueAt(value, selectedRow, selectedColumn);
         }
     }
@@ -655,40 +554,40 @@ public class Screen2 extends javax.swing.JFrame {
     private void deleteValueBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteValueBtnActionPerformed
         // TODO add your handling code here:
         deleteValueSelectedRow = jsonTable.getSelectedRow();
-        if(deleteValueSelectedRow!=-1){    
+        if (deleteValueSelectedRow != -1) {
             String positiveValue = (String) jsonTable.getValueAt(deleteValueSelectedRow, 3);
             String negativeValue = (String) jsonTable.getValueAt(deleteValueSelectedRow, 4);
             String[] postiveValueAr = positiveValue.split(",");
             String[] negativeValueAr = negativeValue.split(",");
-            if(positiveValue.equals("") && negativeValue.equals("")){
+            if (positiveValue.equals("") && negativeValue.equals("")) {
                 JOptionPane.showMessageDialog(this, "No positive or negative value is present for selected field", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            DeleteValuePopUp popUp = new DeleteValuePopUp(this,true,postiveValueAr, negativeValueAr);
+            DeleteValuePopUp popUp = new DeleteValuePopUp(this, true, postiveValueAr, negativeValueAr);
             popUp.setVisible(true);
-        }else{
+        } else {
             JOptionPane.showMessageDialog(this, "Please Selected a field", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_deleteValueBtnActionPerformed
 
-    public void updaTableValues(DefaultListModel<String> positiveValue,DefaultListModel<String> negativeValue){
+    public void updaTableValues(DefaultListModel<String> positiveValue, DefaultListModel<String> negativeValue) {
         deleteValueSelectedRow = jsonTable.getSelectedRow();
         String positiveValues = "";
-        if(!positiveValue.isEmpty()){
+        if (!positiveValue.isEmpty()) {
             positiveValues = IntStream.range(0, positiveValue.getSize())
-                                 .mapToObj(positiveValue::getElementAt)
-                                 .collect(Collectors.joining(", "));
+                    .mapToObj(positiveValue::getElementAt)
+                    .collect(Collectors.joining(", "));
         }
         String negativeValues = "";
-        if(!negativeValue.isEmpty()){
+        if (!negativeValue.isEmpty()) {
             negativeValues = IntStream.range(0, negativeValue.getSize())
-                                 .mapToObj(negativeValue::getElementAt)
-                                 .collect(Collectors.joining(", "));
+                    .mapToObj(negativeValue::getElementAt)
+                    .collect(Collectors.joining(", "));
         }
         jsonTable.setValueAt(positiveValues, deleteValueSelectedRow, 3);
         jsonTable.setValueAt(negativeValues, deleteValueSelectedRow, 4);
     }
-    
+
     /**
      * @param args the command line arguments
      */

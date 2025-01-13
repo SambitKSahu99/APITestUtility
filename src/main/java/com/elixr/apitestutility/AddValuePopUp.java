@@ -8,19 +8,27 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 /**
- *
- * @author sambit.sahu
+ * This class represents a pop-up dialog to add a new value, either as "Positive
+ * Data" or "Negative Data". It provides options to add, clear, or exit the
+ * dialog.
  */
 public class AddValuePopUp extends javax.swing.JDialog {
 
     /**
-     * Creates new form OpenHeaderDialog
+     * Creates new AddValuePopUp dialog.
      */
     public AddValuePopUp(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
     }
 
+    /**
+     * Private constructor that is not yet supported for initialization. Throws
+     * an UnsupportedOperationException if called.
+     *
+     * @param jFrame The parent JFrame (not used).
+     * @param b A boolean flag (not used).
+     */
     private AddValuePopUp(JFrame jFrame, boolean b) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
@@ -136,24 +144,43 @@ public class AddValuePopUp extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Handles the action performed when the "Add" button is clicked. Retrieves
+     * the selected type and value entered by the user. Validates the input and
+     * passes the values to the parent frame.
+     *
+     * @param evt The event triggered by clicking the "Add" button.
+     */
     private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
         String type = positiveOrNegativeComboBox.getSelectedItem().toString().trim();
         String value = valueTextField.getText().trim();
-        if(!value.isEmpty()){
+        if (!value.isEmpty()) {
             Screen2 parentFrame = (Screen2) this.getParent();
-            parentFrame.addFieldValues(type,value);
+            parentFrame.addFieldValues(type, value);
             dispose();
         } else {
             JOptionPane.showMessageDialog(this, "Value can't be empty", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_addBtnActionPerformed
 
+    /**
+     * Handles the action performed when the "Clear" button is clicked. Resets
+     * the combo box selection and clears the text field.
+     *
+     * @param evt The event triggered by clicking the "Clear" button.
+     */
     private void clearBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearBtnActionPerformed
         // TODO add your handling code here:
         positiveOrNegativeComboBox.setSelectedIndex(0);
         valueTextField.setText("");
     }//GEN-LAST:event_clearBtnActionPerformed
 
+    /**
+     * Handles the action performed when the "Exit" button is clicked. Closes
+     * the dialog and disposes of its resources.
+     *
+     * @param evt The event triggered by clicking the "Exit" button.
+     */
     private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
         // TODO add your handling code here:
         dispose();

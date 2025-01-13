@@ -5,72 +5,94 @@
 package com.elixr.apitestutility;
 
 import javax.swing.DefaultListModel;
-import javax.swing.JCheckBox;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
 /**
- *
- * @author sambit.sahu
+ * This class represents a pop-up dialog for deleting values from positive and
+ * negative data lists. The user can select multiple values from both lists and
+ * remove them. The updated lists are then passed back to the parent frame.
  */
 public class DeleteValuePopUp extends javax.swing.JDialog {
-    
+
     private final DefaultListModel<String> positiveList = new DefaultListModel<>();
     private final DefaultListModel<String> negativeList = new DefaultListModel<>();
+
     /**
-     * Creates new form OpenHeaderDialog
+     * Creates a new DeleteValuePopUp dialog.
+     *
+     * @param parent The parent frame that owns this dialog.
+     * @param modal Specifies whether the dialog is modal.
+     * @param positiveValues An array of strings representing positive values.
+     * @param negativeValues An array of strings representing negative values.
      */
     public DeleteValuePopUp(java.awt.Frame parent, boolean modal,
             String[] positiveValues, String[] negativeValues) {
         super(parent, modal);
         initComponents();
         setUpFrame();
-        setUpList(positiveValues,negativeValues);
+        setUpList(positiveValues, negativeValues);
     }
 
     private DeleteValuePopUp(JFrame jFrame, boolean b) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
+    /**
+     * Configures the frame's scroll panes to display scrollbars as needed.
+     */
     private void setUpFrame() {
         positiveScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         negativeScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
     }
 
-    private void setUpList(String[] positiveValues, String[] negativeValues){
-        
-        for(String items: positiveValues){
-              positiveList.addElement(items);
-          }
+    /**
+     * Populates the positive and negative lists with the provided values and
+     * sets up their selection modes.
+     *
+     * @param positiveValues An array of strings representing positive values.
+     * @param negativeValues An array of strings representing negative values.
+     */
+    private void setUpList(String[] positiveValues, String[] negativeValues) {
+
+        for (String items : positiveValues) {
+            positiveList.addElement(items);
+        }
         positiveValueList.setModel(positiveList);
         positiveValueList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        
-          for(String items: negativeValues){
-              negativeList.addElement(items);
-         }
+
+        for (String items : negativeValues) {
+            negativeList.addElement(items);
+        }
         negativeValueList.setModel(negativeList);
         negativeValueList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     }
-    
-     private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) { 
-        int[] selectedPositiveIndex  = positiveValueList.getSelectedIndices();
-        for(int i:selectedPositiveIndex){
-            System.out.println("selected indx :"+i);
+
+    /**
+     * Handles the action performed when the "Delete" button is clicked. Removes
+     * the selected items from both positive and negative lists and updates the
+     * parent frame with the modified lists.
+     *
+     * @param evt The event triggered by clicking the "Delete" button.
+     */
+    private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        int[] selectedPositiveIndex = positiveValueList.getSelectedIndices();
+        for (int i : selectedPositiveIndex) {
+            System.out.println("selected indx :" + i);
         }
-        for(int i=selectedPositiveIndex.length-1;i>=0;i--){
+        for (int i = selectedPositiveIndex.length - 1; i >= 0; i--) {
             positiveList.remove(selectedPositiveIndex[i]);
         }
-        int[] selectedNegativeIndex  = negativeValueList.getSelectedIndices();
-        for(int i=selectedNegativeIndex.length-1;i>=0;i--){
+        int[] selectedNegativeIndex = negativeValueList.getSelectedIndices();
+        for (int i = selectedNegativeIndex.length - 1; i >= 0; i--) {
             negativeList.remove(selectedNegativeIndex[i]);
-        } 
+        }
         Screen2 screen2 = (Screen2) this.getParent();
         screen2.updaTableValues(positiveList, negativeList);
         this.dispose();
-    }  
-    
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -197,11 +219,16 @@ public class DeleteValuePopUp extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Handles the action performed when the "Exit" button is clicked. Closes
+     * the dialog and disposes of its resources.
+     *
+     * @param evt The event triggered by clicking the "Exit" button.
+     */
     private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
         // TODO add your handling code here:
         dispose();
     }//GEN-LAST:event_exitBtnActionPerformed
-                                          
 
     /**
      * @param args the command line arguments

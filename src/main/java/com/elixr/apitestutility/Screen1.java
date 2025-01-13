@@ -360,11 +360,10 @@ public class Screen1 extends javax.swing.JFrame {
                 jsonFieldsAndValues.clear(); // Clear previous data
                 extractFieldsAndValues(jsonRequestBodyObject, "");
                 jsonRequestBodyTableData = prepareTableData(jsonFieldsAndValues);
-            }
-            else {
+            } else {
                 jsonRequestBodyTableData = null;
             }
-            Screen2 screen2 = new Screen2(this,jsonRequestBodyObject, jsonRequestBodyTableData, baseUrlInput, methodInput, pathInput, nameInput, tableModel, getExtendedState());
+            Screen2 screen2 = new Screen2(this, jsonRequestBodyObject, jsonRequestBodyTableData, baseUrlInput, methodInput, pathInput, nameInput, tableModel, getExtendedState());
             screen2.setVisible(true);
             setVisible(false);
         } catch (Exception e) {

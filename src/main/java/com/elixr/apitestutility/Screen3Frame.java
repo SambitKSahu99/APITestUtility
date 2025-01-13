@@ -85,7 +85,7 @@ public class Screen3Frame extends javax.swing.JFrame {
                     ((JLabel) c).setVerticalAlignment(SwingConstants.TOP); // Set vertical alignment to top
                 }
                 // Apply border
-                setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+                ((JLabel) c).setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
                 return c;
             }
         };
@@ -128,6 +128,7 @@ public class Screen3Frame extends javax.swing.JFrame {
         public JsonCellRenderer() {
             textArea.setLineWrap(true);
             textArea.setWrapStyleWord(true);
+            textArea.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1)); // Add border to JSON cells
         }
 
         @Override

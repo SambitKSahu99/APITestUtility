@@ -111,6 +111,7 @@ public class Screen1 extends javax.swing.JFrame {
         nameLabel = new javax.swing.JLabel();
         nameField = new javax.swing.JTextField();
         methodDropDown = new javax.swing.JComboBox<>();
+        protocolComboBox = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -186,12 +187,14 @@ public class Screen1 extends javax.swing.JFrame {
         nameLabel.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         nameLabel.setText("Name");
 
-        methodDropDown.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Get", "Post", "Put", "Delete","Patch" }));
+        methodDropDown.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "GET", "POST", "PUT", "DELETE","PATCH" }));
         methodDropDown.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 methodDropDownActionPerformed(evt);
             }
         });
+
+        protocolComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "http", "https"}));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -212,7 +215,7 @@ public class Screen1 extends javax.swing.JFrame {
                             .addComponent(deleteHeaderBtn)))
                     .addComponent(jsonTextLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 167, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jsonScrollPane)
-                    .addComponent(bottomPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 677, Short.MAX_VALUE)
+                    .addComponent(bottomPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -222,7 +225,9 @@ public class Screen1 extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(baseUrlLabel)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(baseUrl))
+                                .addComponent(protocolComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(baseUrl, javax.swing.GroupLayout.DEFAULT_SIZE, 409, Short.MAX_VALUE))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(pathLabel)
                                 .addGap(33, 33, 33)
@@ -236,7 +241,8 @@ public class Screen1 extends javax.swing.JFrame {
                 .addGap(11, 11, 11)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(baseUrlLabel)
-                    .addComponent(baseUrl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(baseUrl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(protocolComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(12, 12, 12)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -331,6 +337,7 @@ public class Screen1 extends javax.swing.JFrame {
      * @param evt Action event triggered by the submit button.
      */
     private void SubmitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SubmitBtnActionPerformed
+        String protocol = protocolComboBox.getSelectedItem().toString().trim();
         String baseUrlInput = baseUrl.getText();
         String methodInput = (String) methodDropDown.getSelectedItem();
         String nameInput = nameField.getText();
@@ -363,7 +370,8 @@ public class Screen1 extends javax.swing.JFrame {
             } else {
                 jsonRequestBodyTableData = null;
             }
-            Screen2 screen2 = new Screen2(this, jsonRequestBodyObject, jsonRequestBodyTableData, baseUrlInput, methodInput, pathInput, nameInput, tableModel, getExtendedState());
+            String formattedBaseUrl = protocol+"://"+baseUrlInput+"/"+pathInput;
+            Screen2 screen2 = new Screen2(this, jsonRequestBodyObject, jsonRequestBodyTableData, formattedBaseUrl , methodInput, nameInput, tableModel, getExtendedState());
             screen2.setVisible(true);
             setVisible(false);
         } catch (Exception e) {
@@ -512,6 +520,7 @@ public class Screen1 extends javax.swing.JFrame {
     private javax.swing.JLabel nameLabel;
     private javax.swing.JTextField path;
     private javax.swing.JLabel pathLabel;
+    private javax.swing.JComboBox<String> protocolComboBox;
     private javax.swing.JButton resetBtn;
     // End of variables declaration//GEN-END:variables
 }

@@ -50,12 +50,11 @@ public class Screen2 extends javax.swing.JFrame {
      * request bodies.
      * @param baseUrl The base URL of the request.
      * @param method The HTTP method (e.g., GET, POST).
-     * @param path The request path.
      * @param name The name or identifier for the current screen.
      * @param headersTableModel The table model containing HTTP headers.
      * @param previousState The previous frame state (e.g., maximized).
      */
-    public Screen2(Screen1 previousFrame, JSONObject jsonRequestBodyObject, Object[][] jsonRequestBodyTableData, String baseUrl, String method, String path, String name, DefaultTableModel headersTableModel, int previousState) {
+    public Screen2(Screen1 previousFrame, JSONObject jsonRequestBodyObject, Object[][] jsonRequestBodyTableData, String baseUrl, String method, String name, DefaultTableModel headersTableModel, int previousState) {
         this.deleteValueSelectedRow = -1;
         this.jsonRequestBodyObject = jsonRequestBodyObject;
         this.previousFrame = previousFrame;

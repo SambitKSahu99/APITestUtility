@@ -183,7 +183,6 @@ public class Screen2 extends javax.swing.JFrame {
         backBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(689, 476));
 
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel4.setText("Request Field Data and Validations");
@@ -218,17 +217,27 @@ public class Screen2 extends javax.swing.JFrame {
             }
         });
 
+        otherComponentsPanel.setBackground(new java.awt.Color(255, 255, 255));
         otherComponentsPanel.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         otherComponentsPanel.setForeground(new java.awt.Color(255, 255, 255));
 
-        urlLabel.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        urlLabel.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         urlLabel.setText("URL :");
+        urlLabel.setMaximumSize(new java.awt.Dimension(34, 20));
+        urlLabel.setMinimumSize(new java.awt.Dimension(34, 20));
+        urlLabel.setPreferredSize(new java.awt.Dimension(34, 20));
 
-        methodLabel.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        methodLabel.setText(" Method :");
+        methodLabel.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
+        methodLabel.setText("Method :");
 
-        headersLabel.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        headersLabel.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         headersLabel.setText("Headers :");
+
+        urlValueLabel.setFont(new java.awt.Font("Segoe UI", 0, 15)); // NOI18N
+
+        methodValueLabel.setFont(new java.awt.Font("Segoe UI", 0, 15)); // NOI18N
+
+        headersValueLabel.setFont(new java.awt.Font("Segoe UI", 0, 15)); // NOI18N
 
         javax.swing.GroupLayout otherComponentsPanelLayout = new javax.swing.GroupLayout(otherComponentsPanel);
         otherComponentsPanel.setLayout(otherComponentsPanelLayout);
@@ -238,25 +247,24 @@ public class Screen2 extends javax.swing.JFrame {
                 .addGap(17, 17, 17)
                 .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(otherComponentsPanelLayout.createSequentialGroup()
-                        .addComponent(headersLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(urlLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(headersValueLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(otherComponentsPanelLayout.createSequentialGroup()
-                        .addComponent(urlLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(29, 29, 29)
                         .addComponent(urlValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 457, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(otherComponentsPanelLayout.createSequentialGroup()
-                        .addComponent(methodLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(methodLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(methodValueLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(methodValueLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(headersValueLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(headersLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(78, Short.MAX_VALUE))
         );
         otherComponentsPanelLayout.setVerticalGroup(
             otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(otherComponentsPanelLayout.createSequentialGroup()
                 .addGap(16, 16, 16)
                 .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(urlLabel)
+                    .addComponent(urlLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(urlValueLabel))
                 .addGap(18, 18, 18)
                 .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -264,9 +272,9 @@ public class Screen2 extends javax.swing.JFrame {
                     .addComponent(methodValueLabel))
                 .addGap(18, 18, 18)
                 .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(headersLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(headersLabel)
                     .addComponent(headersValueLabel))
-                .addContainerGap(26, Short.MAX_VALUE))
+                .addContainerGap(22, Short.MAX_VALUE))
         );
 
         addValueBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -331,7 +339,7 @@ public class Screen2 extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(requestBodyScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
+                        .addComponent(requestBodyScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 223, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(102, 102, 102)

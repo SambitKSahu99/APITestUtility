@@ -572,15 +572,11 @@ public class Screen2 extends javax.swing.JFrame {
      */
     public void addFieldValues(String type, String value) {
         int selectedRow = jsonTable.getSelectedRow();
-        int selectedColumn = 0;
-        if (type.equalsIgnoreCase("positive data")) {
-            selectedColumn = 3;
-        } else if (type.equalsIgnoreCase("negative data")) {
-            selectedColumn = 4;
-        }
+        int selectedColumn = type.equalsIgnoreCase("positive data") ? 3 : 4; // Positive data -> column 3, Negative data -> column 4
+
         String existedValue = (String) jsonTable.getValueAt(selectedRow, selectedColumn);
         if (!existedValue.equals("")) {
-            String newValue = existedValue + "," + value;
+            String newValue = existedValue + "," + value; // Append new value
             jsonTable.setValueAt(newValue, selectedRow, selectedColumn);
         } else {
             jsonTable.setValueAt(value, selectedRow, selectedColumn);

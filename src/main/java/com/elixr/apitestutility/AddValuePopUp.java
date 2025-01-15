@@ -5,21 +5,23 @@
 package com.elixr.apitestutility;
 
 import javax.swing.*;
-import java.util.Arrays;
 
 /**
- *
- * @author chandrakanth.shaji
+ * A dialog window for adding positive and negative values. The values are
+ * entered in JTextAreas and processed to ensure that only valid input is passed
+ * to the parent frame (Screen2).
  */
 public class AddValuePopUp extends javax.swing.JDialog {
 
     /**
-     * Creates new form AdddValuePopUp
+     * Creates a new AddValuePopUp dialog.
+     *
+     * @param parent the parent frame of this dialog
+     * @param modal whether the dialog is modal
      */
     public AddValuePopUp(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-
         // Positive TextArea key listener
         positiveTextArea1.addKeyListener(new java.awt.event.KeyAdapter() {
             @Override
@@ -29,7 +31,6 @@ public class AddValuePopUp extends javax.swing.JDialog {
                 }
             }
         });
-
         // Negative TextArea key listener
         negativeTextArea1.addKeyListener(new java.awt.event.KeyAdapter() {
             @Override
@@ -39,12 +40,14 @@ public class AddValuePopUp extends javax.swing.JDialog {
                 }
             }
         });
-
         setUpFrame();
     }
 
     /**
-     * Ensures there are no unnecessary blank lines in the JTextArea.
+     * Ensures there are no unnecessary blank lines in the JTextArea by removing
+     * extra newlines and trimming leading/trailing spaces.
+     *
+     * @param textArea the JTextArea to sanitize
      */
     private void removeExtraNewLines(JTextArea textArea) {
         String text = textArea.getText();
@@ -56,18 +59,20 @@ public class AddValuePopUp extends javax.swing.JDialog {
                 sanitizedText.append(line.trim()).append("\n");
             }
         }
-
         textArea.setText(sanitizedText.toString());
     }
 
     /**
-     * Converts the text area content into a single comma-separated string.
+     * Converts the content of a JTextArea into a comma-separated string,
+     * removing blank lines and unnecessary spaces.
+     *
+     * @param textArea the JTextArea to process
+     * @return a comma-separated string of values
      */
     private String getCommaSeparatedValues(JTextArea textArea) {
         String text = textArea.getText();
         String[] lines = text.split("\\n");
         StringBuilder commaSeparated = new StringBuilder();
-
         for (String line : lines) {
             if (!line.trim().isEmpty()) {
                 if (commaSeparated.length() > 0) {
@@ -76,12 +81,12 @@ public class AddValuePopUp extends javax.swing.JDialog {
                 commaSeparated.append(line.trim());
             }
         }
-
         return commaSeparated.toString();
     }
 
     /**
-     * Save button action to handle input values.
+     * Configures the frame settings and ensures the scroll panes dynamically
+     * adjust based on the content.
      */
     private void setUpFrame() {
         this.setTitle("Add Positive and Negative Values");
@@ -227,22 +232,25 @@ public class AddValuePopUp extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Handles the action of the Save button. Processes the values from the
+     * JTextAreas, validates the input, and passes the data to the parent frame
+     * (Screen2).
+     *
+     * @param evt the ActionEvent triggered by clicking the Save button
+     */
     private void saveButton1ActionPerformed(java.awt.event.ActionEvent evt) {
-        // Retrieve and process values from JTextAreas
         String positiveValues = getCommaSeparatedValues(positiveTextArea1);
         String negativeValues = getCommaSeparatedValues(negativeTextArea1);
 
-        // Validate input
         if (positiveValues.trim().isEmpty() && negativeValues.trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please enter at least one value.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
         // Split values by commas
         String[] positiveArray = positiveValues.split(",");
         String[] negativeArray = negativeValues.split(",");
 
-        // Pass data to Screen2 (assuming Screen2 is the parent)
         Screen2 parentFrame = (Screen2) this.getParent();
         for (String value : positiveArray) {
             if (!value.trim().isEmpty()) {
@@ -254,15 +262,15 @@ public class AddValuePopUp extends javax.swing.JDialog {
                 parentFrame.addFieldValues("negative data", value.trim());
             }
         }
-
-        // Show success message
         JOptionPane.showMessageDialog(this, "Values saved successfully!");
-
-        // Close dialog
         this.dispose();
     }
 
-
+    /**
+     * Handles the action of the Exit button. Closes the dialog.
+     *
+     * @param evt the ActionEvent triggered by clicking the Exit button
+     */
     private void exitButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitButton1ActionPerformed
         this.dispose();
     }//GEN-LAST:event_exitButton1ActionPerformed

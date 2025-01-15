@@ -114,10 +114,13 @@ public class Screen1 extends javax.swing.JFrame {
         protocolComboBox = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setFocusCycleRoot(false);
 
         SubmitBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         SubmitBtn.setText("Submit");
         SubmitBtn.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        SubmitBtn.setMaximumSize(new java.awt.Dimension(81, 23));
+        SubmitBtn.setMinimumSize(new java.awt.Dimension(81, 23));
         SubmitBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 SubmitBtnActionPerformed(evt);
@@ -128,6 +131,8 @@ public class Screen1 extends javax.swing.JFrame {
         resetBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         resetBtn.setText("Reset");
         resetBtn.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        resetBtn.setMaximumSize(new java.awt.Dimension(81, 23));
+        resetBtn.setMinimumSize(new java.awt.Dimension(81, 23));
         resetBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 resetBtnActionPerformed(evt);
@@ -138,6 +143,8 @@ public class Screen1 extends javax.swing.JFrame {
         exitBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         exitBtn.setText("Exit");
         exitBtn.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        exitBtn.setMaximumSize(new java.awt.Dimension(81, 23));
+        exitBtn.setMinimumSize(new java.awt.Dimension(81, 23));
         exitBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exitBtnActionPerformed(evt);
@@ -201,7 +208,7 @@ public class Screen1 extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(6, 6, 6)
+                .addGap(30, 30, 30)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(methodLabel)
@@ -227,18 +234,18 @@ public class Screen1 extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(protocolComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(baseUrl, javax.swing.GroupLayout.DEFAULT_SIZE, 409, Short.MAX_VALUE))
+                                .addComponent(baseUrl, javax.swing.GroupLayout.DEFAULT_SIZE, 361, Short.MAX_VALUE))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(pathLabel)
                                 .addGap(33, 33, 33)
                                 .addComponent(path)))
                         .addGap(107, 107, 107)))
-                .addGap(6, 6, 6))
+                .addGap(30, 30, 30))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(11, 11, 11)
+                .addGap(14, 14, 14)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(baseUrlLabel)
                     .addComponent(baseUrl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -263,7 +270,7 @@ public class Screen1 extends javax.swing.JFrame {
                     .addComponent(nameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(13, 13, 13)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(headersJScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 119, Short.MAX_VALUE)
+                    .addComponent(headersJScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 125, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(20, 20, 20)
                         .addComponent(addHeaderBtn)
@@ -272,10 +279,10 @@ public class Screen1 extends javax.swing.JFrame {
                 .addGap(6, 6, 6)
                 .addComponent(jsonTextLabel)
                 .addGap(6, 6, 6)
-                .addComponent(jsonScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
+                .addComponent(jsonScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 117, Short.MAX_VALUE)
                 .addGap(12, 12, 12)
-                .addComponent(bottomPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(6, 6, 6))
+                .addComponent(bottomPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         pack();

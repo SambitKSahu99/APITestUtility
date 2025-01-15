@@ -4,33 +4,103 @@
  */
 package com.elixr.apitestutility;
 
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
+import javax.swing.*;
+import java.util.Arrays;
 
 /**
- * This class represents a pop-up dialog to add a new value, either as "Positive
- * Data" or "Negative Data". It provides options to add, clear, or exit the
- * dialog.
+ *
+ * @author chandrakanth.shaji
  */
 public class AddValuePopUp extends javax.swing.JDialog {
 
     /**
-     * Creates new AddValuePopUp dialog.
+     * Creates new form AdddValuePopUp
      */
     public AddValuePopUp(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+
+        // Positive TextArea key listener
+        positiveTextArea1.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                    javax.swing.SwingUtilities.invokeLater(() -> removeExtraNewLines(positiveTextArea1));
+                }
+            }
+        });
+
+        // Negative TextArea key listener
+        negativeTextArea1.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                    javax.swing.SwingUtilities.invokeLater(() -> removeExtraNewLines(negativeTextArea1));
+                }
+            }
+        });
+
+        setUpFrame();
     }
 
     /**
-     * Private constructor that is not yet supported for initialization. Throws
-     * an UnsupportedOperationException if called.
-     *
-     * @param jFrame The parent JFrame (not used).
-     * @param b A boolean flag (not used).
+     * Ensures there are no unnecessary blank lines in the JTextArea.
      */
-    private AddValuePopUp(JFrame jFrame, boolean b) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private void removeExtraNewLines(JTextArea textArea) {
+        String text = textArea.getText();
+        String[] lines = text.split("\\n");
+        StringBuilder sanitizedText = new StringBuilder();
+
+        for (String line : lines) {
+            if (!line.trim().isEmpty()) {
+                sanitizedText.append(line.trim()).append("\n");
+            }
+        }
+
+        textArea.setText(sanitizedText.toString());
+    }
+
+    /**
+     * Converts the text area content into a single comma-separated string.
+     */
+    private String getCommaSeparatedValues(JTextArea textArea) {
+        String text = textArea.getText();
+        String[] lines = text.split("\\n");
+        StringBuilder commaSeparated = new StringBuilder();
+
+        for (String line : lines) {
+            if (!line.trim().isEmpty()) {
+                if (commaSeparated.length() > 0) {
+                    commaSeparated.append(",");
+                }
+                commaSeparated.append(line.trim());
+            }
+        }
+
+        return commaSeparated.toString();
+    }
+
+    /**
+     * Save button action to handle input values.
+     */
+    private void setUpFrame() {
+        this.setTitle("Add Positive and Negative Values");
+
+        // Set the scroll pane properties for the positive scroll pane
+        positiveScrollPane1.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Vertical scrollbar only when needed
+        positiveScrollPane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // Horizontal scrollbar only when needed
+
+        // Set the scroll pane properties for the negative scroll pane
+        negativeScrollPane2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Vertical scrollbar only when needed
+        negativeScrollPane2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // Horizontal scrollbar only when needed
+
+        // Force a layout recalculation to ensure the content size is taken into account
+        positiveScrollPane1.revalidate();
+        negativeScrollPane2.revalidate();
+
+        // Optionally, you can also force a repaint to ensure the UI is updated correctly
+        positiveScrollPane1.repaint();
+        negativeScrollPane2.repaint();
     }
 
     /**
@@ -42,153 +112,160 @@ public class AddValuePopUp extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel2 = new javax.swing.JLabel();
-        valueTextField = new javax.swing.JTextField();
-        jPanel1 = new javax.swing.JPanel();
-        addBtn = new javax.swing.JButton();
-        clearBtn = new javax.swing.JButton();
-        exitBtn = new javax.swing.JButton();
-        jLabel3 = new javax.swing.JLabel();
-        positiveOrNegativeComboBox = new javax.swing.JComboBox<>();
-        jLabel1 = new javax.swing.JLabel();
+        headerPanel = new javax.swing.JPanel();
+        addValueHeader = new javax.swing.JLabel();
+        positiveLabel1 = new javax.swing.JLabel();
+        negativeLabel2 = new javax.swing.JLabel();
+        positiveScrollPane1 = new javax.swing.JScrollPane();
+        positiveTextArea1 = new javax.swing.JTextArea();
+        negativeScrollPane2 = new javax.swing.JScrollPane();
+        negativeTextArea1 = new javax.swing.JTextArea();
+        saveButton1 = new javax.swing.JButton();
+        exitButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel2.setText("Value");
+        addValueHeader.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        addValueHeader.setText("Add Value");
 
-        valueTextField.addActionListener(new java.awt.event.ActionListener() {
+        javax.swing.GroupLayout headerPanelLayout = new javax.swing.GroupLayout(headerPanel);
+        headerPanel.setLayout(headerPanelLayout);
+        headerPanelLayout.setHorizontalGroup(
+            headerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(headerPanelLayout.createSequentialGroup()
+                .addGap(161, 161, 161)
+                .addComponent(addValueHeader, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        headerPanelLayout.setVerticalGroup(
+            headerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(headerPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(addValueHeader, javax.swing.GroupLayout.DEFAULT_SIZE, 22, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        positiveLabel1.setText("Positive Values");
+
+        negativeLabel2.setText("Negative Values");
+
+        positiveScrollPane1.setPreferredSize(new java.awt.Dimension(47, 146));
+
+        positiveTextArea1.setColumns(20);
+        positiveTextArea1.setRows(5);
+        positiveTextArea1.setMaximumSize(new java.awt.Dimension(45, 90));
+        positiveTextArea1.setMinimumSize(new java.awt.Dimension(45, 90));
+        positiveTextArea1.setPreferredSize(new java.awt.Dimension(45, 90));
+        positiveScrollPane1.setViewportView(positiveTextArea1);
+
+        negativeScrollPane2.setPreferredSize(new java.awt.Dimension(47, 146));
+
+        negativeTextArea1.setColumns(20);
+        negativeTextArea1.setRows(5);
+        negativeTextArea1.setMaximumSize(new java.awt.Dimension(45, 90));
+        negativeTextArea1.setMinimumSize(new java.awt.Dimension(45, 90));
+        negativeTextArea1.setPreferredSize(new java.awt.Dimension(45, 90));
+        negativeScrollPane2.setViewportView(negativeTextArea1);
+
+        saveButton1.setText("Save");
+        saveButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                valueTextFieldActionPerformed(evt);
+                saveButton1ActionPerformed(evt);
             }
         });
 
-        addBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        addBtn.setText("Add");
-        addBtn.addActionListener(new java.awt.event.ActionListener() {
+        exitButton1.setText("Exit");
+        exitButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addBtnActionPerformed(evt);
+                exitButton1ActionPerformed(evt);
             }
         });
-        jPanel1.add(addBtn);
-
-        clearBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        clearBtn.setText("Clear");
-        clearBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                clearBtnActionPerformed(evt);
-            }
-        });
-        jPanel1.add(clearBtn);
-
-        exitBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        exitBtn.setText("Exit");
-        exitBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exitBtnActionPerformed(evt);
-            }
-        });
-        jPanel1.add(exitBtn);
-
-        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jLabel3.setText("Add Field Value");
-
-        positiveOrNegativeComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Positive Data", "Negative Data"}));
-
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel1.setText("Type");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(headerPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(68, 68, 68)
-                        .addComponent(jLabel3))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(15, 15, 15)
+                        .addGap(6, 6, 6)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel1))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(positiveLabel1)
+                            .addComponent(positiveScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(saveButton1))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 70, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(positiveOrNegativeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(valueTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 272, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 20, Short.MAX_VALUE)))))
-                .addContainerGap())
+                            .addComponent(negativeLabel2)
+                            .addComponent(negativeScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(exitButton1))
+                        .addGap(18, 18, 18))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(17, 17, 17)
-                .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 14, Short.MAX_VALUE)
+                .addContainerGap()
+                .addComponent(headerPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(positiveOrNegativeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(valueTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2))
+                    .addComponent(positiveLabel1)
+                    .addComponent(negativeLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(21, 21, 21))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(positiveScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 218, Short.MAX_VALUE)
+                    .addComponent(negativeScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(saveButton1)
+                    .addComponent(exitButton1))
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * Handles the action performed when the "Add" button is clicked. Retrieves
-     * the selected type and value entered by the user. Validates the input and
-     * passes the values to the parent frame.
-     *
-     * @param evt The event triggered by clicking the "Add" button.
-     */
-    private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
-        String type = positiveOrNegativeComboBox.getSelectedItem().toString().trim();
-        String value = valueTextField.getText().trim();
-        if (!value.isEmpty()) {
-            Screen2 parentFrame = (Screen2) this.getParent();
-            parentFrame.addFieldValues(type, value);
-            dispose();
-        } else {
-            JOptionPane.showMessageDialog(this, "Value can't be empty", "Error", JOptionPane.ERROR_MESSAGE);
+    private void saveButton1ActionPerformed(java.awt.event.ActionEvent evt) {
+        // Retrieve and process values from JTextAreas
+        String positiveValues = getCommaSeparatedValues(positiveTextArea1);
+        String negativeValues = getCommaSeparatedValues(negativeTextArea1);
+
+        // Validate input
+        if (positiveValues.trim().isEmpty() && negativeValues.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter at least one value.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
         }
-    }//GEN-LAST:event_addBtnActionPerformed
 
-    /**
-     * Handles the action performed when the "Clear" button is clicked. Resets
-     * the combo box selection and clears the text field.
-     *
-     * @param evt The event triggered by clicking the "Clear" button.
-     */
-    private void clearBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearBtnActionPerformed
-        // TODO add your handling code here:
-        positiveOrNegativeComboBox.setSelectedIndex(0);
-        valueTextField.setText("");
-    }//GEN-LAST:event_clearBtnActionPerformed
+        // Split values by commas
+        String[] positiveArray = positiveValues.split(",");
+        String[] negativeArray = negativeValues.split(",");
 
-    /**
-     * Handles the action performed when the "Exit" button is clicked. Closes
-     * the dialog and disposes of its resources.
-     *
-     * @param evt The event triggered by clicking the "Exit" button.
-     */
-    private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
-        // TODO add your handling code here:
-        dispose();
-    }//GEN-LAST:event_exitBtnActionPerformed
+        // Pass data to Screen2 (assuming Screen2 is the parent)
+        Screen2 parentFrame = (Screen2) this.getParent();
+        for (String value : positiveArray) {
+            if (!value.trim().isEmpty()) {
+                parentFrame.addFieldValues("positive data", value.trim());
+            }
+        }
+        for (String value : negativeArray) {
+            if (!value.trim().isEmpty()) {
+                parentFrame.addFieldValues("negative data", value.trim());
+            }
+        }
 
-    private void valueTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_valueTextFieldActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_valueTextFieldActionPerformed
+        // Show success message
+        JOptionPane.showMessageDialog(this, "Values saved successfully!");
+
+        // Close dialog
+        this.dispose();
+    }
+
+
+    private void exitButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitButton1ActionPerformed
+        this.dispose();
+    }//GEN-LAST:event_exitButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -217,12 +294,6 @@ public class AddValuePopUp extends javax.swing.JDialog {
         }
         //</editor-fold>
         //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
 
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -240,14 +311,15 @@ public class AddValuePopUp extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton addBtn;
-    private javax.swing.JButton clearBtn;
-    private javax.swing.JButton exitBtn;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JComboBox<String> positiveOrNegativeComboBox;
-    private javax.swing.JTextField valueTextField;
+    private javax.swing.JLabel addValueHeader;
+    private javax.swing.JButton exitButton1;
+    private javax.swing.JPanel headerPanel;
+    private javax.swing.JLabel negativeLabel2;
+    private javax.swing.JScrollPane negativeScrollPane2;
+    private javax.swing.JTextArea negativeTextArea1;
+    private javax.swing.JLabel positiveLabel1;
+    private javax.swing.JScrollPane positiveScrollPane1;
+    private javax.swing.JTextArea positiveTextArea1;
+    private javax.swing.JButton saveButton1;
     // End of variables declaration//GEN-END:variables
 }

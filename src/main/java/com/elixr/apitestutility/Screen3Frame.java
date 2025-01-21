@@ -6,6 +6,7 @@ package com.elixr.apitestutility;
 
 import java.awt.Color;
 import java.awt.Component;
+import static java.lang.System.exit;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -47,6 +48,7 @@ public class Screen3Frame extends javax.swing.JFrame {
      * @param state the state to set the frame to (e.g., maximized, normal).
      */
     private void setupFrame(int state) {
+        this.setTitle("APITestUtility");
         setExtendedState(state);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
@@ -166,6 +168,7 @@ public class Screen3Frame extends javax.swing.JFrame {
         resultTable = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
         backBtn = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setPreferredSize(new java.awt.Dimension(688, 476));
@@ -194,6 +197,15 @@ public class Screen3Frame extends javax.swing.JFrame {
             }
         });
         jPanel1.add(backBtn);
+
+        jButton1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButton1.setText("Exit");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jButton1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -241,6 +253,14 @@ public class Screen3Frame extends javax.swing.JFrame {
 
     }//GEN-LAST:event_backBtnActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        int confirm = JOptionPane.showConfirmDialog(null, "Are you sure want to exit?");
+        if (confirm == 0) {
+            exit(0);
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -278,6 +298,7 @@ public class Screen3Frame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton backBtn;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JTable resultTable;

@@ -139,6 +139,7 @@ public class Screen2 extends javax.swing.JFrame {
      * @param state The state of the frame (e.g., maximized, minimized).
      */
     private void setupFrame(int state) {
+        this.setTitle("APITestUtility");
         jsonTable.getTableHeader().setReorderingAllowed(false);
         setExtendedState(state);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -362,9 +363,11 @@ public class Screen2 extends javax.swing.JFrame {
      */
     private void executeTestbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_executeTestbtnActionPerformed
         // TODO add your handling code here:
-        Object[][] screen3TableData = null;
+        Object[][] screen3TableData = null ;
         if (jsonTable.getRowCount() == 0) {
-            screen3TableData = null;
+            screen3TableData = new Object[1][2];
+            screen3TableData[0][0] = "Verify " + name ;
+            screen3TableData[0][1] = "";
         } else {
             try {
                 screen3TableData = generateRequestBodies(name, jsonTable);

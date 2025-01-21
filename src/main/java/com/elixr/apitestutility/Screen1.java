@@ -35,6 +35,7 @@ public class Screen1 extends javax.swing.JFrame {
      * supports a request body is selected.
      */
     public Screen1() {
+        this.setTitle("APITestUtility");
         initComponents();
         setUpHeaderComponents();
         jsonScrollPane.setEnabled(false);

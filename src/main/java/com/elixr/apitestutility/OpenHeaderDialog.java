@@ -26,10 +26,15 @@ public class OpenHeaderDialog extends javax.swing.JDialog {
     public OpenHeaderDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        setUpFrame();
     }
 
     private OpenHeaderDialog(JFrame jFrame, boolean b) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+    
+    private void setUpFrame(){
+        this.setTitle("Add Headers");
     }
 
     /**
@@ -153,6 +158,10 @@ public class OpenHeaderDialog extends javax.swing.JDialog {
      * @param evt Action event triggered by the "Add" button.
      */
     private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
+        if(nameComboBox.getSelectedItem()==null || valueComboBox.getSelectedItem()==null){
+            JOptionPane.showMessageDialog(this, "Name and Value cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         String name = nameComboBox.getSelectedItem().toString().trim();
         String value = valueComboBox.getSelectedItem().toString().trim();
         if (!name.isEmpty() && !value.isEmpty()) {
@@ -160,7 +169,7 @@ public class OpenHeaderDialog extends javax.swing.JDialog {
             parentFrame.addHeader(name, value);
             dispose();
         } else {
-            JOptionPane.showMessageDialog(this, "Key and Value cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Name and Value cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_addBtnActionPerformed
 

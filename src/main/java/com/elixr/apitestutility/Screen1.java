@@ -42,6 +42,7 @@ public class Screen1 extends javax.swing.JFrame {
         jsonRequestBody.setEnabled(false);
         jsonrequestBody1.setEnabled(false);
         jsonTextLabel.setEnabled(false);
+        setLocationRelativeTo(null);
     }
 
     /**

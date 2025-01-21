@@ -23,16 +23,17 @@ public class Screen3Frame extends javax.swing.JFrame {
     private Screen2 previousFrame;
 
     /**
-     * Constructs a new Screen3Frame with the given data and state.
+     * Constructs a new Screen3Frame with the given data and previousState.
      *
      * @param previousFrame the previous screen's frame, used for navigation.
      * @param tableData the data to populate the result table.
-     * @param state the state of the frame (e.g., maximized, normal).
+     * @param previousState the previousState of the frame (e.g., maximized,
+     * normal).
      */
-    public Screen3Frame(Screen2 previousFrame, Object[][] tableData, int state) {
+    public Screen3Frame(Screen2 previousFrame, Object[][] tableData, int previousState) {
         this.previousFrame = previousFrame;
         initComponents();
-        setupFrame(state);
+        setupFrame(previousState);
         populateResultTable(tableData);
     }
 
@@ -43,13 +44,14 @@ public class Screen3Frame extends javax.swing.JFrame {
     }
 
     /**
-     * Configures the frame's state and default close operation.
+     * Configures the frame's previousState and default close operation.
      *
-     * @param state the state to set the frame to (e.g., maximized, normal).
+     * @param previousState the previousState to set the frame to (e.g., maximized, normal).
      */
-    private void setupFrame(int state) {
+    private void setupFrame(int previousState) {
         this.setTitle("APITestUtility");
-        setExtendedState(state);
+        setExtendedState(previousState);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
@@ -245,6 +247,7 @@ public class Screen3Frame extends javax.swing.JFrame {
      */
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
         if (previousFrame != null) {
+            previousFrame.setExtendedState(this.getExtendedState());
             previousFrame.setVisible(true);
             this.dispose();
         } else {

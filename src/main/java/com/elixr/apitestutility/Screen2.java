@@ -136,12 +136,14 @@ public class Screen2 extends javax.swing.JFrame {
     /**
      * Configures the frame's initial setup.
      *
-     * @param state The state of the frame (e.g., maximized, minimized).
+     * @param previousState The previousState of the frame (e.g., maximized,
+     * minimized).
      */
-    private void setupFrame(int state) {
+    private void setupFrame(int previousState) {
         this.setTitle("APITestUtility");
         jsonTable.getTableHeader().setReorderingAllowed(false);
-        setExtendedState(state);
+        setExtendedState(previousState);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
@@ -363,10 +365,10 @@ public class Screen2 extends javax.swing.JFrame {
      */
     private void executeTestbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_executeTestbtnActionPerformed
         // TODO add your handling code here:
-        Object[][] screen3TableData = null ;
+        Object[][] screen3TableData = null;
         if (jsonTable.getRowCount() == 0) {
             screen3TableData = new Object[1][2];
-            screen3TableData[0][0] = "Verify " + name ;
+            screen3TableData[0][0] = "Verify " + name;
             screen3TableData[0][1] = "";
         } else {
             try {
@@ -545,6 +547,7 @@ public class Screen2 extends javax.swing.JFrame {
      */
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
         if (previousFrame != null) {
+            previousFrame.setExtendedState(this.getExtendedState());
             previousFrame.setVisible(true);
         }
         this.dispose();

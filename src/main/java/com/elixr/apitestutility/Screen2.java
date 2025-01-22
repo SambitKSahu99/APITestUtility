@@ -4,7 +4,17 @@
  */
 package com.elixr.apitestutility;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import static java.lang.System.exit;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -32,6 +42,9 @@ public class Screen2 extends javax.swing.JFrame {
     private Screen1 previousFrame;
     private int deleteValueSelectedRow;
     private JSONObject jsonRequestBodyObject;
+    private String url;
+    private String methodType;
+    private Map<String,String> headers = new HashMap<>();
 
     /**
      * Default constructor for Screen2. Initializes the components of the frame.
@@ -106,13 +119,16 @@ public class Screen2 extends javax.swing.JFrame {
             jsonTable.setEnabled(false);
         }
         urlValueLabel.setText(baseUrl);
-        methodValueLabel.setText(method.toUpperCase());
+        url = baseUrl;
+        methodType = method.toUpperCase();
+        methodValueLabel.setText(methodType);
         //  to display the Headers in Screen 2.
         if (headersTableModel.getRowCount() != 0) {
             StringBuilder headersText = new StringBuilder();
             for (int i = 0; i < headersTableModel.getRowCount(); i++) {
                 String headerName = (String) headersTableModel.getValueAt(i, 0);
                 String headerValue = (String) headersTableModel.getValueAt(i, 1);
+                this.headers.put(headerName, headerValue);
                 headersText.append(headerName).append(": ").append(headerValue);
                 if (i < headersTableModel.getRowCount() - 1) {
                     headersText.append(" , ").append("\n");
@@ -366,24 +382,67 @@ public class Screen2 extends javax.swing.JFrame {
     private void executeTestbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_executeTestbtnActionPerformed
         // TODO add your handling code here:
         Object[][] screen3TableData = null;
+        Object[][] jsonTableBody = null;
         if (jsonTable.getRowCount() == 0) {
-            screen3TableData = new Object[1][2];
-            screen3TableData[0][0] = "Verify " + name;
-            screen3TableData[0][1] = "";
+            jsonTableBody = new Object[1][2];
+            jsonTableBody[0][0] = "Verify " + name;
+            jsonTableBody[0][1] = "";
+            executeTest(null);
         } else {
             try {
-                screen3TableData = generateRequestBodies(name, jsonTable);
-                System.out.println("Screen 3 row count = " + screen3TableData.length);
+                jsonTableBody = generateRequestBodies(name, jsonTable);
+                int jsonBodyLength = jsonTableBody.length;
+                for(int i=0;i<jsonBodyLength;i++){
+                    executeTest((JSONObject)jsonTableBody[i][1]);
+                }
             } catch (Exception ex) {
                 Logger.getLogger(Screen2.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        Screen3Frame screen3 = new Screen3Frame(this, screen3TableData, getExtendedState());
-        screen3.setVisible(true);
+//        Screen3Frame screen3 = new Screen3Frame(this, screen3TableData, getExtendedState());
+//        screen3.setVisible(true);
         setVisible(false);
         this.dispose();
     }//GEN-LAST:event_executeTestbtnActionPerformed
 
+    private void executeTest(JSONObject requestBody){
+        try {
+            URL connectionUrl = new URL(this.url);
+            HttpURLConnection connection = (HttpURLConnection)connectionUrl.openConnection();
+            connection.setRequestMethod(methodType);
+            if(headers!=null){
+                for(Map.Entry<String,String> entry:headers.entrySet()){
+                    connection.setRequestProperty(entry.getKey(), entry.getValue());
+                }
+            }
+            if(requestBody!=null){
+                connection.setDoOutput(true);
+                try(OutputStream os = connection.getOutputStream()){
+                    byte[] input = requestBody.toString().getBytes("utf-8");
+                    os.write(input,0,input.length);
+                }
+            }
+            int responseCode = connection.getResponseCode();
+            System.out.println("Responsecode: "+responseCode);
+            InputStream inputStream = (responseCode >= 200 && responseCode < 300)
+                                        ? connection.getInputStream()
+                                        : connection.getErrorStream();
+            StringBuilder response = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+            }
+            System.out.println("Response Body: " + response.toString());
+            connection.disconnect();
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(Screen2.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Screen2.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     /**
      * Generates combinations of request bodies for testing based on the input
      * JTable's data. The method extracts field values, handles fields with

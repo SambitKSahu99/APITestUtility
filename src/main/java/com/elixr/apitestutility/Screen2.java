@@ -250,11 +250,11 @@ public class Screen2 extends javax.swing.JFrame {
             otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(otherComponentsPanelLayout.createSequentialGroup()
                 .addGap(17, 17, 17)
-                .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(otherComponentsPanelLayout.createSequentialGroup()
                         .addComponent(urlLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(urlValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 457, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(urlValueLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 457, Short.MAX_VALUE))
                     .addGroup(otherComponentsPanelLayout.createSequentialGroup()
                         .addComponent(methodLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -262,7 +262,7 @@ public class Screen2 extends javax.swing.JFrame {
                             .addComponent(methodValueLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(headersValueLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addComponent(headersLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(78, Short.MAX_VALUE))
+                .addGap(84, 84, 84))
         );
         otherComponentsPanelLayout.setVerticalGroup(
             otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -386,24 +386,22 @@ public class Screen2 extends javax.swing.JFrame {
 
         if (jsonTable.getRowCount() == 0) {
             jsonTableBody = new Object[1][2];
-            jsonTableBody[0][0] = "Verify " + name;
+            String testName = "Verify " + name;
             jsonTableBody[0][1] = "";
             screen3TableData = new Object[1][3];
-            screen3TableData[0] = executeTest(null);
+            screen3TableData[0] = executeTest(testName,null);
         } else {
             try {
                 jsonTableBody = generateRequestBodies(name, jsonTable);
                 int jsonBodyLength = jsonTableBody.length;
                 screen3TableData = new Object[jsonBodyLength][3];
-
                 for (int i = 0; i < jsonBodyLength; i++) {
-                    screen3TableData[i] = executeTest((JSONObject) jsonTableBody[i][1]);
+                    screen3TableData[i] = executeTest((String) jsonTableBody[i][0],(JSONObject) jsonTableBody[i][1]);
                 }
             } catch (Exception ex) {
                 Logger.getLogger(Screen2.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-
         Screen3Frame screen3 = new Screen3Frame(this, screen3TableData, getExtendedState());
         screen3.setVisible(true);
         setVisible(false);
@@ -427,8 +425,8 @@ public class Screen2 extends javax.swing.JFrame {
      * Returns the results as an Object array for further processing.
      *
      */
-    private Object[] executeTest(JSONObject requestBody) {
-        Object[] resultData = new Object[3]; // Array to hold test details: Test Name, Response Code, Response Body
+    private Object[] executeTest(String name,JSONObject requestBody) {
+        Object[] resultData = new Object[4]; // Array to hold test details: Test Name, Response Code, Response Body
         try {
             URL connectionUrl = new URL(this.url);
             HttpURLConnection connection = (HttpURLConnection) connectionUrl.openConnection();
@@ -465,9 +463,10 @@ public class Screen2 extends javax.swing.JFrame {
             connection.disconnect();
 
             // Populate result data
-            resultData[0] = (requestBody != null) ? requestBody.toString() : "Empty Request Body"; // Request Body
-            resultData[1] = responseCode; // Response Code
-            resultData[2] = response.toString(); // Response Body
+            resultData[0] = name;
+            resultData[1] = (requestBody != null) ? requestBody.toString() : "Empty Request Body"; // Request Body
+            resultData[2] = responseCode; // Response Code
+            resultData[3] = response.toString(); // Response Body
 
         } catch (MalformedURLException ex) {
             Logger.getLogger(Screen2.class.getName()).log(Level.SEVERE, null, ex);

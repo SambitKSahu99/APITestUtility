@@ -4,8 +4,8 @@
  */
 package com.elixr.apitestutility;
 
-import java.awt.Color;
-import java.awt.Component;
+import java.awt.*;
+
 import static java.lang.System.exit;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -82,12 +82,15 @@ public class Screen3Frame extends javax.swing.JFrame {
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Make the table cells non-editable.
+                return true; // Make the table cells non-editable.
             }
         };
 
         resultTable.setModel(model);
+
         resultTable.getColumnModel().getColumn(2).setCellRenderer(new JsonCellRenderer());
+        resultTable.getColumnModel().getColumn(4).setCellRenderer(new JsonCellRenderer());
+
         DefaultTableCellRenderer borderedCellRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -102,12 +105,13 @@ public class Screen3Frame extends javax.swing.JFrame {
         };
         // Apply the bordered renderer to all columns except "Request Body"
         for (int col = 0; col < resultTable.getColumnCount(); col++) {
-            if (col != 2) { // Skip JSON column to preserve its special rendering
+            if (col != 2 && col != 4) { // Skip JSON column to preserve its special rendering
                 resultTable.getColumnModel().getColumn(col).setCellRenderer(borderedCellRenderer);
             }
         }
         for (int row = 0; row < resultTable.getRowCount(); row++) {
             adjustRowHeight(resultTable, row, 2); // Adjust for column 2 ("Request Body")
+            adjustRowHeight(resultTable, row, 4); //Adjust for column 4 ("Response Body")
         }
         resultTableScrollPane.revalidate();
         resultTableScrollPane.repaint();
@@ -140,6 +144,7 @@ public class Screen3Frame extends javax.swing.JFrame {
             textArea.setLineWrap(true);
             textArea.setWrapStyleWord(true);
             textArea.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1)); // Add border to JSON cells
+            textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
         }
 
         @Override

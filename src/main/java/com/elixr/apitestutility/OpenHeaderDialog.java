@@ -95,7 +95,7 @@ public class OpenHeaderDialog extends javax.swing.JDialog {
         jLabel3.setText("Add Headers");
 
         nameComboBox.setEditable(true);
-        nameComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Content-Type","Accept"}));
+        nameComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Content-Type","Accept","Authorization"}));
 
         valueComboBox.setEditable(true);
         valueComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "application/json" }));

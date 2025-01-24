@@ -69,10 +69,10 @@ public class Screen3Frame extends javax.swing.JFrame {
         Object[][] updatedTableData = new Object[tableData.length][6]; // 6 columns now
         for (int i = 0; i < tableData.length; i++) {
             updatedTableData[i][0] = i + 1; // SL column with serial numbers starting from 1
-            updatedTableData[i][1] = "Test " + (i + 1); // Test Name
-            updatedTableData[i][2] = tableData[i][0]; // Request Body
-            updatedTableData[i][3] = tableData[i][1]; // Response Code
-            updatedTableData[i][4] = tableData[i][2]; // Response Body
+            updatedTableData[i][1] = tableData[i][0]; // Test Name
+            updatedTableData[i][2] = tableData[i][1]; // Request Body
+            updatedTableData[i][3] = tableData[i][2]; // Response Code
+            updatedTableData[i][4] = tableData[i][3]; // Response Body
             updatedTableData[i][5] = ""; // Test Result (empty for now)
         }
 

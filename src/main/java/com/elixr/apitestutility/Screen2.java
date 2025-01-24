@@ -44,7 +44,7 @@ public class Screen2 extends javax.swing.JFrame {
     private JSONObject jsonRequestBodyObject;
     private String url;
     private String methodType;
-    private Map<String,String> headers = new HashMap<>();
+    private Map<String, String> headers = new HashMap<>();
 
     /**
      * Default constructor for Screen2. Initializes the components of the frame.
@@ -383,50 +383,78 @@ public class Screen2 extends javax.swing.JFrame {
         // TODO add your handling code here:
         Object[][] screen3TableData = null;
         Object[][] jsonTableBody = null;
+
         if (jsonTable.getRowCount() == 0) {
             jsonTableBody = new Object[1][2];
             jsonTableBody[0][0] = "Verify " + name;
             jsonTableBody[0][1] = "";
-            executeTest(null);
+            screen3TableData = new Object[1][3];
+            screen3TableData[0] = executeTest(null);
         } else {
             try {
                 jsonTableBody = generateRequestBodies(name, jsonTable);
                 int jsonBodyLength = jsonTableBody.length;
-                for(int i=0;i<jsonBodyLength;i++){
-                    executeTest((JSONObject)jsonTableBody[i][1]);
+                screen3TableData = new Object[jsonBodyLength][3];
+
+                for (int i = 0; i < jsonBodyLength; i++) {
+                    screen3TableData[i] = executeTest((JSONObject) jsonTableBody[i][1]);
                 }
             } catch (Exception ex) {
                 Logger.getLogger(Screen2.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-//        Screen3Frame screen3 = new Screen3Frame(this, screen3TableData, getExtendedState());
-//        screen3.setVisible(true);
+
+        Screen3Frame screen3 = new Screen3Frame(this, screen3TableData, getExtendedState());
+        screen3.setVisible(true);
         setVisible(false);
         this.dispose();
     }//GEN-LAST:event_executeTestbtnActionPerformed
 
-    private void executeTest(JSONObject requestBody){
+    /**
+     * Executes an HTTP request based on the provided request body, headers, and
+     * method type.
+     *
+     * @param requestBody A JSON object representing the request body to be sent
+     * with the HTTP request.
+     * @return An Object array containing: - [0]: The request body as a string.
+     * - [1]: The HTTP response code as an integer. - [2]: The HTTP response
+     * body as a string.
+     *
+     * This method performs the following: 1. Configures an HTTP connection
+     * using the provided URL and method type. 2. Adds custom headers to the
+     * request if specified. 3. Sends the provided JSON request body if
+     * applicable. 4. Captures the HTTP response code and response body. 5.
+     * Returns the results as an Object array for further processing.
+     *
+     */
+    private Object[] executeTest(JSONObject requestBody) {
+        Object[] resultData = new Object[3]; // Array to hold test details: Test Name, Response Code, Response Body
         try {
             URL connectionUrl = new URL(this.url);
-            HttpURLConnection connection = (HttpURLConnection)connectionUrl.openConnection();
+            HttpURLConnection connection = (HttpURLConnection) connectionUrl.openConnection();
             connection.setRequestMethod(methodType);
-            if(headers!=null){
-                for(Map.Entry<String,String> entry:headers.entrySet()){
+
+            // Add headers
+            if (headers != null) {
+                for (Map.Entry<String, String> entry : headers.entrySet()) {
                     connection.setRequestProperty(entry.getKey(), entry.getValue());
                 }
             }
-            if(requestBody!=null){
+
+            // Add request body
+            if (requestBody != null) {
                 connection.setDoOutput(true);
-                try(OutputStream os = connection.getOutputStream()){
+                try (OutputStream os = connection.getOutputStream()) {
                     byte[] input = requestBody.toString().getBytes("utf-8");
-                    os.write(input,0,input.length);
+                    os.write(input, 0, input.length);
                 }
             }
+
+            // Capture response code and response body
             int responseCode = connection.getResponseCode();
-            System.out.println("Responsecode: "+responseCode);
             InputStream inputStream = (responseCode >= 200 && responseCode < 300)
-                                        ? connection.getInputStream()
-                                        : connection.getErrorStream();
+                    ? connection.getInputStream()
+                    : connection.getErrorStream();
             StringBuilder response = new StringBuilder();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
                 String line;
@@ -434,15 +462,21 @@ public class Screen2 extends javax.swing.JFrame {
                     response.append(line);
                 }
             }
-            System.out.println("Response Body: " + response.toString());
             connection.disconnect();
+
+            // Populate result data
+            resultData[0] = (requestBody != null) ? requestBody.toString() : "Empty Request Body"; // Request Body
+            resultData[1] = responseCode; // Response Code
+            resultData[2] = response.toString(); // Response Body
+
         } catch (MalformedURLException ex) {
             Logger.getLogger(Screen2.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(Screen2.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return resultData;
     }
-    
+
     /**
      * Generates combinations of request bodies for testing based on the input
      * JTable's data. The method extracts field values, handles fields with

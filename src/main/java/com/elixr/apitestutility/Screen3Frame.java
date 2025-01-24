@@ -46,7 +46,8 @@ public class Screen3Frame extends javax.swing.JFrame {
     /**
      * Configures the frame's previousState and default close operation.
      *
-     * @param previousState the previousState to set the frame to (e.g., maximized, normal).
+     * @param previousState the previousState to set the frame to (e.g.,
+     * maximized, normal).
      */
     private void setupFrame(int previousState) {
         this.setTitle("APITestUtility");
@@ -68,17 +69,23 @@ public class Screen3Frame extends javax.swing.JFrame {
         Object[][] updatedTableData = new Object[tableData.length][6]; // 6 columns now
         for (int i = 0; i < tableData.length; i++) {
             updatedTableData[i][0] = i + 1; // SL column with serial numbers starting from 1
-            System.arraycopy(tableData[i], 0, updatedTableData[i], 1, tableData[i].length);
+            updatedTableData[i][1] = "Test " + (i + 1); // Test Name
+            updatedTableData[i][2] = tableData[i][0]; // Request Body
+            updatedTableData[i][3] = tableData[i][1]; // Response Code
+            updatedTableData[i][4] = tableData[i][2]; // Response Body
+            updatedTableData[i][5] = ""; // Test Result (empty for now)
         }
+
         DefaultTableModel model = new DefaultTableModel(
                 updatedTableData,
                 new String[]{"SL", "Test Name", "Request Body", "Response Code", "Response Body", "Test Result"}
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return true; // Make the table cells non-editable.
+                return false; // Make the table cells non-editable.
             }
         };
+
         resultTable.setModel(model);
         resultTable.getColumnModel().getColumn(2).setCellRenderer(new JsonCellRenderer());
         DefaultTableCellRenderer borderedCellRenderer = new DefaultTableCellRenderer() {

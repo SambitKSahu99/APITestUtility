@@ -24,6 +24,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -91,6 +92,8 @@ public class Screen2 extends javax.swing.JFrame {
      * in a formatted way.
      */
     private void setUpComponents(Object[][] jsonRequestBodyTableData, String baseUrl, String method, DefaultTableModel headersTableModel) {
+        topComponentsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Vertical scrollbar only when needed
+        topComponentsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); 
         if (jsonRequestBodyTableData != null) {
             for (Object[] row : jsonRequestBodyTableData) {
                 if (row[1] == "String") {
@@ -188,6 +191,13 @@ public class Screen2 extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         requestBodyScrollPane = new javax.swing.JScrollPane();
         jsonTable = new javax.swing.JTable();
+        addValueBtn = new javax.swing.JButton();
+        deleteValueBtn = new javax.swing.JButton();
+        bottomPanel = new javax.swing.JPanel();
+        backBtn = new javax.swing.JButton();
+        executeTestbtn = new javax.swing.JButton();
+        exitBtn = new javax.swing.JButton();
+        topComponentsScrollPane = new javax.swing.JScrollPane();
         otherComponentsPanel = new javax.swing.JPanel();
         urlLabel = new javax.swing.JLabel();
         methodLabel = new javax.swing.JLabel();
@@ -195,15 +205,8 @@ public class Screen2 extends javax.swing.JFrame {
         urlValueLabel = new javax.swing.JLabel();
         methodValueLabel = new javax.swing.JLabel();
         headersValueLabel = new javax.swing.JLabel();
-        addValueBtn = new javax.swing.JButton();
-        deleteValueBtn = new javax.swing.JButton();
-        bottomPanel = new javax.swing.JPanel();
-        backBtn = new javax.swing.JButton();
-        executeTestbtn = new javax.swing.JButton();
-        exitBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(689, 476));
 
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel4.setText("Request Field Data and Validations");
@@ -221,6 +224,51 @@ public class Screen2 extends javax.swing.JFrame {
             }
         });
         requestBodyScrollPane.setViewportView(jsonTable);
+
+        addValueBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        addValueBtn.setText("Add Value");
+        addValueBtn.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        addValueBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addValueBtnActionPerformed(evt);
+            }
+        });
+
+        deleteValueBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        deleteValueBtn.setText("Delete Value");
+        deleteValueBtn.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        deleteValueBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteValueBtnActionPerformed(evt);
+            }
+        });
+
+        backBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        backBtn.setText("Back");
+        backBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                backBtnActionPerformed(evt);
+            }
+        });
+        bottomPanel.add(backBtn);
+
+        executeTestbtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        executeTestbtn.setText("Execute Test");
+        executeTestbtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                executeTestbtnActionPerformed(evt);
+            }
+        });
+        bottomPanel.add(executeTestbtn);
+
+        exitBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        exitBtn.setText("Exit");
+        exitBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exitBtnActionPerformed(evt);
+            }
+        });
+        bottomPanel.add(exitBtn);
 
         otherComponentsPanel.setBackground(new java.awt.Color(255, 255, 255));
         otherComponentsPanel.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
@@ -271,61 +319,18 @@ public class Screen2 extends javax.swing.JFrame {
                 .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(urlLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(urlValueLabel))
-                .addGap(18, 18, 18)
-                .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(methodLabel)
-                    .addComponent(methodValueLabel))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(methodValueLabel)
+                    .addComponent(methodLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(headersLabel)
                     .addComponent(headersValueLabel))
-                .addContainerGap(22, Short.MAX_VALUE))
+                .addContainerGap(29, Short.MAX_VALUE))
         );
 
-        addValueBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        addValueBtn.setText("Add Value");
-        addValueBtn.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        addValueBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addValueBtnActionPerformed(evt);
-            }
-        });
-
-        deleteValueBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        deleteValueBtn.setText("Delete Value");
-        deleteValueBtn.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        deleteValueBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                deleteValueBtnActionPerformed(evt);
-            }
-        });
-
-        backBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        backBtn.setText("Back");
-        backBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                backBtnActionPerformed(evt);
-            }
-        });
-        bottomPanel.add(backBtn);
-
-        executeTestbtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        executeTestbtn.setText("Execute Test");
-        executeTestbtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                executeTestbtnActionPerformed(evt);
-            }
-        });
-        bottomPanel.add(executeTestbtn);
-
-        exitBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        exitBtn.setText("Exit");
-        exitBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exitBtnActionPerformed(evt);
-            }
-        });
-        bottomPanel.add(exitBtn);
+        topComponentsScrollPane.setViewportView(otherComponentsPanel);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -334,8 +339,8 @@ public class Screen2 extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(30, 30, 30)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(topComponentsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(bottomPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(otherComponentsPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addComponent(requestBodyScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 521, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -350,20 +355,21 @@ public class Screen2 extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addComponent(otherComponentsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGap(18, 18, 18)
+                .addComponent(topComponentsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(18, 18, 18)
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(requestBodyScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
+                        .addComponent(requestBodyScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(102, 102, 102)
+                        .addGap(99, 99, 99)
                         .addComponent(addValueBtn)
-                        .addGap(33, 33, 33)
-                        .addComponent(deleteValueBtn)))
+                        .addGap(53, 53, 53)
+                        .addComponent(deleteValueBtn)
+                        .addGap(0, 97, Short.MAX_VALUE)))
                 .addComponent(bottomPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(11, 11, 11))
         );
@@ -789,6 +795,7 @@ public class Screen2 extends javax.swing.JFrame {
     private javax.swing.JLabel methodValueLabel;
     private javax.swing.JPanel otherComponentsPanel;
     private javax.swing.JScrollPane requestBodyScrollPane;
+    private javax.swing.JScrollPane topComponentsScrollPane;
     private javax.swing.JLabel urlLabel;
     private javax.swing.JLabel urlValueLabel;
     // End of variables declaration//GEN-END:variables

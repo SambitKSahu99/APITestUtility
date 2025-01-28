@@ -219,7 +219,7 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
                               <Component id="urlLabel" min="-2" pref="49" max="-2" attributes="0"/>
-                              <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="27" max="-2" attributes="0"/>
                               <Component id="urlValueLabel" pref="457" max="32767" attributes="0"/>
                           </Group>
                           <Group type="102" attributes="0">

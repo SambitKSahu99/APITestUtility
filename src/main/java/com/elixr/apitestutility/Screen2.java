@@ -142,21 +142,26 @@ public class Screen2 extends javax.swing.JFrame {
         methodValueLabel.setText(methodType);
         //  to display the Headers in Screen 2.
         if (headersTableModel.getRowCount() != 0) {
-            StringBuilder headersText = new StringBuilder();
-            for (int i = 0; i < headersTableModel.getRowCount(); i++) {
+            StringBuilder headersText = new StringBuilder("<html>"); // Start HTML formatting
+            int rowCount = headersTableModel.getRowCount();
+
+            for (int i = 0; i < rowCount; i++) {
                 String headerName = (String) headersTableModel.getValueAt(i, 0);
                 String headerValue = (String) headersTableModel.getValueAt(i, 1);
                 this.headers.put(headerName, headerValue);
+
                 headersText.append(headerName).append(": ").append(headerValue);
-                if (i < headersTableModel.getRowCount() - 1) {
-                    headersText.append(" , ").append("\n");
+                // Only add "<br>" if it's NOT the last item
+                if (i < rowCount - 1) {
+                    headersText.append(",<br>");
                 }
             }
+            headersText.append("</html>"); // End HTML formatting
             logger.info("Headers set up: {}", headers);
             headersValueLabel.setText(headersText.toString());
         } else {
             logger.warn("No headers available to set up");
-            headersValueLabel.setText("No headers available");
+            headersValueLabel.setText("<html>No headers available</html>");
         }
     }
 
@@ -455,7 +460,7 @@ public class Screen2 extends javax.swing.JFrame {
      * Returns the results as an Object array for further processing.
      *
      */
-    private Object[] executeTest(String name,JSONObject requestBody) {
+    private Object[] executeTest(String name, JSONObject requestBody) {
         Object[] resultData = null;// Array to hold test details: Test Name, Response Code, Response Body
         try {
             URL connectionUrl = new URL(this.url);
@@ -473,10 +478,10 @@ public class Screen2 extends javax.swing.JFrame {
             // Add request body
             if (requestBody != null) {
                 connection.setDoOutput(true);
-                    OutputStream os = connection.getOutputStream();
-                    byte[] input = requestBody.toString().getBytes("utf-8");
-                    os.write(input, 0, input.length);
-                    os.close();
+                OutputStream os = connection.getOutputStream();
+                byte[] input = requestBody.toString().getBytes("utf-8");
+                os.write(input, 0, input.length);
+                os.close();
             }
 
             // Capture response code and response body
@@ -486,10 +491,10 @@ public class Screen2 extends javax.swing.JFrame {
                     : connection.getErrorStream();
             StringBuilder response = new StringBuilder();
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
+            String line;
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
             connection.disconnect();
             resultData = new Object[4];
             resultData[0] = name;
@@ -805,12 +810,12 @@ public class Screen2 extends javax.swing.JFrame {
     }
 
     public static void showErrorDialog(Exception exception) {
-        String message = "An error occured: "+exception.toString();
+        String message = "An error occured: " + exception.toString();
         JOptionPane.showMessageDialog(
-            null,
-            message,
-            "Error",
-            JOptionPane.ERROR_MESSAGE
+                null,
+                message,
+                "Error",
+                JOptionPane.ERROR_MESSAGE
         );
     }
 

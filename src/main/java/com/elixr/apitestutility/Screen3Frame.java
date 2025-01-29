@@ -12,6 +12,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Screen3Frame class represents a JFrame that displays test results in a table
@@ -20,6 +22,7 @@ import org.json.JSONObject;
  */
 public class Screen3Frame extends javax.swing.JFrame {
 
+    private static final Logger logger = LoggerFactory.getLogger(Screen3Frame.class);
     private Screen2 previousFrame;
 
     /**
@@ -31,6 +34,7 @@ public class Screen3Frame extends javax.swing.JFrame {
      * normal).
      */
     public Screen3Frame(Screen2 previousFrame, Object[][] tableData, int previousState) {
+        logger.info("Initializing Screen3Frame with data and previous state.");
         this.previousFrame = previousFrame;
         initComponents();
         setupFrame(previousState);
@@ -41,6 +45,7 @@ public class Screen3Frame extends javax.swing.JFrame {
      * Default constructor for Screen3Frame.
      */
     public Screen3Frame() {
+        logger.info("Default constructor for Screen3Frame called.");
     }
 
     /**
@@ -50,6 +55,7 @@ public class Screen3Frame extends javax.swing.JFrame {
      * maximized, normal).
      */
     private void setupFrame(int previousState) {
+        logger.debug("Setting up frame with previous state: {}", previousState);
         this.setTitle("APITestUtility");
         setExtendedState(previousState);
         setLocationRelativeTo(null);
@@ -65,7 +71,7 @@ public class Screen3Frame extends javax.swing.JFrame {
      * representing a test case.
      */
     private void populateResultTable(Object[][] tableData) {
-        // Add an "SL" column to the table data
+        logger.info("Populating result table with data.");
         Object[][] updatedTableData = new Object[tableData.length][6]; // 6 columns now
         for (int i = 0; i < tableData.length; i++) {
             updatedTableData[i][0] = i + 1; // SL column with serial numbers starting from 1
@@ -115,6 +121,7 @@ public class Screen3Frame extends javax.swing.JFrame {
         }
         resultTableScrollPane.revalidate();
         resultTableScrollPane.repaint();
+        logger.info("Result table populated successfully.");
     }
 
     /**
@@ -126,10 +133,14 @@ public class Screen3Frame extends javax.swing.JFrame {
      * @param column the column index to consider for height adjustment.
      */
     private static void adjustRowHeight(JTable table, int row, int column) {
-        TableCellRenderer renderer = table.getCellRenderer(row, column);
-        Component comp = table.prepareRenderer(renderer, row, column);
-        int preferredHeight = comp.getPreferredSize().height;
-        table.setRowHeight(row, Math.max(table.getRowHeight(row), preferredHeight));
+        try {
+            TableCellRenderer renderer = table.getCellRenderer(row, column);
+            Component comp = table.prepareRenderer(renderer, row, column);
+            int preferredHeight = comp.getPreferredSize().height;
+            table.setRowHeight(row, Math.max(table.getRowHeight(row), preferredHeight));
+        } catch (Exception exception) {
+            logger.error("Error adjusting row height for row {} and column {}: {}", row, column, exception.getMessage(), exception);
+        }
     }
 
     /**
@@ -258,21 +269,27 @@ public class Screen3Frame extends javax.swing.JFrame {
      * @param evt the action event triggered by the back button click.
      */
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
+        logger.info("Back button clicked.");
         if (previousFrame != null) {
+            logger.debug("Navigating back to previous frame.");
             previousFrame.setExtendedState(this.getExtendedState());
             previousFrame.setVisible(true);
             this.dispose();
         } else {
+            logger.warn("No previous frame available to navigate back to.");
             JOptionPane.showMessageDialog(this, "No previous screen to navigate to!", "Error", JOptionPane.ERROR_MESSAGE);
         }
 
     }//GEN-LAST:event_backBtnActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+        logger.info("Exit button clicked.");
         int confirm = JOptionPane.showConfirmDialog(null, "Are you sure want to exit?");
         if (confirm == 0) {
-            exit(0);
+            logger.info("Application exit confirmed by the user.");
+            System.exit(0);
+        } else {
+            logger.info("Application exit canceled by the user.");
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 

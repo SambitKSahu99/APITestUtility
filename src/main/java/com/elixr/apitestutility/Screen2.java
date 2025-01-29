@@ -4,11 +4,15 @@
  */
 package com.elixr.apitestutility;
 
+import java.awt.BorderLayout;
+import java.awt.Window;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import static java.lang.System.exit;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -21,11 +25,16 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultListModel;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import org.json.JSONArray;
@@ -310,7 +319,7 @@ public class Screen2 extends javax.swing.JFrame {
                 .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(otherComponentsPanelLayout.createSequentialGroup()
                         .addComponent(urlLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
+                        .addGap(27, 27, 27)
                         .addComponent(urlValueLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 457, Short.MAX_VALUE))
                     .addGroup(otherComponentsPanelLayout.createSequentialGroup()
                         .addComponent(methodLabel)
@@ -418,6 +427,7 @@ public class Screen2 extends javax.swing.JFrame {
                     screen3TableData[i] = executeTest((String) jsonTableBody[i][0], (JSONObject) jsonTableBody[i][1]);
                 }
             } catch (Exception ex) {
+                showErrorDialog(ex);
                 logger.error("Error during test execution. JSON Table rows: {}", jsonTable.getRowCount(), ex);
             }
         }
@@ -445,8 +455,8 @@ public class Screen2 extends javax.swing.JFrame {
      * Returns the results as an Object array for further processing.
      *
      */
-    private Object[] executeTest(String name, JSONObject requestBody) {
-        Object[] resultData = new Object[4]; // Array to hold test details: Test Name, Response Code, Response Body
+    private Object[] executeTest(String name,JSONObject requestBody) {
+        Object[] resultData = null;// Array to hold test details: Test Name, Response Code, Response Body
         try {
             URL connectionUrl = new URL(this.url);
             HttpURLConnection connection = (HttpURLConnection) connectionUrl.openConnection();
@@ -463,10 +473,10 @@ public class Screen2 extends javax.swing.JFrame {
             // Add request body
             if (requestBody != null) {
                 connection.setDoOutput(true);
-                try (OutputStream os = connection.getOutputStream()) {
+                    OutputStream os = connection.getOutputStream();
                     byte[] input = requestBody.toString().getBytes("utf-8");
                     os.write(input, 0, input.length);
-                }
+                    os.close();
             }
 
             // Capture response code and response body
@@ -475,25 +485,29 @@ public class Screen2 extends javax.swing.JFrame {
                     ? connection.getInputStream()
                     : connection.getErrorStream();
             StringBuilder response = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                 String line;
                 while ((line = reader.readLine()) != null) {
                     response.append(line);
                 }
-            }
             connection.disconnect();
-
-            // Populate result data
+            resultData = new Object[4];
             resultData[0] = name;
             resultData[1] = (requestBody != null) ? requestBody.toString() : "Empty Request Body"; // Request Body
             resultData[2] = responseCode; // Response Code
             resultData[3] = response.toString(); // Response Body
+            reader.close();
             logger.info("Test executed: name={}, responseCode={}, responseBody={}", name, responseCode, response);
 
         } catch (MalformedURLException ex) {
+            showErrorDialog(ex);
             logger.error("MalformedURLException during test execution", ex);
         } catch (IOException ex) {
+            showErrorDialog(ex);
             logger.error("IOException during test execution", ex);
+        } catch (Exception ex) {
+            showErrorDialog(ex);
+            logger.error("Exception during test execution", ex);
         }
         return resultData;
     }
@@ -550,7 +564,7 @@ public class Screen2 extends javax.swing.JFrame {
                 for (String value : positiveValues) {
                     JSONObject newJson = new JSONObject(baseJsonBody.toString());
                     replaceValue(newJson, fieldName, parseValue(dataType, value.trim()));
-                    result[resultIndex][0] = "Verify " + name + " with " + fieldName + " value " + value.trim();
+                    result[resultIndex][0] = "Verify " + name + " with " + fieldName + " value as " + value.trim();
                     result[resultIndex][1] = newJson;
                     logger.debug("Generated positive test case: {}", result[resultIndex][0]);
                     resultIndex++;
@@ -563,7 +577,7 @@ public class Screen2 extends javax.swing.JFrame {
                 for (String value : negativeValues) {
                     JSONObject newJson = new JSONObject(baseJsonBody.toString());
                     replaceValue(newJson, fieldName, parseValue(dataType, value.trim()));
-                    result[resultIndex][0] = "Verify " + name + " with " + fieldName + " value " + value.trim();
+                    result[resultIndex][0] = "Verify " + name + " with " + fieldName + " value as " + value.trim();
                     result[resultIndex][1] = newJson;
                     logger.debug("Generated negative test case: {}", result[resultIndex][0]);
                     resultIndex++;
@@ -790,6 +804,16 @@ public class Screen2 extends javax.swing.JFrame {
         logger.info("Table values updated successfully for row: {}", deleteValueSelectedRow);
     }
 
+    public static void showErrorDialog(Exception exception) {
+        String message = "An error occured: "+exception.toString();
+        JOptionPane.showMessageDialog(
+            null,
+            message,
+            "Error",
+            JOptionPane.ERROR_MESSAGE
+        );
+    }
+
     /**
      * @param args the command line arguments
      */
@@ -807,15 +831,12 @@ public class Screen2 extends javax.swing.JFrame {
                     break;
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Screen2.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Screen2.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Screen2.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+            showErrorDialog(ex);
             java.util.logging.Logger.getLogger(Screen2.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+
         //</editor-fold>
 
         /* Create and display the form */

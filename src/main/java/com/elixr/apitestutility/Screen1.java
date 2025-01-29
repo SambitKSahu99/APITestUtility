@@ -398,9 +398,12 @@ public class Screen1 extends javax.swing.JFrame {
             } else {
                 jsonRequestBodyTableData = null;
             }
-            String formattedBaseUrl = protocol + "://" + baseUrlInput + "/" + pathInput;
+            if(!pathInput.startsWith("/")){
+                pathInput = "/"+pathInput;
+            }
+            String formattedBaseUrl = protocol+"://"+baseUrlInput+pathInput;
+            Screen2 screen2 = new Screen2(this, jsonRequestBodyObject, jsonRequestBodyTableData, formattedBaseUrl , methodInput, nameInput, tableModel, getExtendedState());
             logger.info("Navigating to Screen2 with Base URL: {}", formattedBaseUrl);
-            Screen2 screen2 = new Screen2(this, jsonRequestBodyObject, jsonRequestBodyTableData, formattedBaseUrl, methodInput, nameInput, tableModel, getExtendedState());
             screen2.setVisible(true);
             setVisible(false);
         } catch (Exception exception) {
@@ -451,6 +454,7 @@ public class Screen1 extends javax.swing.JFrame {
             jsonTextLabel.setEnabled(false);
             jsonScrollPane.setEnabled(false);
             jsonrequestBody1.setEnabled(false);
+            jsonrequestBody1.setText("");
             logger.info("JSON input components disabled for method: " + method);
         }
     }//GEN-LAST:event_methodDropDownActionPerformed
@@ -530,6 +534,7 @@ public class Screen1 extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+            Screen2.showErrorDialog(ex);
             java.util.logging.Logger.getLogger(Screen1.class
                     .getName()).log(java.util.logging.Level.SEVERE, null, ex);
 

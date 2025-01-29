@@ -30,6 +30,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Screen2 class represents a secondary frame in the application, providing
@@ -39,6 +40,7 @@ import org.json.JSONObject;
  */
 public class Screen2 extends javax.swing.JFrame {
 
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Screen2.class);
     private String name;
     private Screen1 previousFrame;
     private int deleteValueSelectedRow;
@@ -51,6 +53,7 @@ public class Screen2 extends javax.swing.JFrame {
      * Default constructor for Screen2. Initializes the components of the frame.
      */
     public Screen2() {
+        logger.info("Screen2 initialized with default constructor");
         this.deleteValueSelectedRow = -1;
         initComponents();
     }
@@ -73,6 +76,7 @@ public class Screen2 extends javax.swing.JFrame {
         this.jsonRequestBodyObject = jsonRequestBodyObject;
         this.previousFrame = previousFrame;
         this.name = name;
+        logger.info("Screen2 initialized with parameters: url={}, method={}, name={}", baseUrl, method, name);
         initComponents();
         setupFrame(previousState);
         setUpComponents(jsonRequestBodyTableData, baseUrl, method, headersTableModel);
@@ -92,14 +96,16 @@ public class Screen2 extends javax.swing.JFrame {
      * in a formatted way.
      */
     private void setUpComponents(Object[][] jsonRequestBodyTableData, String baseUrl, String method, DefaultTableModel headersTableModel) {
+        logger.debug("Setting up components for Screen2 with URL: {} and Method: {}", baseUrl, method);
         topComponentsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Vertical scrollbar only when needed
-        topComponentsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); 
+        topComponentsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         if (jsonRequestBodyTableData != null) {
             for (Object[] row : jsonRequestBodyTableData) {
                 if (row[1] == "String") {
                     row[1] = "String";
                 }
             }
+            logger.info("Populating JSON table with {} rows", jsonRequestBodyTableData.length);
             jsonTable.setModel(new DefaultTableModel(jsonRequestBodyTableData, new String[]{
                 "Field", "Data Type", "Default Data", "Positive Data", "Negative Data", "Error Message"
             }) {
@@ -137,8 +143,10 @@ public class Screen2 extends javax.swing.JFrame {
                     headersText.append(" , ").append("\n");
                 }
             }
+            logger.info("Headers set up: {}", headers);
             headersValueLabel.setText(headersText.toString());
         } else {
+            logger.warn("No headers available to set up");
             headersValueLabel.setText("No headers available");
         }
     }
@@ -159,6 +167,7 @@ public class Screen2 extends javax.swing.JFrame {
      * minimized).
      */
     private void setupFrame(int previousState) {
+        logger.debug("Setting up the frame with state: {}", previousState);
         this.setTitle("APITestUtility");
         jsonTable.getTableHeader().setReorderingAllowed(false);
         setExtendedState(previousState);
@@ -386,28 +395,33 @@ public class Screen2 extends javax.swing.JFrame {
      * @param evt The ActionEvent triggered by the button click.
      */
     private void executeTestbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_executeTestbtnActionPerformed
-        // TODO add your handling code here:
+        logger.info("Executing test...");
         Object[][] screen3TableData = null;
         Object[][] jsonTableBody = null;
 
         if (jsonTable.getRowCount() == 0) {
+            logger.warn("JSON Table is empty. Proceeding with default request body.");
             jsonTableBody = new Object[1][2];
             String testName = "Verify " + name;
             jsonTableBody[0][1] = "";
+            logger.info("Generated test name for empty JSON Table: " + testName);
             screen3TableData = new Object[1][3];
-            screen3TableData[0] = executeTest(testName,null);
+            screen3TableData[0] = executeTest(testName, null);
         } else {
             try {
+                logger.info("Generating request bodies for JSON Table with " + jsonTable.getRowCount() + " rows.");
                 jsonTableBody = generateRequestBodies(name, jsonTable);
                 int jsonBodyLength = jsonTableBody.length;
                 screen3TableData = new Object[jsonBodyLength][3];
                 for (int i = 0; i < jsonBodyLength; i++) {
-                    screen3TableData[i] = executeTest((String) jsonTableBody[i][0],(JSONObject) jsonTableBody[i][1]);
+                    logger.info("Executing test: " + jsonTableBody[i][0]);
+                    screen3TableData[i] = executeTest((String) jsonTableBody[i][0], (JSONObject) jsonTableBody[i][1]);
                 }
             } catch (Exception ex) {
-                Logger.getLogger(Screen2.class.getName()).log(Level.SEVERE, null, ex);
+                logger.error("Error during test execution. JSON Table rows: {}", jsonTable.getRowCount(), ex);
             }
         }
+        logger.info("Transitioning to Screen3Frame with table data. Rows: " + screen3TableData.length);
         Screen3Frame screen3 = new Screen3Frame(this, screen3TableData, getExtendedState());
         screen3.setVisible(true);
         setVisible(false);
@@ -431,12 +445,13 @@ public class Screen2 extends javax.swing.JFrame {
      * Returns the results as an Object array for further processing.
      *
      */
-    private Object[] executeTest(String name,JSONObject requestBody) {
+    private Object[] executeTest(String name, JSONObject requestBody) {
         Object[] resultData = new Object[4]; // Array to hold test details: Test Name, Response Code, Response Body
         try {
             URL connectionUrl = new URL(this.url);
             HttpURLConnection connection = (HttpURLConnection) connectionUrl.openConnection();
             connection.setRequestMethod(methodType);
+            logger.info("Executing test: name={}, url={}, method={}", name, url, methodType);
 
             // Add headers
             if (headers != null) {
@@ -473,11 +488,12 @@ public class Screen2 extends javax.swing.JFrame {
             resultData[1] = (requestBody != null) ? requestBody.toString() : "Empty Request Body"; // Request Body
             resultData[2] = responseCode; // Response Code
             resultData[3] = response.toString(); // Response Body
+            logger.info("Test executed: name={}, responseCode={}, responseBody={}", name, responseCode, response);
 
         } catch (MalformedURLException ex) {
-            Logger.getLogger(Screen2.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("MalformedURLException during test execution", ex);
         } catch (IOException ex) {
-            Logger.getLogger(Screen2.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("IOException during test execution", ex);
         }
         return resultData;
     }
@@ -494,6 +510,7 @@ public class Screen2 extends javax.swing.JFrame {
      * the corresponding JSON request body.
      */
     public Object[][] generateRequestBodies(String name, JTable table) {
+        logger.info("Generating request bodies for: {}", name);
         int rowCount = table.getRowCount();
         int colCount = 2; // Test Case Name and Request Body
 
@@ -513,6 +530,7 @@ public class Screen2 extends javax.swing.JFrame {
         }
 
         // Initialize the result array
+        logger.debug("Total test cases calculated: {}", totalTestCases);
         Object[][] result = new Object[totalTestCases + 1][colCount];
         int resultIndex = 0;
         result[resultIndex][0] = "Verify " + name + " with default values";
@@ -534,6 +552,7 @@ public class Screen2 extends javax.swing.JFrame {
                     replaceValue(newJson, fieldName, parseValue(dataType, value.trim()));
                     result[resultIndex][0] = "Verify " + name + " with " + fieldName + " value " + value.trim();
                     result[resultIndex][1] = newJson;
+                    logger.debug("Generated positive test case: {}", result[resultIndex][0]);
                     resultIndex++;
                 }
             }
@@ -546,10 +565,12 @@ public class Screen2 extends javax.swing.JFrame {
                     replaceValue(newJson, fieldName, parseValue(dataType, value.trim()));
                     result[resultIndex][0] = "Verify " + name + " with " + fieldName + " value " + value.trim();
                     result[resultIndex][1] = newJson;
+                    logger.debug("Generated negative test case: {}", result[resultIndex][0]);
                     resultIndex++;
                 }
             }
         }
+        logger.info("Request bodies generated successfully.");
         return result;
     }
 
@@ -585,6 +606,7 @@ public class Screen2 extends javax.swing.JFrame {
      * exist in the JSONObject.
      */
     private void replaceValue(JSONObject json, String fieldName, Object value) {
+        logger.info("Replacing value for field: {} with value: {}", fieldName, value);
         if (fieldName.contains(".")) {
             // Handle nested keys
             String[] keys = fieldName.split("\\.");
@@ -610,9 +632,11 @@ public class Screen2 extends javax.swing.JFrame {
             // Replace the value for the final key
             String finalKey = keys[keys.length - 1];
             current.put(finalKey, value);
+            logger.info("Successfully replaced value for nested field: {}", fieldName);
         } else {
             // Simple key, replace directly
             json.put(fieldName, value);
+            logger.info("Successfully replaced value for field: {}", fieldName);
         }
     }
 
@@ -628,10 +652,10 @@ public class Screen2 extends javax.swing.JFrame {
      * @param evt The ActionEvent triggered by the button click.
      */
     private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
-        // TODO add your handling code here:
+        logger.debug("Exit button clicked");
         int confirm = JOptionPane.showConfirmDialog(null, "Are you sure want to exit?");
         if (confirm == 0) {
-            exit(0);
+            System.exit(0);
         }
     }//GEN-LAST:event_exitBtnActionPerformed
 
@@ -644,11 +668,13 @@ public class Screen2 extends javax.swing.JFrame {
      * @param evt The ActionEvent triggered by the button click.
      */
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
+        logger.debug("Back button clicked");
         if (previousFrame != null) {
             previousFrame.setExtendedState(this.getExtendedState());
             previousFrame.setVisible(true);
         }
         this.dispose();
+        logger.info("Returning to the previous frame");
     }//GEN-LAST:event_backBtnActionPerformed
 
     /**
@@ -659,11 +685,14 @@ public class Screen2 extends javax.swing.JFrame {
      * @param evt The ActionEvent triggered by clicking the "Add Value" button.
      */
     private void addValueBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addValueBtnActionPerformed
-        // TODO add your handling code here:
+        logger.info("Add Value button clicked.");
         if (jsonTable.getSelectedRow() != -1) {
+            logger.debug("Row selected: {}", jsonTable.getSelectedRow());
             AddValuePopUp popUp = new AddValuePopUp(this, true);
             popUp.setVisible(true);
+            logger.info("AddValuePopUp displayed successfully.");
         } else {
+            logger.warn("No row selected for adding a value.");
             JOptionPane.showMessageDialog(this, "Please Selected a field", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_addValueBtnActionPerformed
@@ -678,6 +707,7 @@ public class Screen2 extends javax.swing.JFrame {
      * @param value The value to be added to the JSON table.
      */
     public void addFieldValues(String type, String value) {
+        logger.info("Adding field value. Type: {}, Value: {}", type, value);
         int selectedRow = jsonTable.getSelectedRow();
         int selectedColumn = type.equalsIgnoreCase("positive data") ? 3 : 4; // Positive data -> column 3, Negative data -> column 4
 
@@ -685,9 +715,12 @@ public class Screen2 extends javax.swing.JFrame {
         if (!existedValue.equals("")) {
             String newValue = existedValue + "," + value; // Append new value
             jsonTable.setValueAt(newValue, selectedRow, selectedColumn);
+            logger.debug("Appended value: {} to column: {}", newValue, selectedColumn);
         } else {
             jsonTable.setValueAt(value, selectedRow, selectedColumn);
+            logger.debug("Added new value: {} to column: {}", value, selectedColumn);
         }
+        logger.info("Field value added successfully.");
     }
 
     /**
@@ -700,20 +733,27 @@ public class Screen2 extends javax.swing.JFrame {
      * button.
      */
     private void deleteValueBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteValueBtnActionPerformed
-        // TODO add your handling code here:
+        logger.info("Delete value button clicked.");
         deleteValueSelectedRow = jsonTable.getSelectedRow();
+
         if (deleteValueSelectedRow != -1) {
+            logger.debug("Selected row for deletion: {}", deleteValueSelectedRow);
             String positiveValue = (String) jsonTable.getValueAt(deleteValueSelectedRow, 3);
             String negativeValue = (String) jsonTable.getValueAt(deleteValueSelectedRow, 4);
+            logger.debug("Positive values: {}, Negative values: {}", positiveValue, negativeValue);
+
             String[] postiveValueAr = positiveValue.split(",");
             String[] negativeValueAr = negativeValue.split(",");
             if (positiveValue.equals("") && negativeValue.equals("")) {
+                logger.warn("No positive or negative value present for selected field.");
                 JOptionPane.showMessageDialog(this, "No positive or negative value is present for selected field", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            logger.info("Launching DeleteValuePopUp...");
             DeleteValuePopUp popUp = new DeleteValuePopUp(this, true, postiveValueAr, negativeValueAr);
             popUp.setVisible(true);
         } else {
+            logger.warn("No row selected for deletion.");
             JOptionPane.showMessageDialog(this, "Please Selected a field", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_deleteValueBtnActionPerformed
@@ -729,21 +769,25 @@ public class Screen2 extends javax.swing.JFrame {
      * values.
      */
     public void updaTableValues(DefaultListModel<String> positiveValue, DefaultListModel<String> negativeValue) {
+        logger.info("Updating table values for selected row...");
         deleteValueSelectedRow = jsonTable.getSelectedRow();
         String positiveValues = "";
         if (!positiveValue.isEmpty()) {
             positiveValues = IntStream.range(0, positiveValue.getSize())
                     .mapToObj(positiveValue::getElementAt)
                     .collect(Collectors.joining(", "));
+            logger.debug("Collected positive values: {}", positiveValues);
         }
         String negativeValues = "";
         if (!negativeValue.isEmpty()) {
             negativeValues = IntStream.range(0, negativeValue.getSize())
                     .mapToObj(negativeValue::getElementAt)
                     .collect(Collectors.joining(", "));
+            logger.debug("Collected negative values: {}", negativeValues);
         }
         jsonTable.setValueAt(positiveValues, deleteValueSelectedRow, 3);
         jsonTable.setValueAt(negativeValues, deleteValueSelectedRow, 4);
+        logger.info("Table values updated successfully for row: {}", deleteValueSelectedRow);
     }
 
     /**

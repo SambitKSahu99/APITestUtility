@@ -6,7 +6,6 @@ package com.elixr.apitestutility;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import static java.lang.System.exit;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,6 +16,8 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Screen1 class represents the first screen in the application's workflow.
@@ -26,6 +27,7 @@ import org.json.JSONObject;
  */
 public class Screen1 extends javax.swing.JFrame {
 
+    private static final Logger logger = LoggerFactory.getLogger(Screen1.class);
     private DefaultTableModel tableModel;
     private JTable headersTable;
 
@@ -35,6 +37,7 @@ public class Screen1 extends javax.swing.JFrame {
      * supports a request body is selected.
      */
     public Screen1() {
+        logger.info("Initializing Screen 1.");
         this.setTitle("APITestUtility");
         initComponents();
         setUpHeaderComponents();
@@ -43,6 +46,7 @@ public class Screen1 extends javax.swing.JFrame {
         jsonrequestBody1.setEnabled(false);
         jsonTextLabel.setEnabled(false);
         setLocationRelativeTo(null);
+        logger.info("Screen1 Initialized Successfully.");
     }
 
     /**
@@ -51,6 +55,7 @@ public class Screen1 extends javax.swing.JFrame {
      * integrates it into the headers panel.
      */
     private void setUpHeaderComponents() {
+        logger.debug("Setting up header components...");
         // Initialize table model and table
         String[] columnNames = {"Header Name", "Header Value"};
         tableModel = new DefaultTableModel(columnNames, 0);
@@ -67,6 +72,7 @@ public class Screen1 extends javax.swing.JFrame {
             headersPanel.revalidate();
             headersPanel.repaint();
         }
+        logger.debug("Header components set up successfully.");
     }
 
     /**
@@ -74,10 +80,13 @@ public class Screen1 extends javax.swing.JFrame {
      * row is selected.
      */
     private void deleteSelectedRow() {
+        logger.debug("Deleting selected row...");
         int selectedRow = headersTable.getSelectedRow();
         if (selectedRow != -1) {
             tableModel.removeRow(selectedRow);
+            logger.info("Row deleted at index {}", selectedRow);
         } else {
+            logger.warn("No row selected for deletion.");
             JOptionPane.showMessageDialog(this, "Please select a row to delete.", "No Row Selected", JOptionPane.WARNING_MESSAGE);
         }
     }
@@ -298,13 +307,15 @@ public class Screen1 extends javax.swing.JFrame {
      * @param evt Action event triggered by the reset button.
      */
     private void resetBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetBtnActionPerformed
-        // TODO add your handling code here:
+        logger.debug("Reset button clicked.");
         if (baseUrl.getText().isBlank() && methodDropDown.getSelectedItem() == null && path.getText().isBlank() && nameField.getText().isBlank() && tableModel.getRowCount() == 0 && jsonrequestBody1.getText().isBlank()) {
+            logger.warn("Nothing to reset, all fields are already empty.");
             JOptionPane.showMessageDialog(null, "There is no value present");
             return;
         }
         int resetConfirm = JOptionPane.showConfirmDialog(null, "Are you sure want to reset ?", "Rest", JOptionPane.YES_NO_OPTION);
         if (resetConfirm == 0) {
+            logger.info("Resetting all input fields and table data...");
             baseUrl.setText("");
             methodDropDown.setSelectedIndex(0);
             nameField.setText("");
@@ -312,6 +323,7 @@ public class Screen1 extends javax.swing.JFrame {
             jsonrequestBody1.setText("");
             DefaultTableModel model = tableModel;
             model.setRowCount(0);
+            logger.info("All fields reset successfully.");
         }
     }//GEN-LAST:event_resetBtnActionPerformed
 
@@ -324,6 +336,7 @@ public class Screen1 extends javax.swing.JFrame {
      * @param path The current JSON path (used to maintain field hierarchy).
      */
     private static void extractFieldsAndValues(Object requestObject, String path) {
+        logger.debug("Extracting fields and values from JSON object...");
         if (requestObject instanceof JSONObject jsonObject) {
             for (Object key : jsonObject.keySet()) {
                 String keyField = key.toString();
@@ -336,6 +349,7 @@ public class Screen1 extends javax.swing.JFrame {
         } else {
             jsonFieldsAndValues.put(path, requestObject); // Store field and value
         }
+        logger.debug("Fields and values extracted successfully.");
     }
 
     /**
@@ -346,6 +360,7 @@ public class Screen1 extends javax.swing.JFrame {
      * @param evt Action event triggered by the submit button.
      */
     private void SubmitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SubmitBtnActionPerformed
+        logger.debug("Submit button clicked.");
         String protocol = protocolComboBox.getSelectedItem().toString().trim();
         String baseUrlInput = baseUrl.getText();
         String methodInput = (String) methodDropDown.getSelectedItem();
@@ -354,18 +369,22 @@ public class Screen1 extends javax.swing.JFrame {
         JSONObject jsonRequestBodyObject = null;
         Object[][] jsonRequestBodyTableData = null;
         if (baseUrlInput.isBlank()) {
+            logger.warn("Base url is mandatory");
             JOptionPane.showMessageDialog(this, "Base URL is mandatory", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (methodInput.isBlank()) {
+            logger.warn("Method is mandatory");
             JOptionPane.showMessageDialog(this, "Method is mandatory", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (nameInput.isBlank()) {
+            logger.warn("Name is mandatory");
             JOptionPane.showMessageDialog(this, "Name is mandatory", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (pathInput.isBlank()) {
+            logger.warn("Path is mandatory");
             JOptionPane.showMessageDialog(this, "Path is mandatory", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -379,13 +398,14 @@ public class Screen1 extends javax.swing.JFrame {
             } else {
                 jsonRequestBodyTableData = null;
             }
-            String formattedBaseUrl = protocol+"://"+baseUrlInput+"/"+pathInput;
-            Screen2 screen2 = new Screen2(this, jsonRequestBodyObject, jsonRequestBodyTableData, formattedBaseUrl , methodInput, nameInput, tableModel, getExtendedState());
+            String formattedBaseUrl = protocol + "://" + baseUrlInput + "/" + pathInput;
+            logger.info("Navigating to Screen2 with Base URL: {}", formattedBaseUrl);
+            Screen2 screen2 = new Screen2(this, jsonRequestBodyObject, jsonRequestBodyTableData, formattedBaseUrl, methodInput, nameInput, tableModel, getExtendedState());
             screen2.setVisible(true);
             setVisible(false);
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception exception) {
+            logger.error("Error while processing Submit action: {}", exception.getMessage(), exception);
+            JOptionPane.showMessageDialog(this, exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_SubmitBtnActionPerformed
 
@@ -395,7 +415,7 @@ public class Screen1 extends javax.swing.JFrame {
      * @param evt Action event triggered by the "Add Header" button.
      */
     private void addHeaderBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addHeaderBtnActionPerformed
-        // TODO add your handling code here:
+        logger.info("Add Header button clicked. Opening Add Header dialog.");
         OpenHeaderDialog dialog = new OpenHeaderDialog(this, true);
         dialog.setVisible(true);
     }//GEN-LAST:event_addHeaderBtnActionPerformed
@@ -406,8 +426,9 @@ public class Screen1 extends javax.swing.JFrame {
      * @param evt Action event triggered by the "Delete Header" button.
      */
     private void deleteHeaderBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteHeaderBtnActionPerformed
-        // TODO add your handling code here:
+        logger.info("Delete Header button clicked.");
         deleteSelectedRow();
+        logger.info("Header deletion attempted.");
     }//GEN-LAST:event_deleteHeaderBtnActionPerformed
 
     /**
@@ -420,14 +441,17 @@ public class Screen1 extends javax.swing.JFrame {
     private void methodDropDownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_methodDropDownActionPerformed
         // TODO add your handling code here:
         String method = (String) methodDropDown.getSelectedItem();
+        logger.info("Method selected: " + method);
         if (method.equalsIgnoreCase("post") || method.equalsIgnoreCase("put") || method.equalsIgnoreCase("patch")) {
             jsonTextLabel.setEnabled(true);
             jsonScrollPane.setEnabled(true);
             jsonrequestBody1.setEnabled(true);
+            logger.info("JSON input components enabled for method: " + method);
         } else {
             jsonTextLabel.setEnabled(false);
             jsonScrollPane.setEnabled(false);
             jsonrequestBody1.setEnabled(false);
+            logger.info("JSON input components disabled for method: " + method);
         }
     }//GEN-LAST:event_methodDropDownActionPerformed
 
@@ -439,9 +463,13 @@ public class Screen1 extends javax.swing.JFrame {
      */
     private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
         // TODO add your handling code here:
+        logger.info("Exit button clicked.");
         int confirm = JOptionPane.showConfirmDialog(null, "Are you sure want to exit?");
         if (confirm == 0) {
-            exit(0);
+            logger.info("User confirmed exit. Exiting application.");
+            System.exit(0);
+        } else {
+            logger.info("User canceled exit.");
         }
     }//GEN-LAST:event_exitBtnActionPerformed
 
@@ -454,6 +482,9 @@ public class Screen1 extends javax.swing.JFrame {
     public void addHeader(String name, String value) {
         if (tableModel != null) {
             tableModel.addRow(new Object[]{name, value});
+            logger.info("Header added: Name = " + name + ", Value = " + value);
+        } else {
+            logger.warn("Table model is null. Unable to add header.");
         }
     }
 
@@ -466,6 +497,7 @@ public class Screen1 extends javax.swing.JFrame {
      * @return A 2D array representing the table data.
      */
     private static Object[][] prepareTableData(Map<String, Object> fieldKeyAndValueMap) {
+        logger.info("Preparing table data for JSON fields and values...");
         List<Object[]> tableDataList = new ArrayList<>();
         for (Map.Entry<String, Object> entry : fieldKeyAndValueMap.entrySet()) {
             String field = entry.getKey();  // Field name
@@ -475,6 +507,7 @@ public class Screen1 extends javax.swing.JFrame {
             // Prepare table row with default values
             tableDataList.add(new Object[]{field, dataType, value, "", ""});
         }
+        logger.info("Table data prepared with " + tableDataList.size() + " entries.");
         return tableDataList.toArray(new Object[0][]);
     }
 
@@ -487,6 +520,7 @@ public class Screen1 extends javax.swing.JFrame {
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
+        logger.info("Starting Screen1 application...");
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {

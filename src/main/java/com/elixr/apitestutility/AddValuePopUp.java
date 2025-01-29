@@ -5,6 +5,8 @@
 package com.elixr.apitestutility;
 
 import javax.swing.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A dialog window for adding positive and negative values. The values are
@@ -12,6 +14,8 @@ import javax.swing.*;
  * to the parent frame (Screen2).
  */
 public class AddValuePopUp extends javax.swing.JDialog {
+
+    private static final Logger logger = LoggerFactory.getLogger(AddValuePopUp.class);
 
     /**
      * Creates a new AddValuePopUp dialog.
@@ -21,12 +25,14 @@ public class AddValuePopUp extends javax.swing.JDialog {
      */
     public AddValuePopUp(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
+        logger.info("Initializing AddValuePopUp dialog.");
         initComponents();
         // Positive TextArea key listener
         positiveTextArea1.addKeyListener(new java.awt.event.KeyAdapter() {
             @Override
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                    logger.debug("Enter key pressed in Positive TextArea.");
                     javax.swing.SwingUtilities.invokeLater(() -> removeExtraNewLines(positiveTextArea1));
                 }
             }
@@ -36,6 +42,7 @@ public class AddValuePopUp extends javax.swing.JDialog {
             @Override
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                    logger.debug("Enter key pressed in Negative TextArea.");
                     javax.swing.SwingUtilities.invokeLater(() -> removeExtraNewLines(negativeTextArea1));
                 }
             }
@@ -50,6 +57,7 @@ public class AddValuePopUp extends javax.swing.JDialog {
      * @param textArea the JTextArea to sanitize
      */
     private void removeExtraNewLines(JTextArea textArea) {
+        logger.debug("Removing extra new lines from text area.");
         String text = textArea.getText();
         String[] lines = text.split("\\n");
         StringBuilder sanitizedText = new StringBuilder();
@@ -60,6 +68,7 @@ public class AddValuePopUp extends javax.swing.JDialog {
             }
         }
         textArea.setText(sanitizedText.toString());
+        logger.debug("Extra new lines removed.");
     }
 
     /**
@@ -70,6 +79,7 @@ public class AddValuePopUp extends javax.swing.JDialog {
      * @return a comma-separated string of values
      */
     private String getCommaSeparatedValues(JTextArea textArea) {
+        logger.debug("Converting text area content to comma-separated values.");
         String text = textArea.getText();
         String[] lines = text.split("\\n");
         StringBuilder commaSeparated = new StringBuilder();
@@ -81,6 +91,7 @@ public class AddValuePopUp extends javax.swing.JDialog {
                 commaSeparated.append(line.trim());
             }
         }
+        logger.debug("Comma-separated values: {}", commaSeparated);
         return commaSeparated.toString();
     }
 
@@ -89,6 +100,7 @@ public class AddValuePopUp extends javax.swing.JDialog {
      * adjust based on the content.
      */
     private void setUpFrame() {
+        logger.info("Setting up frame properties for AddValuePopUp dialog.");
         this.setTitle("Add Positive and Negative Values");
 
         // Set the scroll pane properties for the positive scroll pane
@@ -106,6 +118,7 @@ public class AddValuePopUp extends javax.swing.JDialog {
         // Optionally, you can also force a repaint to ensure the UI is updated correctly
         positiveScrollPane1.repaint();
         negativeScrollPane2.repaint();
+        logger.info("Frame properties set up successfully.");
     }
 
     /**
@@ -240,10 +253,12 @@ public class AddValuePopUp extends javax.swing.JDialog {
      * @param evt the ActionEvent triggered by clicking the Save button
      */
     private void saveButton1ActionPerformed(java.awt.event.ActionEvent evt) {
+        logger.info("Save button clicked.");
         String positiveValues = getCommaSeparatedValues(positiveTextArea1);
         String negativeValues = getCommaSeparatedValues(negativeTextArea1);
 
         if (positiveValues.trim().isEmpty() && negativeValues.trim().isEmpty()) {
+            logger.warn("No values entered. Displaying error message.");
             JOptionPane.showMessageDialog(this, "Please enter at least one value.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -254,14 +269,17 @@ public class AddValuePopUp extends javax.swing.JDialog {
         Screen2 parentFrame = (Screen2) this.getParent();
         for (String value : positiveArray) {
             if (!value.trim().isEmpty()) {
+                logger.debug("Adding positive value: {}", value.trim());
                 parentFrame.addFieldValues("positive data", value.trim());
             }
         }
         for (String value : negativeArray) {
             if (!value.trim().isEmpty()) {
+                logger.debug("Adding negative value: {}", value.trim());
                 parentFrame.addFieldValues("negative data", value.trim());
             }
         }
+        logger.info("Values saved successfully.");
         JOptionPane.showMessageDialog(this, "Values saved successfully!");
         this.dispose();
     }
@@ -272,6 +290,7 @@ public class AddValuePopUp extends javax.swing.JDialog {
      * @param evt the ActionEvent triggered by clicking the Exit button
      */
     private void exitButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitButton1ActionPerformed
+        logger.info("Exit button clicked. Closing AddValuePopUp dialog.");
         this.dispose();
     }//GEN-LAST:event_exitButton1ActionPerformed
 

@@ -8,6 +8,8 @@ import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represents a pop-up dialog for deleting values from positive and
@@ -16,6 +18,7 @@ import javax.swing.ListSelectionModel;
  */
 public class DeleteValuePopUp extends javax.swing.JDialog {
 
+    private static final Logger logger = LoggerFactory.getLogger(DeleteValuePopUp.class);
     private final DefaultListModel<String> positiveList = new DefaultListModel<>();
     private final DefaultListModel<String> negativeList = new DefaultListModel<>();
 
@@ -30,6 +33,7 @@ public class DeleteValuePopUp extends javax.swing.JDialog {
     public DeleteValuePopUp(java.awt.Frame parent, boolean modal,
             String[] positiveValues, String[] negativeValues) {
         super(parent, modal);
+        logger.info("Initializing DeleteValuePopUp dialog.");
         initComponents();
         setUpFrame();
         setUpList(positiveValues, negativeValues);
@@ -43,8 +47,10 @@ public class DeleteValuePopUp extends javax.swing.JDialog {
      * Configures the frame's scroll panes to display scrollbars as needed.
      */
     private void setUpFrame() {
+        logger.info("Setting up frame properties for DeleteValuePopUp dialog.");
         positiveScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         negativeScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        logger.info("Frame properties set up successfully.");
     }
 
     /**
@@ -55,18 +61,23 @@ public class DeleteValuePopUp extends javax.swing.JDialog {
      * @param negativeValues An array of strings representing negative values.
      */
     private void setUpList(String[] positiveValues, String[] negativeValues) {
+        logger.info("Setting up value lists for DeleteValuePopUp.");
 
+        logger.debug("Adding positive values to the list.");
         for (String items : positiveValues) {
+            logger.debug("Adding positive value: {}", items);
             positiveList.addElement(items);
         }
         positiveValueList.setModel(positiveList);
         positiveValueList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
+        logger.debug("Adding negative values to the list.");
         for (String items : negativeValues) {
             negativeList.addElement(items);
         }
         negativeValueList.setModel(negativeList);
         negativeValueList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        logger.info("Value lists set up successfully.");
     }
 
     /**
@@ -77,19 +88,32 @@ public class DeleteValuePopUp extends javax.swing.JDialog {
      * @param evt The event triggered by clicking the "Delete" button.
      */
     private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        logger.info("Delete button clicked. Deleting selected values.");
+
         int[] selectedPositiveIndex = positiveValueList.getSelectedIndices();
+        logger.debug("Selected positive indices: {}", selectedPositiveIndex);
+
         for (int i : selectedPositiveIndex) {
             System.out.println("selected indx :" + i);
         }
         for (int i = selectedPositiveIndex.length - 1; i >= 0; i--) {
+            logger.debug("Removing positive value at index: {}", selectedPositiveIndex[i]);
             positiveList.remove(selectedPositiveIndex[i]);
         }
+
         int[] selectedNegativeIndex = negativeValueList.getSelectedIndices();
+        logger.debug("Selected negative indices: {}", selectedNegativeIndex);
+
         for (int i = selectedNegativeIndex.length - 1; i >= 0; i--) {
+            logger.debug("Removing negative value at index: {}", selectedNegativeIndex[i]);
             negativeList.remove(selectedNegativeIndex[i]);
         }
+
+        logger.info("Updating parent screen with new values.");
         Screen2 screen2 = (Screen2) this.getParent();
         screen2.updaTableValues(positiveList, negativeList);
+
+        logger.info("Values deleted successfully. Closing DeleteValuePopUp dialog.");
         this.dispose();
     }
 
@@ -226,7 +250,7 @@ public class DeleteValuePopUp extends javax.swing.JDialog {
      * @param evt The event triggered by clicking the "Exit" button.
      */
     private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
-        // TODO add your handling code here:
+        logger.info("Exit button clicked. Closing DeleteValuePopUp dialog.");
         dispose();
     }//GEN-LAST:event_exitBtnActionPerformed
 

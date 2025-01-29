@@ -6,6 +6,8 @@ package com.elixr.apitestutility;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The OpenHeaderDialog class represents a dialog window that allows the user to
@@ -13,6 +15,8 @@ import javax.swing.JOptionPane;
  * parent Screen1 frame to update the headers table when a new header is added.
  */
 public class OpenHeaderDialog extends javax.swing.JDialog {
+
+    private static final Logger logger = LoggerFactory.getLogger(OpenHeaderDialog.class);
 
     /**
      * Constructor to initialize the OpenHeaderDialog. This dialog is modal,
@@ -25,6 +29,7 @@ public class OpenHeaderDialog extends javax.swing.JDialog {
      */
     public OpenHeaderDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
+        logger.info("Initializing  OpenHeaderDailog. ");
         initComponents();
         setUpFrame();
     }
@@ -32,8 +37,9 @@ public class OpenHeaderDialog extends javax.swing.JDialog {
     private OpenHeaderDialog(JFrame jFrame, boolean b) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-    
-    private void setUpFrame(){
+
+    private void setUpFrame() {
+        logger.info("Setting up frame properties for OpenHeaderDailog. ");
         this.setTitle("Add Headers");
     }
 
@@ -158,17 +164,25 @@ public class OpenHeaderDialog extends javax.swing.JDialog {
      * @param evt Action event triggered by the "Add" button.
      */
     private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
-        if(nameComboBox.getSelectedItem()==null || valueComboBox.getSelectedItem()==null){
+        logger.info("Add Buttun Clicked.");
+
+        if (nameComboBox.getSelectedItem() == null || valueComboBox.getSelectedItem() == null) {
+            logger.warn("Attempted to add header with empty name or value.");
             JOptionPane.showMessageDialog(this, "Name and Value cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+
         String name = nameComboBox.getSelectedItem().toString().trim();
         String value = valueComboBox.getSelectedItem().toString().trim();
+
         if (!name.isEmpty() && !value.isEmpty()) {
+            logger.info("Adding header - Name: {}, Value: {}", name, value);
             Screen1 parentFrame = (Screen1) this.getParent();
             parentFrame.addHeader(name, value);
+            logger.info("Header added successfully. Closing dialog.");
             dispose();
         } else {
+            logger.warn("Name and Value are empty despite checks.");
             JOptionPane.showMessageDialog(this, "Name and Value cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_addBtnActionPerformed
@@ -180,7 +194,7 @@ public class OpenHeaderDialog extends javax.swing.JDialog {
      * @param evt Action event triggered by the "Clear" button.
      */
     private void clearBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearBtnActionPerformed
-        // TODO add your handling code here:
+        logger.info("Clear button clicked. Resetting combo box selections.");
         nameComboBox.setSelectedItem(null);
         valueComboBox.setSelectedItem(null);
     }//GEN-LAST:event_clearBtnActionPerformed
@@ -192,7 +206,7 @@ public class OpenHeaderDialog extends javax.swing.JDialog {
      * @param evt Action event triggered by the "Exit" button.
      */
     private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
-        // TODO add your handling code here:
+        logger.info("Exit button clicked. Closing OpenHeaderDialog.");
         dispose();
     }//GEN-LAST:event_exitBtnActionPerformed
 

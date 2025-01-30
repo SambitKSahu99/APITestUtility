@@ -41,6 +41,9 @@ public class OpenHeaderDialog extends javax.swing.JDialog {
     private void setUpFrame() {
         logger.info("Setting up frame properties for OpenHeaderDailog. ");
         this.setTitle("Add Headers");
+        // Center the dialog relative to the parent frame
+        this.setLocationRelativeTo(getParent());
+        logger.info("Pop Up Button displayed in the center of the Application. ");
     }
 
     /**

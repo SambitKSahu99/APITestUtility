@@ -51,6 +51,9 @@ public class DeleteValuePopUp extends javax.swing.JDialog {
         positiveScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         negativeScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         logger.info("Frame properties set up successfully.");
+
+        this.setLocationRelativeTo(getParent());
+        logger.info(("Pop Up Button Displayed in the Center of the Application. "));
     }
 
     /**

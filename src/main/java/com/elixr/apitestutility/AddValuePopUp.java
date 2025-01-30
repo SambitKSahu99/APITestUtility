@@ -119,6 +119,8 @@ public class AddValuePopUp extends javax.swing.JDialog {
         positiveScrollPane1.repaint();
         negativeScrollPane2.repaint();
         logger.info("Frame properties set up successfully.");
+        this.setLocationRelativeTo(getParent());
+        logger.info(("Pop Up Button Displayed in the Center of the Application. "));
     }
 
     /**

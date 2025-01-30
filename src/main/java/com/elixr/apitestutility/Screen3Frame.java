@@ -6,7 +6,6 @@ package com.elixr.apitestutility;
 
 import java.awt.*;
 
-import static java.lang.System.exit;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -91,8 +90,9 @@ public class Screen3Frame extends javax.swing.JFrame {
                 return true; // Make the table cells non-editable.
             }
         };
-
         resultTable.setModel(model);
+
+        resultTable.getColumnModel().getColumn(0).setMaxWidth(50); // Small width for SL
 
         resultTable.getColumnModel().getColumn(2).setCellRenderer(new JsonCellRenderer());
         resultTable.getColumnModel().getColumn(4).setCellRenderer(new JsonCellRenderer());
@@ -179,6 +179,7 @@ public class Screen3Frame extends javax.swing.JFrame {
         }
     }
 
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -212,6 +213,21 @@ public class Screen3Frame extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        resultTable.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            public void mouseMoved(java.awt.event.MouseEvent evt) {
+                resultTableMouseMoved(evt);
+            }
+        });
+        resultTable.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                resultTableFocusLost(evt);
+            }
+        });
+        resultTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                resultTableMouseClicked(evt);
+            }
+        });
         resultTableScrollPane.setViewportView(resultTable);
 
         backBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -292,6 +308,49 @@ public class Screen3Frame extends javax.swing.JFrame {
             logger.info("Application exit canceled by the user.");
         }
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void resultTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_resultTableMouseClicked
+        // TODO add your handling code here:
+
+        int row = resultTable.rowAtPoint(evt.getPoint());
+        int col = resultTable.columnAtPoint(evt.getPoint());
+
+        if (col == 2 || col == 4) { // Open popup only for JSON columns
+            Object value = resultTable.getValueAt(row, col);
+            if (value != null) {
+               if (value.toString().equalsIgnoreCase("Empty Request Body")){
+                   JOptionPane.showMessageDialog(this, "No JSON Body to show", null, JOptionPane.INFORMATION_MESSAGE);
+               }
+                String formattedJson = new JSONObject(value.toString()).toString(4);
+                JTextArea textArea = new JTextArea(formattedJson);
+                textArea.setWrapStyleWord(true);
+                textArea.setLineWrap(true);
+                textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+                textArea.setEditable(false);
+
+                JScrollPane scrollPane = new JScrollPane(textArea);
+                scrollPane.setPreferredSize(new Dimension(600, 400)); // Adjust popup size
+
+                JOptionPane.showMessageDialog(
+                        null, scrollPane, "Full JSON View", JOptionPane.PLAIN_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_resultTableMouseClicked
+
+    private void resultTableMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_resultTableMouseMoved
+        // TODO add your handling code here:
+        int col = resultTable.columnAtPoint(evt.getPoint());
+
+        if (col == 2 || col == 4) { // "Request Body" & "Response Body" columns
+            resultTable.setToolTipText("Click to open full content");
+        } else {
+            resultTable.setToolTipText(null);
+        }
+    }//GEN-LAST:event_resultTableMouseMoved
+
+    private void resultTableFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_resultTableFocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_resultTableFocusLost
 
     /**
      * @param args the command line arguments

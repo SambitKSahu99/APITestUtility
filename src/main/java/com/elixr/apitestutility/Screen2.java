@@ -6,6 +6,8 @@ package com.elixr.apitestutility;
 
 import java.awt.BorderLayout;
 import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,14 +29,19 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import org.json.JSONArray;
@@ -410,38 +417,94 @@ public class Screen2 extends javax.swing.JFrame {
      */
     private void executeTestbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_executeTestbtnActionPerformed
         logger.info("Executing test...");
-        Object[][] screen3TableData = null;
-        Object[][] jsonTableBody = null;
 
-        if (jsonTable.getRowCount() == 0) {
-            logger.warn("JSON Table is empty. Proceeding with default request body.");
-            jsonTableBody = new Object[1][2];
-            String testName = "Verify " + name;
-            jsonTableBody[0][1] = "";
-            logger.info("Generated test name for empty JSON Table: " + testName);
-            screen3TableData = new Object[1][3];
-            screen3TableData[0] = executeTest(testName, null);
-        } else {
-            try {
-                logger.info("Generating request bodies for JSON Table with " + jsonTable.getRowCount() + " rows.");
-                jsonTableBody = generateRequestBodies(name, jsonTable);
-                int jsonBodyLength = jsonTableBody.length;
-                screen3TableData = new Object[jsonBodyLength][3];
-                for (int i = 0; i < jsonBodyLength; i++) {
-                    logger.info("Executing test: " + jsonTableBody[i][0]);
-                    screen3TableData[i] = executeTest((String) jsonTableBody[i][0], (JSONObject) jsonTableBody[i][1]);
+        // Create and show the loading dialog
+        JDialog loadingDialog = createLoadingDialog();
+        SwingUtilities.invokeLater(() -> loadingDialog.setVisible(true));
+
+        // Run the tests in a background thread
+        new SwingWorker<Object[][], Void>() {
+            @Override
+            protected Object[][] doInBackground() throws Exception {
+                Object[][] screen3TableData = null;
+                Object[][] jsonTableBody = null;
+
+                if (jsonTable.getRowCount() == 0) {
+                    logger.warn("JSON Table is empty. Proceeding with default request body.");
+                    jsonTableBody = new Object[1][2];
+                    String testName = "Verify " + name;
+                    jsonTableBody[0][1] = "";
+                    logger.info("Generated test name for empty JSON Table: " + testName);
+                    screen3TableData = new Object[1][3];
+                    screen3TableData[0] = executeTest(testName, null);
+                } else {
+                    try {
+                        logger.info("Generating request bodies for JSON Table with " + jsonTable.getRowCount() + " rows.");
+                        jsonTableBody = generateRequestBodies(name, jsonTable);
+                        int jsonBodyLength = jsonTableBody.length;
+                        screen3TableData = new Object[jsonBodyLength][3];
+                        for (int i = 0; i < jsonBodyLength; i++) {
+                            logger.info("Executing test: " + jsonTableBody[i][0]);
+                            screen3TableData[i] = executeTest((String) jsonTableBody[i][0], (JSONObject) jsonTableBody[i][1]);
+                        }
+                    } catch (Exception ex) {
+                        showErrorDialog(ex);
+                        logger.error("Error during test execution. JSON Table rows: {}", jsonTable.getRowCount(), ex);
+                    }
                 }
-            } catch (Exception ex) {
-                showErrorDialog(ex);
-                logger.error("Error during test execution. JSON Table rows: {}", jsonTable.getRowCount(), ex);
+                return screen3TableData;
             }
-        }
-        logger.info("Transitioning to Screen3Frame with table data. Rows: " + screen3TableData.length);
-        Screen3Frame screen3 = new Screen3Frame(this, screen3TableData, getExtendedState());
-        screen3.setVisible(true);
-        setVisible(false);
-        this.dispose();
-    }//GEN-LAST:event_executeTestbtnActionPerformed
+
+            @Override
+            protected void done() {
+                try {
+                    Object[][] screen3TableData = get();
+                    logger.info("Transitioning to Screen3Frame with table data. Rows: " + screen3TableData.length);
+
+                    // Close the loading dialog on the Event Dispatch Thread
+                    SwingUtilities.invokeLater(() -> {
+                        loadingDialog.dispose();
+
+                        // Open the next screen
+                        Screen3Frame screen3 = new Screen3Frame(Screen2.this, screen3TableData, getExtendedState());
+                        screen3.setVisible(true);
+                        setVisible(false);
+                        dispose();
+                    });
+                } catch (Exception ex) {
+                    logger.error("Error retrieving results from background task", ex);
+                    showErrorDialog(ex);
+                    SwingUtilities.invokeLater(loadingDialog::dispose);
+                }
+            }
+        }.execute();
+    }
+
+    /**
+     * Creates and returns a non-modal loading dialog with a progress bar.
+     */
+    private JDialog createLoadingDialog() {
+        JDialog dialog = new JDialog(this, "Processing", false); // Set modal to false
+        dialog.setSize(250, 100);
+        dialog.setLocationRelativeTo(this);
+        dialog.setLayout(new BorderLayout());
+
+        JLabel loadingLabel = new JLabel("Executing tests,please wait", SwingConstants.CENTER);
+        Timer timer = new Timer(500, new ActionListener() {
+            private int dots = 0;
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dots = (dots + 1) % 4;
+                loadingLabel.setText("Executing tests,please wait" + ".".repeat(dots));
+            }
+        });
+        timer.start();// Show infinite loading animation
+
+        dialog.add(loadingLabel, BorderLayout.CENTER);
+
+        return dialog;
+    }
+//GEN-LAST:event_executeTestbtnActionPerformed
 
     /**
      * Executes an HTTP request based on the provided request body, headers, and

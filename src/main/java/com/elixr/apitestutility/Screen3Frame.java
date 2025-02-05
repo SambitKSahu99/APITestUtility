@@ -93,7 +93,7 @@ public class Screen3Frame extends javax.swing.JFrame {
         resultTable.setModel(model);
 
         resultTable.getColumnModel().getColumn(0).setMaxWidth(50); // Small width for SL
-
+        resultTable.setRowHeight(120);
         resultTable.getColumnModel().getColumn(2).setCellRenderer(new JsonCellRenderer());
         resultTable.getColumnModel().getColumn(4).setCellRenderer(new JsonCellRenderer());
 

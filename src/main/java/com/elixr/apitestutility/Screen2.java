@@ -5,39 +5,26 @@
 package com.elixr.apitestutility;
 
 import java.awt.BorderLayout;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import static java.lang.System.exit;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultListModel;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -524,55 +511,33 @@ public class Screen2 extends javax.swing.JFrame {
      *
      */
     private Object[] executeTest(String name, JSONObject requestBody) {
-        Object[] resultData = null;// Array to hold test details: Test Name, Response Code, Response Body
+        Object[] resultData = new Object[4]; // To store test details
         try {
-            URL connectionUrl = new URL(this.url);
-            HttpURLConnection connection = (HttpURLConnection) connectionUrl.openConnection();
-            connection.setRequestMethod(methodType);
-            logger.info("Executing test: name={}, url={}, method={}", name, url, methodType);
-
-            // Add headers
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create(this.url))
+                    .method(methodType, (requestBody != null)
+                            ? HttpRequest.BodyPublishers.ofString(requestBody.toString())
+                            : HttpRequest.BodyPublishers.noBody());
             if (headers != null) {
                 for (Map.Entry<String, String> entry : headers.entrySet()) {
-                    connection.setRequestProperty(entry.getKey(), entry.getValue());
+                    requestBuilder.header(entry.getKey(), entry.getValue());
                 }
             }
-
-            // Add request body
-            if (requestBody != null) {
-                connection.setDoOutput(true);
-                OutputStream os = connection.getOutputStream();
-                byte[] input = requestBody.toString().getBytes("utf-8");
-                os.write(input, 0, input.length);
-                os.close();
-            }
-
-            // Capture response code and response body
-            int responseCode = connection.getResponseCode();
-            InputStream inputStream = (responseCode >= 200 && responseCode < 300)
-                    ? connection.getInputStream()
-                    : connection.getErrorStream();
-            StringBuilder response = new StringBuilder();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                response.append(line);
-            }
-            connection.disconnect();
-            resultData = new Object[4];
+            HttpRequest request = requestBuilder.build();
+            logger.info("Executing test: name={}, url={}, method={}", name, url, methodType);
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             resultData[0] = name;
             resultData[1] = (requestBody != null) ? requestBody.toString() : "Empty Request Body"; // Request Body
-            resultData[2] = responseCode; // Response Code
-            resultData[3] = response.toString(); // Response Body
-            reader.close();
-            logger.info("Test executed: name={}, responseCode={}, responseBody={}", name, responseCode, response);
+            resultData[2] = response.statusCode(); // Response Code
+            resultData[3] = response.body(); // Response Body
 
-        } catch (MalformedURLException ex) {
+            logger.info("Test executed: name={}, responseCode={}, responseBody={}",
+                    name, response.statusCode(), response.body());
+
+        } catch (IOException | InterruptedException ex) {
             showErrorDialog(ex);
-            logger.error("MalformedURLException during test execution", ex);
-        } catch (IOException ex) {
-            showErrorDialog(ex);
-            logger.error("IOException during test execution", ex);
+            logger.error("Exception during test execution", ex);
         } catch (Exception ex) {
             showErrorDialog(ex);
             logger.error("Exception during test execution", ex);

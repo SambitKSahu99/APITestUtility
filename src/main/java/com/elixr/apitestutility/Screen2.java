@@ -7,11 +7,6 @@ package com.elixr.apitestutility;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -99,6 +95,7 @@ public class Screen2 extends javax.swing.JFrame {
      * in a formatted way.
      */
     private void setUpComponents(Object[][] jsonRequestBodyTableData, String baseUrl, String method, DefaultTableModel headersTableModel) {
+        jsonTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         logger.debug("Setting up components for Screen2 with URL: {} and Method: {}", baseUrl, method);
         topComponentsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Vertical scrollbar only when needed
         topComponentsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -212,7 +209,7 @@ public class Screen2 extends javax.swing.JFrame {
         deleteValueBtn = new javax.swing.JButton();
         bottomPanel = new javax.swing.JPanel();
         backBtn = new javax.swing.JButton();
-        executeTestbtn = new javax.swing.JButton();
+        generateTest = new javax.swing.JButton();
         exitBtn = new javax.swing.JButton();
         topComponentsScrollPane = new javax.swing.JScrollPane();
         otherComponentsPanel = new javax.swing.JPanel();
@@ -269,14 +266,14 @@ public class Screen2 extends javax.swing.JFrame {
         });
         bottomPanel.add(backBtn);
 
-        executeTestbtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        executeTestbtn.setText("Execute Test");
-        executeTestbtn.addActionListener(new java.awt.event.ActionListener() {
+        generateTest.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        generateTest.setText("Generate Test");
+        generateTest.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                executeTestbtnActionPerformed(evt);
+                generateTestActionPerformed(evt);
             }
         });
-        bottomPanel.add(executeTestbtn);
+        bottomPanel.add(generateTest);
 
         exitBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         exitBtn.setText("Exit");
@@ -402,149 +399,31 @@ public class Screen2 extends javax.swing.JFrame {
      *
      * @param evt The ActionEvent triggered by the button click.
      */
-    private void executeTestbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_executeTestbtnActionPerformed
-        logger.info("Executing test...");
-
-        // Create and show the loading dialog
-        JDialog loadingDialog = createLoadingDialog();
-        SwingUtilities.invokeLater(() -> loadingDialog.setVisible(true));
-
-        // Run the tests in a background thread
-        new SwingWorker<Object[][], Void>() {
-            @Override
-            protected Object[][] doInBackground() throws Exception {
-                Object[][] screen3TableData = null;
-                Object[][] jsonTableBody = null;
-
-                if (jsonTable.getRowCount() == 0) {
-                    logger.warn("JSON Table is empty. Proceeding with default request body.");
-                    jsonTableBody = new Object[1][2];
-                    String testName = "Verify " + name;
-                    jsonTableBody[0][1] = "";
-                    logger.info("Generated test name for empty JSON Table: " + testName);
-                    screen3TableData = new Object[1][3];
-                    screen3TableData[0] = executeTest(testName, null);
-                } else {
-                    try {
-                        logger.info("Generating request bodies for JSON Table with " + jsonTable.getRowCount() + " rows.");
-                        jsonTableBody = generateRequestBodies(name, jsonTable);
-                        int jsonBodyLength = jsonTableBody.length;
-                        screen3TableData = new Object[jsonBodyLength][3];
-                        for (int i = 0; i < jsonBodyLength; i++) {
-                            logger.info("Executing test: " + jsonTableBody[i][0]);
-                            screen3TableData[i] = executeTest((String) jsonTableBody[i][0], (JSONObject) jsonTableBody[i][1]);
-                        }
-                    } catch (Exception ex) {
-                        showErrorDialog(ex);
-                        logger.error("Error during test execution. JSON Table rows: {}", jsonTable.getRowCount(), ex);
-                    }
-                }
-                return screen3TableData;
+    private void generateTestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generateTestActionPerformed
+        logger.info("Generating test...");
+        Object[][] jsonTableBody = null;
+        if (jsonTable.getRowCount() == 0) {
+            logger.warn("JSON Table is empty. Proceeding with default request body.");
+            jsonTableBody = new Object[1][2];
+            String testName = "Verify " + name;
+            jsonTableBody[0][0] = testName;
+            jsonTableBody[0][1] = "Empty Request Body";
+            logger.info("Generated test name for empty JSON Table: " + testName);
+        } else {
+            try {
+                logger.info("Generating request bodies for JSON Table with " + jsonTable.getRowCount() + " rows.");
+                jsonTableBody = generateRequestBodies(name, jsonTable);         
+            } catch (Exception ex) {
+                showErrorDialog(ex);
+                logger.error("Error during test generation. JSON Table rows: {}", jsonTable.getRowCount(), ex);
             }
-
-            @Override
-            protected void done() {
-                try {
-                    Object[][] screen3TableData = get();
-                    logger.info("Transitioning to Screen3Frame with table data. Rows: " + screen3TableData.length);
-
-                    // Close the loading dialog on the Event Dispatch Thread
-                    SwingUtilities.invokeLater(() -> {
-                        loadingDialog.dispose();
-
-                        // Open the next screen
-                        Screen3Frame screen3 = new Screen3Frame(Screen2.this, screen3TableData, getExtendedState());
-                        screen3.setVisible(true);
-                        setVisible(false);
-                        dispose();
-                    });
-                } catch (Exception ex) {
-                    logger.error("Error retrieving results from background task", ex);
-                    showErrorDialog(ex);
-                    SwingUtilities.invokeLater(loadingDialog::dispose);
-                }
-            }
-        }.execute();
-    }
-
-    /**
-     * Creates and returns a non-modal loading dialog with a progress bar.
-     */
-    private JDialog createLoadingDialog() {
-        JDialog dialog = new JDialog(this, "Processing", false); // Set modal to false
-        dialog.setSize(250, 100);
-        dialog.setLocationRelativeTo(this);
-        dialog.setLayout(new BorderLayout());
-
-        JLabel loadingLabel = new JLabel("Executing tests,please wait", SwingConstants.CENTER);
-        Timer timer = new Timer(500, new ActionListener() {
-            private int dots = 0;
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dots = (dots + 1) % 4;
-                loadingLabel.setText("Executing tests,please wait" + ".".repeat(dots));
-            }
-        });
-        timer.start();// Show infinite loading animation
-
-        dialog.add(loadingLabel, BorderLayout.CENTER);
-
-        return dialog;
-    }
-//GEN-LAST:event_executeTestbtnActionPerformed
-
-    /**
-     * Executes an HTTP request based on the provided request body, headers, and
-     * method type.
-     *
-     * @param requestBody A JSON object representing the request body to be sent
-     * with the HTTP request.
-     * @return An Object array containing: - [0]: The request body as a string.
-     * - [1]: The HTTP response code as an integer. - [2]: The HTTP response
-     * body as a string.
-     *
-     * This method performs the following: 1. Configures an HTTP connection
-     * using the provided URL and method type. 2. Adds custom headers to the
-     * request if specified. 3. Sends the provided JSON request body if
-     * applicable. 4. Captures the HTTP response code and response body. 5.
-     * Returns the results as an Object array for further processing.
-     *
-     */
-    private Object[] executeTest(String name, JSONObject requestBody) {
-        Object[] resultData = new Object[4]; // To store test details
-        try {
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create(this.url))
-                    .method(methodType, (requestBody != null)
-                            ? HttpRequest.BodyPublishers.ofString(requestBody.toString())
-                            : HttpRequest.BodyPublishers.noBody());
-            if (headers != null) {
-                for (Map.Entry<String, String> entry : headers.entrySet()) {
-                    requestBuilder.header(entry.getKey(), entry.getValue());
-                }
-            }
-            HttpRequest request = requestBuilder.build();
-            logger.info("Executing test: name={}, url={}, method={}", name, url, methodType);
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            resultData[0] = name;
-            resultData[1] = (requestBody != null) ? requestBody.toString() : "Empty Request Body"; // Request Body
-            resultData[2] = response.statusCode(); // Response Code
-            resultData[3] = response.body(); // Response Body
-
-            logger.info("Test executed: name={}, responseCode={}, responseBody={}",
-                    name, response.statusCode(), response.body());
-
-        } catch (IOException | InterruptedException ex) {
-            showErrorDialog(ex);
-            logger.error("Exception during test execution", ex);
-        } catch (Exception ex) {
-            showErrorDialog(ex);
-            logger.error("Exception during test execution", ex);
         }
-        return resultData;
+        Screen3Frame screen3 = new Screen3Frame(Screen2.this, getExtendedState(), jsonTableBody, url, methodType, headers);
+        screen3.setVisible(true);
+        setVisible(false);
+        dispose();
     }
-
+//GEN-LAST:event_generateTestActionPerformed
     /**
      * Generates combinations of request bodies for testing based on the input
      * JTable's data. The method extracts field values, handles fields with
@@ -883,8 +762,8 @@ public class Screen2 extends javax.swing.JFrame {
     private javax.swing.JButton backBtn;
     private javax.swing.JPanel bottomPanel;
     private javax.swing.JButton deleteValueBtn;
-    private javax.swing.JButton executeTestbtn;
     private javax.swing.JButton exitBtn;
+    private javax.swing.JButton generateTest;
     private javax.swing.JLabel headersLabel;
     private javax.swing.JLabel headersValueLabel;
     private javax.swing.JLabel jLabel4;

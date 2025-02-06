@@ -4,12 +4,20 @@
  */
 package com.elixr.apitestutility;
 
+import static com.elixr.apitestutility.Screen2.showErrorDialog;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,21 +31,30 @@ public class Screen3Frame extends javax.swing.JFrame {
 
     private static final Logger logger = LoggerFactory.getLogger(Screen3Frame.class);
     private Screen2 previousFrame;
+    private String url;
+    private String methodType;
+    private Map<String, String> headers = new HashMap<>();
 
     /**
      * Constructs a new Screen3Frame with the given data and previousState.
      *
      * @param previousFrame the previous screen's frame, used for navigation.
-     * @param tableData the data to populate the result table.
+     * @param testScenarios the data to populate the result table.
      * @param previousState the previousState of the frame (e.g., maximized,
      * normal).
+     * @param url The base URL of the request.
+     * @param methodType The HTTP method (e.g., GET, POST).
+     * @param headers The Map<String,String> containing HTTP headers.
      */
-    public Screen3Frame(Screen2 previousFrame, Object[][] tableData, int previousState) {
+    public Screen3Frame(Screen2 previousFrame,int previousState,Object[][] testScenarios,String url,String methodType,Map<String,String> headers) {
         logger.info("Initializing Screen3Frame with data and previous state.");
         this.previousFrame = previousFrame;
         initComponents();
         setupFrame(previousState);
-        populateResultTable(tableData);
+        this.url = url;
+        this.methodType = methodType;
+        this.headers = headers;
+        populateResultTable(testScenarios);
     }
 
     /**
@@ -58,6 +75,8 @@ public class Screen3Frame extends javax.swing.JFrame {
         this.setTitle("APITestUtility");
         setExtendedState(previousState);
         setLocationRelativeTo(null);
+        resultTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        resultTable.getTableHeader().setReorderingAllowed(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
@@ -76,14 +95,11 @@ public class Screen3Frame extends javax.swing.JFrame {
             updatedTableData[i][0] = i + 1; // SL column with serial numbers starting from 1
             updatedTableData[i][1] = tableData[i][0]; // Test Name
             updatedTableData[i][2] = tableData[i][1]; // Request Body
-            updatedTableData[i][3] = tableData[i][2]; // Response Code
-            updatedTableData[i][4] = tableData[i][3]; // Response Body
-            updatedTableData[i][5] = ""; // Test Result (empty for now)
         }
 
         DefaultTableModel model = new DefaultTableModel(
                 updatedTableData,
-                new String[]{"SL", "Test Name", "Request Body", "Response Code", "Response Body", "Test Result"}
+                new String[]{"SL", "Test Name", "Request Body","Response Code", "Response Body", "Test Result"}
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -93,10 +109,9 @@ public class Screen3Frame extends javax.swing.JFrame {
         resultTable.setModel(model);
 
         resultTable.getColumnModel().getColumn(0).setMaxWidth(50); // Small width for SL
-        resultTable.setRowHeight(120);
+        resultTable.setRowHeight(125);
         resultTable.getColumnModel().getColumn(2).setCellRenderer(new JsonCellRenderer());
         resultTable.getColumnModel().getColumn(4).setCellRenderer(new JsonCellRenderer());
-
         DefaultTableCellRenderer borderedCellRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -115,32 +130,54 @@ public class Screen3Frame extends javax.swing.JFrame {
                 resultTable.getColumnModel().getColumn(col).setCellRenderer(borderedCellRenderer);
             }
         }
-        for (int row = 0; row < resultTable.getRowCount(); row++) {
-            adjustRowHeight(resultTable, row, 2); // Adjust for column 2 ("Request Body")
-            adjustRowHeight(resultTable, row, 4); //Adjust for column 4 ("Response Body")
-        }
         resultTableScrollPane.revalidate();
         resultTableScrollPane.repaint();
         logger.info("Result table populated successfully.");
     }
-
+    
     /**
-     * Adjusts the row height of a table to fit the content in the specified
-     * column.
+     * Executes an HTTP request based on the provided request body, headers, and
+     * method type.
      *
-     * @param table the JTable whose row height needs adjustment.
-     * @param row the row index to adjust.
-     * @param column the column index to consider for height adjustment.
+     * @param requestBody A JSON object representing the request body to be sent
+     * with the HTTP request.
+     * @return An Object array containing: - [0]: The request body as a string.
+     * - [1]: The HTTP response code as an integer. - [2]: The HTTP response
+     * body as a string.
+     *
+     * This method performs the following: 1. Configures an HTTP connection
+     * using the provided URL and method type. 2. Adds custom headers to the
+     * request if specified. 3. Sends the provided JSON request body if
+     * applicable. 4. Captures the HTTP response code and response body. 5.
+     * Returns the results as an Object array for further processing.
+     *
      */
-    private static void adjustRowHeight(JTable table, int row, int column) {
+    private Object[] executeTest(String name, JSONObject requestBody) {
+        Object[] resultData = new Object[2]; // To store test details
         try {
-            TableCellRenderer renderer = table.getCellRenderer(row, column);
-            Component comp = table.prepareRenderer(renderer, row, column);
-            int preferredHeight = comp.getPreferredSize().height;
-            table.setRowHeight(row, Math.max(table.getRowHeight(row), preferredHeight));
-        } catch (Exception exception) {
-            logger.error("Error adjusting row height for row {} and column {}: {}", row, column, exception.getMessage(), exception);
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create(this.url))
+                    .method(methodType, (requestBody != null)
+                            ? HttpRequest.BodyPublishers.ofString(requestBody.toString())
+                            : HttpRequest.BodyPublishers.noBody());
+            if (headers != null) {
+                for (Map.Entry<String, String> entry : headers.entrySet()) {
+                    requestBuilder.header(entry.getKey(), entry.getValue());
+                }
+            }
+            HttpRequest request = requestBuilder.build();
+            logger.info("Executing test: name={}, url={}, method={}", name, url, methodType);
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            resultData[0] = response.statusCode(); // Response Code
+            resultData[1] = response.body(); // Response Body
+            logger.info("Test executed: name={}, responseCode={}, responseBody={}",
+                    name, response.statusCode(), response.body());
+        } catch (Exception ex) {
+            showErrorDialog(ex);
+            logger.error("Exception during test execution", ex);
         }
+        return resultData;
     }
 
     /**
@@ -194,6 +231,7 @@ public class Screen3Frame extends javax.swing.JFrame {
         resultTable = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
         backBtn = new javax.swing.JButton();
+        executeTestBtn = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -238,6 +276,15 @@ public class Screen3Frame extends javax.swing.JFrame {
             }
         });
         jPanel1.add(backBtn);
+
+        executeTestBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        executeTestBtn.setText("ExecuteTest");
+        executeTestBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                executeTestBtnActionPerformed(evt);
+            }
+        });
+        jPanel1.add(executeTestBtn);
 
         jButton1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButton1.setText("Exit");
@@ -295,7 +342,6 @@ public class Screen3Frame extends javax.swing.JFrame {
             logger.warn("No previous frame available to navigate back to.");
             JOptionPane.showMessageDialog(this, "No previous screen to navigate to!", "Error", JOptionPane.ERROR_MESSAGE);
         }
-
     }//GEN-LAST:event_backBtnActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -311,15 +357,14 @@ public class Screen3Frame extends javax.swing.JFrame {
 
     private void resultTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_resultTableMouseClicked
         // TODO add your handling code here:
-
         int row = resultTable.rowAtPoint(evt.getPoint());
         int col = resultTable.columnAtPoint(evt.getPoint());
-
         if (col == 2 || col == 4) { // Open popup only for JSON columns
             Object value = resultTable.getValueAt(row, col);
             if (value != null) {
-               if (value.toString().equalsIgnoreCase("Empty Request Body")){
-                   JOptionPane.showMessageDialog(this, "No JSON Body to show", null, JOptionPane.INFORMATION_MESSAGE);
+               if (value.toString().equalsIgnoreCase("Empty Request Body") || 
+                       value.toString().equalsIgnoreCase("")){
+                   return;
                }
                 String formattedJson = new JSONObject(value.toString()).toString(4);
                 JTextArea textArea = new JTextArea(formattedJson);
@@ -327,10 +372,9 @@ public class Screen3Frame extends javax.swing.JFrame {
                 textArea.setLineWrap(true);
                 textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
                 textArea.setEditable(false);
-
                 JScrollPane scrollPane = new JScrollPane(textArea);
                 scrollPane.setPreferredSize(new Dimension(600, 400)); // Adjust popup size
-
+                resultTable.clearSelection();
                 JOptionPane.showMessageDialog(
                         null, scrollPane, "Full JSON View", JOptionPane.PLAIN_MESSAGE);
             }
@@ -340,7 +384,6 @@ public class Screen3Frame extends javax.swing.JFrame {
     private void resultTableMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_resultTableMouseMoved
         // TODO add your handling code here:
         int col = resultTable.columnAtPoint(evt.getPoint());
-
         if (col == 2 || col == 4) { // "Request Body" & "Response Body" columns
             resultTable.setToolTipText("Click to open full content");
         } else {
@@ -352,6 +395,81 @@ public class Screen3Frame extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_resultTableFocusLost
 
+    private void executeTestBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_executeTestBtnActionPerformed
+        // TODO add your handling code here:
+        int selectedRow = resultTable.getSelectedRow();
+        JSONObject jsonBody;
+        if ( selectedRow != -1) {
+            logger.debug("Test selected: {}", resultTable.getSelectedRow());
+            Object requestBody = resultTable.getValueAt(selectedRow, 2);
+            if(requestBody == null || requestBody.toString().equalsIgnoreCase("Empty Request Body")){
+                jsonBody = null;
+            }else{
+                jsonBody = (JSONObject) requestBody;
+            }
+            String testName = (String) resultTable.getValueAt(selectedRow, 1);
+            JDialog loadingDialog = createLoadingDialog("Executing Test,Please Wait");
+            SwingUtilities.invokeLater(()->loadingDialog.setVisible(true));
+            new SwingWorker<Object[],Void>(){
+
+                @Override
+                protected Object[] doInBackground() throws Exception {
+                    Object[] responseResult = null;
+                    try{
+                       responseResult = executeTest(testName,jsonBody);
+                    } catch (Exception ex){
+                        Screen2.showErrorDialog(ex);
+                        logger.error("Error during test execution.");
+                    }
+                    return responseResult;
+                }
+                @Override
+            protected void done() {
+                try {
+                    Object[] responseData = get();
+                    SwingUtilities.invokeLater(() -> {
+                    loadingDialog.dispose();
+                    resultTable.setValueAt(responseData[0], selectedRow, 3);
+                    resultTable.setValueAt(responseData[1], selectedRow, 4);
+                    resultTable.clearSelection();
+                    });
+                } catch (Exception ex) {
+                    logger.error("Error retrieving results from background task", ex);
+                    showErrorDialog(ex);
+                    SwingUtilities.invokeLater(loadingDialog::dispose);
+                }
+            }
+            }.execute();
+            logger.info("Executing Test");
+        } else {
+            logger.warn("No test selected for executing");
+            JOptionPane.showMessageDialog(this, "Please Select a Test To Execute", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_executeTestBtnActionPerformed
+
+    /**
+     * Creates and returns a non-modal loading dialog with a progress bar.
+     */
+    public JDialog createLoadingDialog(String name) {
+        JDialog dialog = new JDialog(this, "Processing", false); // Set modal to false
+        dialog.setSize(250, 100);
+        dialog.setLocationRelativeTo(this);
+        dialog.setLayout(new BorderLayout());
+        JLabel loadingLabel = new JLabel(name, SwingConstants.CENTER);
+        Timer timer = new Timer(500, new ActionListener() {
+            private int dots = 0;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dots = (dots + 1) % 4;
+                loadingLabel.setText(name + ".".repeat(dots));
+            }
+        });
+        timer.start();// Show infinite loading animation
+        dialog.add(loadingLabel, BorderLayout.CENTER);
+        return dialog;
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -389,6 +507,7 @@ public class Screen3Frame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton backBtn;
+    private javax.swing.JButton executeTestBtn;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;

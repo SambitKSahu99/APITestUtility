@@ -402,27 +402,36 @@ public class Screen2 extends javax.swing.JFrame {
     private void generateTestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generateTestActionPerformed
         logger.info("Generating test...");
         Object[][] jsonTableBody = null;
+        String testName = "";
+        String requestBody = "";
+
         if (jsonTable.getRowCount() == 0) {
             logger.warn("JSON Table is empty. Proceeding with default request body.");
             jsonTableBody = new Object[1][2];
-            String testName = "Verify " + name;
+            testName = "Verify " + name;
+            requestBody = "Empty Request Body";
             jsonTableBody[0][0] = testName;
-            jsonTableBody[0][1] = "Empty Request Body";
+            jsonTableBody[0][1] = requestBody;
             logger.info("Generated test name for empty JSON Table: " + testName);
         } else {
             try {
                 logger.info("Generating request bodies for JSON Table with " + jsonTable.getRowCount() + " rows.");
-                jsonTableBody = generateRequestBodies(name, jsonTable);         
+                jsonTableBody = generateRequestBodies(name, jsonTable);
+                // For export, for simplicity let's take the first test scenario.
+                testName = jsonTableBody[0][0].toString();
+                requestBody = jsonTableBody[0][1].toString();
             } catch (Exception ex) {
                 showErrorDialog(ex);
                 logger.error("Error during test generation. JSON Table rows: {}", jsonTable.getRowCount(), ex);
             }
         }
-        Screen3Frame screen3 = new Screen3Frame(Screen2.this, getExtendedState(), jsonTableBody, url, methodType, headers);
+        // Continue to Screen3 if needed.
+        Screen3Frame screen3 = new Screen3Frame(Screen2.this, getExtendedState(), jsonTableBody, url, methodType, headers,name);
         screen3.setVisible(true);
         setVisible(false);
         dispose();
-    }
+    }//GEN-LAST:event_generateTestActionPerformed
+
 //GEN-LAST:event_generateTestActionPerformed
     /**
      * Generates combinations of request bodies for testing based on the input

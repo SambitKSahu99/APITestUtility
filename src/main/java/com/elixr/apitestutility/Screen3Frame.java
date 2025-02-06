@@ -12,6 +12,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +36,8 @@ public class Screen3Frame extends javax.swing.JFrame {
     private String url;
     private String methodType;
     private Map<String, String> headers = new HashMap<>();
+    private Object[][] jsonTableBody;
+    private String nameFromScreen1;
 
     /**
      * Constructs a new Screen3Frame with the given data and previousState.
@@ -46,7 +50,7 @@ public class Screen3Frame extends javax.swing.JFrame {
      * @param methodType The HTTP method (e.g., GET, POST).
      * @param headers The Map<String,String> containing HTTP headers.
      */
-    public Screen3Frame(Screen2 previousFrame,int previousState,Object[][] testScenarios,String url,String methodType,Map<String,String> headers) {
+    public Screen3Frame(Screen2 previousFrame, int previousState, Object[][] testScenarios, String url, String methodType, Map<String, String> headers, String nameFromScreen1) {
         logger.info("Initializing Screen3Frame with data and previous state.");
         this.previousFrame = previousFrame;
         initComponents();
@@ -54,6 +58,8 @@ public class Screen3Frame extends javax.swing.JFrame {
         this.url = url;
         this.methodType = methodType;
         this.headers = headers;
+        this.jsonTableBody = testScenarios;  // Assign jsonTableBody
+        this.nameFromScreen1 = nameFromScreen1;
         populateResultTable(testScenarios);
     }
 
@@ -99,7 +105,7 @@ public class Screen3Frame extends javax.swing.JFrame {
 
         DefaultTableModel model = new DefaultTableModel(
                 updatedTableData,
-                new String[]{"SL", "Test Name", "Request Body","Response Code", "Response Body", "Test Result"}
+                new String[]{"SL", "Test Name", "Request Body", "Response Code", "Response Body", "Test Result"}
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -134,7 +140,7 @@ public class Screen3Frame extends javax.swing.JFrame {
         resultTableScrollPane.repaint();
         logger.info("Result table populated successfully.");
     }
-    
+
     /**
      * Executes an HTTP request based on the provided request body, headers, and
      * method type.
@@ -216,7 +222,6 @@ public class Screen3Frame extends javax.swing.JFrame {
         }
     }
 
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -232,6 +237,7 @@ public class Screen3Frame extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         backBtn = new javax.swing.JButton();
         executeTestBtn = new javax.swing.JButton();
+        exportBtn = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -285,6 +291,15 @@ public class Screen3Frame extends javax.swing.JFrame {
             }
         });
         jPanel1.add(executeTestBtn);
+
+        exportBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        exportBtn.setText("Export To Excel");
+        exportBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportBtnActionPerformed(evt);
+            }
+        });
+        jPanel1.add(exportBtn);
 
         jButton1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButton1.setText("Exit");
@@ -362,10 +377,10 @@ public class Screen3Frame extends javax.swing.JFrame {
         if (col == 2 || col == 4) { // Open popup only for JSON columns
             Object value = resultTable.getValueAt(row, col);
             if (value != null) {
-               if (value.toString().equalsIgnoreCase("Empty Request Body") || 
-                       value.toString().equalsIgnoreCase("")){
-                   return;
-               }
+                if (value.toString().equalsIgnoreCase("Empty Request Body")
+                        || value.toString().equalsIgnoreCase("")) {
+                    return;
+                }
                 String formattedJson = new JSONObject(value.toString()).toString(4);
                 JTextArea textArea = new JTextArea(formattedJson);
                 textArea.setWrapStyleWord(true);
@@ -399,46 +414,47 @@ public class Screen3Frame extends javax.swing.JFrame {
         // TODO add your handling code here:
         int selectedRow = resultTable.getSelectedRow();
         JSONObject jsonBody;
-        if ( selectedRow != -1) {
+        if (selectedRow != -1) {
             logger.debug("Test selected: {}", resultTable.getSelectedRow());
             Object requestBody = resultTable.getValueAt(selectedRow, 2);
-            if(requestBody == null || requestBody.toString().equalsIgnoreCase("Empty Request Body")){
+            if (requestBody == null || requestBody.toString().equalsIgnoreCase("Empty Request Body")) {
                 jsonBody = null;
-            }else{
+            } else {
                 jsonBody = (JSONObject) requestBody;
             }
             String testName = (String) resultTable.getValueAt(selectedRow, 1);
             JDialog loadingDialog = createLoadingDialog("Executing Test,Please Wait");
-            SwingUtilities.invokeLater(()->loadingDialog.setVisible(true));
-            new SwingWorker<Object[],Void>(){
+            SwingUtilities.invokeLater(() -> loadingDialog.setVisible(true));
+            new SwingWorker<Object[], Void>() {
 
                 @Override
                 protected Object[] doInBackground() throws Exception {
                     Object[] responseResult = null;
-                    try{
-                       responseResult = executeTest(testName,jsonBody);
-                    } catch (Exception ex){
+                    try {
+                        responseResult = executeTest(testName, jsonBody);
+                    } catch (Exception ex) {
                         Screen2.showErrorDialog(ex);
                         logger.error("Error during test execution.");
                     }
                     return responseResult;
                 }
+
                 @Override
-            protected void done() {
-                try {
-                    Object[] responseData = get();
-                    SwingUtilities.invokeLater(() -> {
-                    loadingDialog.dispose();
-                    resultTable.setValueAt(responseData[0], selectedRow, 3);
-                    resultTable.setValueAt(responseData[1], selectedRow, 4);
-                    resultTable.clearSelection();
-                    });
-                } catch (Exception ex) {
-                    logger.error("Error retrieving results from background task", ex);
-                    showErrorDialog(ex);
-                    SwingUtilities.invokeLater(loadingDialog::dispose);
+                protected void done() {
+                    try {
+                        Object[] responseData = get();
+                        SwingUtilities.invokeLater(() -> {
+                            loadingDialog.dispose();
+                            resultTable.setValueAt(responseData[0], selectedRow, 3);
+                            resultTable.setValueAt(responseData[1], selectedRow, 4);
+                            resultTable.clearSelection();
+                        });
+                    } catch (Exception ex) {
+                        logger.error("Error retrieving results from background task", ex);
+                        showErrorDialog(ex);
+                        SwingUtilities.invokeLater(loadingDialog::dispose);
+                    }
                 }
-            }
             }.execute();
             logger.info("Executing Test");
         } else {
@@ -446,6 +462,22 @@ public class Screen3Frame extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Please Select a Test To Execute", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_executeTestBtnActionPerformed
+
+    private void exportBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportBtnActionPerformed
+        try {
+            // Generate timestamp for the filename
+            String timestamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
+            String fileName = nameFromScreen1 + "_" + timestamp + ".xlsx";
+
+            // Call the export function
+            ExcelExporter.exportDataToExcel(url, methodType, headers, jsonTableBody, fileName);
+
+            JOptionPane.showMessageDialog(this, "Data exported successfully to " + fileName);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error exporting data: " + e.getMessage());
+            logger.error("Error exporting data", e);
+        }
+    }//GEN-LAST:event_exportBtnActionPerformed
 
     /**
      * Creates and returns a non-modal loading dialog with a progress bar.
@@ -469,7 +501,7 @@ public class Screen3Frame extends javax.swing.JFrame {
         dialog.add(loadingLabel, BorderLayout.CENTER);
         return dialog;
     }
-    
+
     /**
      * @param args the command line arguments
      */
@@ -508,6 +540,7 @@ public class Screen3Frame extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton backBtn;
     private javax.swing.JButton executeTestBtn;
+    private javax.swing.JButton exportBtn;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;

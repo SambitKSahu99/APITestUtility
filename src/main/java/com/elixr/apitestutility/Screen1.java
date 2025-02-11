@@ -3,13 +3,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package com.elixr.apitestutility;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -30,13 +30,16 @@ public class Screen1 extends javax.swing.JFrame {
     private static final Logger logger = LoggerFactory.getLogger(Screen1.class);
     private DefaultTableModel tableModel;
     private JTable headersTable;
+    private JFrame previousFrame ;
 
     /**
      * Default constructor for Screen1. Initializes the UI components and sets
      * up the headers table. Disables JSON-related fields until a method that
      * supports a request body is selected.
      */
-    public Screen1() {
+    public Screen1(JFrame previousFrame) {
+        this.previousFrame = previousFrame;
+        setExtendedState(MAXIMIZED_BOTH);
         logger.info("Initializing Screen 1.");
         this.setTitle("APITestUtility");
         initComponents();
@@ -48,6 +51,8 @@ public class Screen1 extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         logger.info("Screen1 Initialized Successfully.");
     }
+    
+    public Screen1(){}
 
     /**
      * Sets up the table for HTTP headers, including the column names ("Header
@@ -103,6 +108,7 @@ public class Screen1 extends javax.swing.JFrame {
     private void initComponents() {
 
         bottomPanel = new javax.swing.JPanel();
+        backBtn = new javax.swing.JButton();
         SubmitBtn = new javax.swing.JButton();
         resetBtn = new javax.swing.JButton();
         exitBtn = new javax.swing.JButton();
@@ -126,6 +132,15 @@ public class Screen1 extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setFocusCycleRoot(false);
+
+        backBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        backBtn.setText("Back");
+        backBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                backBtnActionPerformed(evt);
+            }
+        });
+        bottomPanel.add(backBtn);
 
         SubmitBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         SubmitBtn.setText("Submit");
@@ -222,10 +237,6 @@ public class Screen1 extends javax.swing.JFrame {
                 .addGap(30, 30, 30)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(methodLabel)
-                        .addGap(12, 12, 12)
-                        .addComponent(methodDropDown, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
                         .addComponent(headersJScrollPane)
                         .addGap(12, 12, 12)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -234,6 +245,10 @@ public class Screen1 extends javax.swing.JFrame {
                     .addComponent(jsonTextLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 167, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jsonScrollPane)
                     .addComponent(bottomPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(methodLabel)
+                        .addGap(12, 12, 12)
+                        .addComponent(methodDropDown, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -296,7 +311,7 @@ public class Screen1 extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        pack();
+        setBounds(0, 0, 703, 484);
     }// </editor-fold>//GEN-END:initComponents
 
     /**
@@ -398,11 +413,11 @@ public class Screen1 extends javax.swing.JFrame {
             } else {
                 jsonRequestBodyTableData = null;
             }
-            if(!pathInput.startsWith("/")){
-                pathInput = "/"+pathInput;
+            if (!pathInput.startsWith("/")) {
+                pathInput = "/" + pathInput;
             }
-            String formattedBaseUrl = protocol+"://"+baseUrlInput+pathInput;
-            Screen2 screen2 = new Screen2(this, jsonRequestBodyObject, jsonRequestBodyTableData, formattedBaseUrl , methodInput, nameInput, tableModel, getExtendedState());
+            String formattedBaseUrl = protocol + "://" + baseUrlInput + pathInput;
+            Screen2 screen2 = new Screen2(this, jsonRequestBodyObject, jsonRequestBodyTableData, formattedBaseUrl, methodInput, nameInput, tableModel, getExtendedState());
             logger.info("Navigating to Screen2 with Base URL: {}", formattedBaseUrl);
             screen2.setVisible(true);
             setVisible(false);
@@ -477,6 +492,17 @@ public class Screen1 extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_exitBtnActionPerformed
 
+    private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
+        // TODO add your handling code here:
+         logger.debug("Back button clicked");
+        if (previousFrame != null) {
+            previousFrame.setExtendedState(this.getExtendedState());
+            previousFrame.setVisible(true);
+        }
+        this.dispose();
+        logger.info("Returning to the previous frame");
+    }//GEN-LAST:event_backBtnActionPerformed
+    
     /**
      * Adds a new header to the headers table.
      *
@@ -551,6 +577,7 @@ public class Screen1 extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton SubmitBtn;
     private javax.swing.JButton addHeaderBtn;
+    private javax.swing.JButton backBtn;
     private javax.swing.JTextField baseUrl;
     private javax.swing.JLabel baseUrlLabel;
     private javax.swing.JPanel bottomPanel;

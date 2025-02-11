@@ -4,18 +4,18 @@
  */
 package com.elixr.apitestutility;
 
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 /**
- *
  * @author chandrakanth.shaji
  */
 public class ExcelExporter {
@@ -47,7 +47,14 @@ public class ExcelExporter {
                 // Writing headers as a single string (or modify to split across rows)
                 StringBuilder headersText = new StringBuilder();
                 for (Map.Entry<String, String> entry : headers.entrySet()) {
-                    headersText.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+                    headersText.append(entry.getKey())
+                            .append(":")
+                            .append(entry.getValue())
+                            .append(",");
+                }
+                // Remove the trailing comma and space if headers are not empty
+                if (!headersText.isEmpty()) {
+                    headersText.setLength(headersText.length() - 1);
                 }
                 row.createCell(2).setCellValue(headersText.toString());
 

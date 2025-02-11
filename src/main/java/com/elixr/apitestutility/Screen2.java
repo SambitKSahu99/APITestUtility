@@ -4,9 +4,6 @@
  */
 package com.elixr.apitestutility;
 
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -14,17 +11,11 @@ import java.util.stream.IntStream;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
-import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import org.json.JSONArray;
@@ -175,7 +166,7 @@ public class Screen2 extends javax.swing.JFrame {
         logger.debug("Setting up the frame with state: {}", previousState);
         this.setTitle("APITestUtility");
         jsonTable.getTableHeader().setReorderingAllowed(false);
-        setExtendedState(previousState);
+        setExtendedState(MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
@@ -417,9 +408,6 @@ public class Screen2 extends javax.swing.JFrame {
             try {
                 logger.info("Generating request bodies for JSON Table with " + jsonTable.getRowCount() + " rows.");
                 jsonTableBody = generateRequestBodies(name, jsonTable);
-                // For export, for simplicity let's take the first test scenario.
-                testName = jsonTableBody[0][0].toString();
-                requestBody = jsonTableBody[0][1].toString();
             } catch (Exception ex) {
                 showErrorDialog(ex);
                 logger.error("Error during test generation. JSON Table rows: {}", jsonTable.getRowCount(), ex);
@@ -430,7 +418,7 @@ public class Screen2 extends javax.swing.JFrame {
         screen3.setVisible(true);
         setVisible(false);
         dispose();
-    }//GEN-LAST:event_generateTestActionPerformed
+    }                                            
 
 //GEN-LAST:event_generateTestActionPerformed
     /**
@@ -448,9 +436,7 @@ public class Screen2 extends javax.swing.JFrame {
         logger.info("Generating request bodies for: {}", name);
         int rowCount = table.getRowCount();
         int colCount = 2; // Test Case Name and Request Body
-
         JSONObject baseJsonBody = this.jsonRequestBodyObject;
-
         // Calculate the total number of test cases
         int totalTestCases = 0;
         for (int i = 0; i < rowCount; i++) {

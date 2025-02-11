@@ -534,32 +534,45 @@ public class Screen2 extends javax.swing.JFrame {
             JSONObject current = json;
             for (int i = 0; i < keys.length - 1; i++) {
                 String key = keys[i];
-                // Handle array notation (e.g., "customErrors[0]")
                 if (key.contains("[")) {
+                    // Handle array notation (e.g., "filters[0]")
                     int arrayIndex = Integer.parseInt(key.substring(key.indexOf("[") + 1, key.indexOf("]")));
                     key = key.substring(0, key.indexOf("["));
                     JSONArray array = current.optJSONArray(key);
-                    if (array == null) {
-                        throw new IllegalArgumentException("Invalid key: " + fieldName);
+                    if (array == null || arrayIndex >= array.length()) {
+                        throw new IllegalArgumentException("Invalid array index for key: " + key);
                     }
                     current = array.getJSONObject(arrayIndex);
                 } else {
                     current = current.optJSONObject(key);
                     if (current == null) {
-                        throw new IllegalArgumentException("Invalid key: " + fieldName);
+                        throw new IllegalArgumentException("Invalid key: " + key);
                     }
                 }
             }
             // Replace the value for the final key
-            String finalKey = keys[keys.length - 1];
-            current.put(finalKey, value);
-            logger.info("Successfully replaced value for nested field: {}", fieldName);
+            replaceFinalKey(current, keys[keys.length - 1], value);
         } else {
-            // Simple key, replace directly
-            json.put(fieldName, value);
-            logger.info("Successfully replaced value for field: {}", fieldName);
+            replaceFinalKey(json, fieldName, value);
+        }
+        logger.info("Successfully replaced value for field: {}", fieldName);
+    }
+
+    private void replaceFinalKey(JSONObject json, String key, Object value) {
+        if (key.contains("[")) {
+            // Handle array element replacement (e.g., "values[0]")
+            int arrayIndex = Integer.parseInt(key.substring(key.indexOf("[") + 1, key.indexOf("]")));
+            key = key.substring(0, key.indexOf("["));
+            JSONArray array = json.optJSONArray(key);
+            if (array == null || arrayIndex >= array.length()) {
+                throw new IllegalArgumentException("Invalid array index for key: " + key);
+            }
+            array.put(arrayIndex, value);  // Replace specific array element
+        } else {
+            json.put(key, value);  // Replace the entire field
         }
     }
+
 
     private void jsonTablePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jsonTablePropertyChange
         // TODO add your handling code here:

@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 public class Screen3Frame extends javax.swing.JFrame {
 
     private static final Logger logger = LoggerFactory.getLogger(Screen3Frame.class);
-    private Screen2 previousFrame;
+    private JFrame previousFrame;
     private String url;
     private String methodType;
     private Map<String, String> headers = new HashMap<>();
@@ -50,7 +50,7 @@ public class Screen3Frame extends javax.swing.JFrame {
      * @param methodType The HTTP method (e.g., GET, POST).
      * @param headers The Map<String,String> containing HTTP headers.
      */
-    public Screen3Frame(Screen2 previousFrame, int previousState, Object[][] testScenarios, String url, String methodType, Map<String, String> headers, String nameFromScreen1) {
+    public Screen3Frame(JFrame previousFrame, int previousState, Object[][] testScenarios, String url, String methodType, Map<String, String> headers, String nameFromScreen1) {
         logger.info("Initializing Screen3Frame with data and previous state.");
         this.previousFrame = previousFrame;
         initComponents();
@@ -61,6 +61,28 @@ public class Screen3Frame extends javax.swing.JFrame {
         this.jsonTableBody = testScenarios;  // Assign jsonTableBody
         this.nameFromScreen1 = nameFromScreen1;
         populateResultTable(testScenarios);
+    }
+
+    public Screen3Frame(JFrame previosuFrame, String url, String method, String headers, Object[][] testCases, String fileName) {
+        initComponents();
+        setupFrame(MAXIMIZED_BOTH);
+        this.previousFrame = previosuFrame;
+        this.url = url;
+        this.methodType = method;
+        if (!headers.equals("")) {
+            String[] headerPairs = headers.split(",");
+            for (String header : headerPairs) {
+                // Split each header pair by colon to separate key and value
+                String[] keyValue = header.split(":", 2);  // Limit to 2 parts in case the value contains ":"
+                if (keyValue.length == 2) {
+                    this.headers.put(keyValue[0].trim(), keyValue[1].trim());
+                }
+            }
+        }
+        this.jsonTableBody = testCases;
+        String[] name = fileName.split("_");
+        this.nameFromScreen1 = name[0];
+        populateResultTable(testCases);
     }
 
     /**
@@ -113,7 +135,6 @@ public class Screen3Frame extends javax.swing.JFrame {
             }
         };
         resultTable.setModel(model);
-
         resultTable.getColumnModel().getColumn(0).setMaxWidth(50); // Small width for SL
         resultTable.setRowHeight(125);
         resultTable.getColumnModel().getColumn(2).setCellRenderer(new JsonCellRenderer());
@@ -348,9 +369,9 @@ public class Screen3Frame extends javax.swing.JFrame {
      */
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
         logger.info("Back button clicked.");
+        System.out.println(this.previousFrame);
         if (previousFrame != null) {
             logger.debug("Navigating back to previous frame.");
-            previousFrame.setExtendedState(this.getExtendedState());
             previousFrame.setVisible(true);
             this.dispose();
         } else {

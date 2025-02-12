@@ -42,8 +42,6 @@ public class Screen3Frame extends javax.swing.JFrame {
     private Map<String, String> headers = new HashMap<>();
     private Object[][] jsonTableBody;
     private String nameFromScreen1;
-    private String updatedBaseUrl;
-    private Map<String, String> updatedHeaders = new HashMap<>();
 
     /**
      * Constructs a new Screen3Frame with the given data and previousState.
@@ -95,36 +93,15 @@ public class Screen3Frame extends javax.swing.JFrame {
 
     private void setUpUrlMethodAndHeaders() {
         logger.debug("Setting up URL, Method, and Headers for Screen 3.");
-
         try {
             URL fullUrlObj = new URL(url);
-            String protocol = fullUrlObj.getProtocol();  // "https"
-            String host = fullUrlObj.getHost();          // "virtserver.swaggerhub.com"
-            String fullPath = fullUrlObj.getPath();      // "/abc5553/mofaic/1.0.0/profileChange"
-
-            // Split path into base URL and actual path
-            int lastSlashIndex = fullPath.lastIndexOf("/");
-            String baseUrl;
-            String path;
-
-            if (lastSlashIndex != -1) {
-                baseUrl = host + fullPath.substring(0, lastSlashIndex); // "virtserver.swaggerhub.com/abc5553/mofaic/1.0.0"
-                path = fullPath.substring(lastSlashIndex + 1);          // "profileChange"
-            } else {
-                baseUrl = host; // Fallback if no slash found
-                path = fullPath;
-            }
-
-            // Set values in UI components
+            String protocol = fullUrlObj.getProtocol();  
+            String host = fullUrlObj.getHost();
+            String fullPath = fullUrlObj.getPath();      
             protocolValueLabel.setText(protocol);
-            baseUrlTextField.setText(baseUrl);
-            pathValueLabel.setText(path);
+            baseUrlTextField.setText(host);
+            pathValueLabel.setText(fullPath);
             methodValueLabel.setText(methodType.toUpperCase());
-
-            //store the base URL initially
-            updatedBaseUrl = baseUrl;
-
-            // Set Headers (editable)
             StringBuilder headersText = new StringBuilder();
             if (!headers.isEmpty()) {
                 for (Map.Entry<String, String> entry : headers.entrySet()) {
@@ -133,14 +110,8 @@ public class Screen3Frame extends javax.swing.JFrame {
             } else {
                 headersText.append("No headers available");
             }
-
             headersTextArea.setText(headersText.toString());
             headersTextArea.setEditable(true);
-
-            //store the headers initially
-            updatedHeaders.putAll(headers);
-
-            // ✅ Add Listeners to Track User Changes
             addBaseUrlChangeListener();
             addHeadersChangeListener();
 
@@ -169,12 +140,12 @@ public class Screen3Frame extends javax.swing.JFrame {
     }
 
     private void updateHeadersFromTextArea() {
-        updatedHeaders.clear();
+        headers.clear();
         String[] lines = headersTextArea.getText().split("\n");
         for (String line : lines) {
             if (line.contains(":")) {
                 String[] parts = line.split(":", 2);
-                updatedHeaders.put(parts[0].trim(), parts[1].trim());
+                headers.put(parts[0].trim(), parts[1].trim());
             }
         }
     }
@@ -183,19 +154,23 @@ public class Screen3Frame extends javax.swing.JFrame {
         baseUrlTextField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                updatedBaseUrl = baseUrlTextField.getText();
+                url = updateUrl(protocolValueLabel.getText(),pathValueLabel.getText(),baseUrlTextField.getText());
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                updatedBaseUrl = baseUrlTextField.getText();
+                url = updateUrl(protocolValueLabel.getText(),pathValueLabel.getText(),baseUrlTextField.getText());
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                updatedBaseUrl = baseUrlTextField.getText();
+                url = updateUrl(protocolValueLabel.getText(),pathValueLabel.getText(),baseUrlTextField.getText());
             }
         });
+    }
+    
+    private String updateUrl(String protocol,String path,String updatedUrl){
+        return protocol + "://" + updatedUrl + path;
     }
 
     /**
@@ -298,33 +273,27 @@ public class Screen3Frame extends javax.swing.JFrame {
         try {
             // Get protocol, base URL, and path separately
             String protocol = "https://";  // Change this dynamically if needed
-            String baseUrl = updatedBaseUrl.trim();
+            String baseUrl = url.trim();
             String path = pathValueLabel.getText().trim();
-
             // Validate the base URL
             if (baseUrl.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Base URL cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
                 return new Object[]{"Error", "Base URL is empty"};
             }
-
             // Ensure path starts with '/'
             if (!path.startsWith("/")) {
                 path = "/" + path;
             }
-
             // Construct the final URL correctly
             String finalUrl = protocol + baseUrl + path;
-
             // Clean up any duplicate slashes (optional safety)
             finalUrl = finalUrl.replaceAll("([^:]/)/+", "$1");
-
             // Debugging: Check headers before building the request
-            if (updatedHeaders == null || updatedHeaders.isEmpty()) {
+            if (headers == null || headers.isEmpty()) {
                 System.out.println("🚨 No custom headers set. Only default headers will be used!");
             } else {
-                System.out.println("✅ Headers before request: " + updatedHeaders);
+                System.out.println("✅ Headers before request: " + headers);
             }
-
             // Build HTTP request
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
@@ -332,35 +301,27 @@ public class Screen3Frame extends javax.swing.JFrame {
                     .method(methodType, (requestBody != null)
                             ? HttpRequest.BodyPublishers.ofString(requestBody.toString())
                             : HttpRequest.BodyPublishers.noBody());
-
             // Remove all headers first (Optional)
             requestBuilder.setHeader("Content-Type", "");
             requestBuilder.setHeader("Accept", "");
-
             // Add only custom headers
-            if (!updatedHeaders.isEmpty()) {
-                for (Map.Entry<String, String> entry : updatedHeaders.entrySet()) {
+            if (!headers.isEmpty()) {
+                for (Map.Entry<String, String> entry : headers.entrySet()) {
                     requestBuilder.header(entry.getKey(), entry.getValue());
                 }
             }
-
             HttpRequest request = requestBuilder.build();
-            logger.info("Executing test: name={}, url={}, method={}, headers={}", name, finalUrl, methodType, updatedHeaders);
+            logger.info("Executing test: name={}, url={}, method={}, headers={}", name, finalUrl, methodType, headers);
             System.out.println("Executing test with URL: " + finalUrl);
-
             // Execute request
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
             // Store response data
             resultData[0] = response.statusCode(); // Response Code
             resultData[1] = response.body(); // Response Body
-
             logger.info("Test executed: name={}, responseCode={}, responseBody={}",
                     name, response.statusCode(), response.body());
-
             // Log response headers
             System.out.println("Response Headers: " + response.headers().map());
-
         } catch (IllegalArgumentException e) {
             JOptionPane.showMessageDialog(this, "Invalid URL format: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             logger.error("Invalid URL: {}", e.getMessage(), e);
@@ -420,7 +381,14 @@ public class Screen3Frame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        topComponentsScrollPane = new javax.swing.JScrollPane();
+        jLabel1 = new javax.swing.JLabel();
+        resultTableScrollPane = new javax.swing.JScrollPane();
+        resultTable = new javax.swing.JTable();
+        jPanel1 = new javax.swing.JPanel();
+        backBtn = new javax.swing.JButton();
+        executeTestBtn = new javax.swing.JButton();
+        exportBtn = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
         otherComponentsPanel = new javax.swing.JPanel();
         urlLabel = new javax.swing.JLabel();
         protocolValueLabel = new javax.swing.JLabel();
@@ -431,107 +399,9 @@ public class Screen3Frame extends javax.swing.JFrame {
         headersLabel = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         headersTextArea = new javax.swing.JTextArea();
-        jLabel1 = new javax.swing.JLabel();
-        resultTableScrollPane = new javax.swing.JScrollPane();
-        resultTable = new javax.swing.JTable();
-        jPanel1 = new javax.swing.JPanel();
-        backBtn = new javax.swing.JButton();
-        executeTestBtn = new javax.swing.JButton();
-        exportBtn = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setPreferredSize(new java.awt.Dimension(689, 494));
-
-        otherComponentsPanel.setBackground(new java.awt.Color(255, 255, 255));
-        otherComponentsPanel.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        otherComponentsPanel.setForeground(new java.awt.Color(255, 255, 255));
-
-        urlLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        urlLabel.setText("URL : ");
-
-        protocolValueLabel.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        protocolValueLabel.setText("protocolValueLabel");
-        protocolValueLabel.setAlignmentX(1.5F);
-        protocolValueLabel.setAlignmentY(1.5F);
-        protocolValueLabel.setPreferredSize(new java.awt.Dimension(50, 25));
-
-        baseUrlTextField.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        baseUrlTextField.setText("baseUrlTextField");
-        baseUrlTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                baseUrlTextFieldActionPerformed(evt);
-            }
-        });
-
-        pathValueLabel.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        pathValueLabel.setText("pathValueLabel");
-        pathValueLabel.setPreferredSize(new java.awt.Dimension(150, 25));
-
-        methodLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        methodLabel.setText("Method : ");
-
-        methodValueLabel.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        methodValueLabel.setText("methodValueLabel");
-
-        headersLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        headersLabel.setText("Headers : ");
-
-        headersTextArea.setColumns(20);
-        headersTextArea.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        headersTextArea.setRows(5);
-        jScrollPane1.setViewportView(headersTextArea);
-
-        javax.swing.GroupLayout otherComponentsPanelLayout = new javax.swing.GroupLayout(otherComponentsPanel);
-        otherComponentsPanel.setLayout(otherComponentsPanelLayout);
-        otherComponentsPanelLayout.setHorizontalGroup(
-            otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(otherComponentsPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(otherComponentsPanelLayout.createSequentialGroup()
-                        .addComponent(methodLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(methodValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, otherComponentsPanelLayout.createSequentialGroup()
-                        .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(otherComponentsPanelLayout.createSequentialGroup()
-                                .addComponent(headersLabel)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jScrollPane1))
-                            .addGroup(otherComponentsPanelLayout.createSequentialGroup()
-                                .addComponent(urlLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(protocolValueLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 117, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(baseUrlTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 327, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(pathValueLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 94, Short.MAX_VALUE)))
-                        .addGap(82, 82, 82)))
-                .addGap(1099, 1099, 1099))
-        );
-        otherComponentsPanelLayout.setVerticalGroup(
-            otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(otherComponentsPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(urlLabel)
-                    .addComponent(baseUrlTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(protocolValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pathValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(methodLabel)
-                    .addComponent(methodValueLabel))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(headersLabel)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(136, 136, 136))
-        );
-
-        topComponentsScrollPane.setViewportView(otherComponentsPanel);
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel1.setText("Result");
@@ -600,30 +470,124 @@ public class Screen3Frame extends javax.swing.JFrame {
         });
         jPanel1.add(jButton1);
 
+        otherComponentsPanel.setBackground(new java.awt.Color(255, 255, 255));
+        otherComponentsPanel.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        otherComponentsPanel.setForeground(new java.awt.Color(255, 255, 255));
+
+        urlLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        urlLabel.setText("URL : ");
+
+        protocolValueLabel.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        protocolValueLabel.setText("https");
+        protocolValueLabel.setToolTipText("Non Editable");
+        protocolValueLabel.setAlignmentX(1.5F);
+        protocolValueLabel.setAlignmentY(1.5F);
+        protocolValueLabel.setPreferredSize(new java.awt.Dimension(50, 25));
+
+        baseUrlTextField.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        baseUrlTextField.setText("baseUrlTextField");
+        baseUrlTextField.setToolTipText("Click To Edit");
+        baseUrlTextField.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 1, true));
+        baseUrlTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                baseUrlTextFieldActionPerformed(evt);
+            }
+        });
+
+        pathValueLabel.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        pathValueLabel.setText("pathValueLabel");
+        pathValueLabel.setToolTipText("Non Editable");
+        pathValueLabel.setPreferredSize(new java.awt.Dimension(150, 25));
+
+        methodLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        methodLabel.setText("Method : ");
+
+        methodValueLabel.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        methodValueLabel.setText("methodValueLabel");
+        methodValueLabel.setToolTipText("Non Editable");
+
+        headersLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        headersLabel.setText("Headers : ");
+
+        jScrollPane1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, java.awt.Color.lightGray, java.awt.Color.lightGray, java.awt.Color.lightGray));
+
+        headersTextArea.setColumns(20);
+        headersTextArea.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        headersTextArea.setRows(5);
+        headersTextArea.setToolTipText("Editable Line Separated");
+        headersTextArea.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jScrollPane1.setViewportView(headersTextArea);
+
+        javax.swing.GroupLayout otherComponentsPanelLayout = new javax.swing.GroupLayout(otherComponentsPanel);
+        otherComponentsPanel.setLayout(otherComponentsPanelLayout);
+        otherComponentsPanelLayout.setHorizontalGroup(
+            otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(otherComponentsPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(otherComponentsPanelLayout.createSequentialGroup()
+                        .addComponent(urlLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(protocolValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(baseUrlTextField)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(pathValueLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())
+                    .addGroup(otherComponentsPanelLayout.createSequentialGroup()
+                        .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(methodLabel)
+                            .addComponent(headersLabel))
+                        .addGap(18, 18, 18)
+                        .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(methodValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane1))
+                        .addGap(27, 27, 27))))
+        );
+        otherComponentsPanelLayout.setVerticalGroup(
+            otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(otherComponentsPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(urlLabel)
+                    .addComponent(protocolValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(pathValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(baseUrlTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(methodLabel)
+                    .addComponent(methodValueLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(headersLabel)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 69, Short.MAX_VALUE))
+                .addGap(15, 15, 15))
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(31, 31, 31)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 631, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(topComponentsScrollPane, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(resultTableScrollPane, javax.swing.GroupLayout.Alignment.LEADING))
-                .addGap(30, 30, 30))
+                    .addComponent(resultTableScrollPane, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 619, Short.MAX_VALUE)
+                    .addComponent(otherComponentsPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(37, 37, 37))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(16, 16, 16)
-                .addComponent(topComponentsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(15, 15, 15)
+                .addComponent(otherComponentsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(resultTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE)
+                .addComponent(resultTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 233, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -707,7 +671,6 @@ public class Screen3Frame extends javax.swing.JFrame {
         // TODO add your handling code here:
         int selectedRow = resultTable.getSelectedRow();
         JSONObject jsonBody;
-
         if (selectedRow != -1) {
             logger.debug("Test selected: {}", resultTable.getSelectedRow());
             Object requestBody = resultTable.getValueAt(selectedRow, 2);
@@ -717,12 +680,10 @@ public class Screen3Frame extends javax.swing.JFrame {
             } else {
                 jsonBody = (JSONObject) requestBody;
             }
-
             String testName = (String) resultTable.getValueAt(selectedRow, 1);
             JDialog loadingDialog = createLoadingDialog("Executing Test,Please Wait");
             SwingUtilities.invokeLater(() -> loadingDialog.setVisible(true));
             new SwingWorker<Object[], Void>() {
-
                 @Override
                 protected Object[] doInBackground() throws Exception {
                     Object[] responseResult = null;
@@ -764,10 +725,8 @@ public class Screen3Frame extends javax.swing.JFrame {
             // Generate timestamp for the filename
             String timestamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
             String fileName = nameFromScreen1 + "_" + timestamp + ".xlsx";
-
             // Call the export function
             ExcelExporter.exportDataToExcel(url, methodType, headers, jsonTableBody, fileName);
-
             JOptionPane.showMessageDialog(this, "Data exported successfully to " + fileName);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error exporting data: " + e.getMessage());
@@ -855,7 +814,6 @@ public class Screen3Frame extends javax.swing.JFrame {
     private javax.swing.JLabel protocolValueLabel;
     private javax.swing.JTable resultTable;
     private javax.swing.JScrollPane resultTableScrollPane;
-    private javax.swing.JScrollPane topComponentsScrollPane;
     private javax.swing.JLabel urlLabel;
     // End of variables declaration//GEN-END:variables
 }

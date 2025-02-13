@@ -170,6 +170,9 @@ public class Screen3Frame extends javax.swing.JFrame {
     }
     
     private String updateUrl(String protocol,String path,String updatedUrl){
+        if (!path.startsWith("/")) {
+                path = "/" + path;
+            }
         return protocol + "://" + updatedUrl + path;
     }
 
@@ -271,23 +274,6 @@ public class Screen3Frame extends javax.swing.JFrame {
         Object[] resultData = new Object[2]; // To store test details
 
         try {
-            // Get protocol, base URL, and path separately
-            String protocol = "https://";  // Change this dynamically if needed
-            String baseUrl = url.trim();
-            String path = pathValueLabel.getText().trim();
-            // Validate the base URL
-            if (baseUrl.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Base URL cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
-                return new Object[]{"Error", "Base URL is empty"};
-            }
-            // Ensure path starts with '/'
-            if (!path.startsWith("/")) {
-                path = "/" + path;
-            }
-            // Construct the final URL correctly
-            String finalUrl = protocol + baseUrl + path;
-            // Clean up any duplicate slashes (optional safety)
-            finalUrl = finalUrl.replaceAll("([^:]/)/+", "$1");
             // Debugging: Check headers before building the request
             if (headers == null || headers.isEmpty()) {
                 System.out.println("🚨 No custom headers set. Only default headers will be used!");
@@ -297,13 +283,10 @@ public class Screen3Frame extends javax.swing.JFrame {
             // Build HTTP request
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create(finalUrl))
+                    .uri(URI.create(url))
                     .method(methodType, (requestBody != null)
                             ? HttpRequest.BodyPublishers.ofString(requestBody.toString())
                             : HttpRequest.BodyPublishers.noBody());
-            // Remove all headers first (Optional)
-            requestBuilder.setHeader("Content-Type", "");
-            requestBuilder.setHeader("Accept", "");
             // Add only custom headers
             if (!headers.isEmpty()) {
                 for (Map.Entry<String, String> entry : headers.entrySet()) {
@@ -311,8 +294,8 @@ public class Screen3Frame extends javax.swing.JFrame {
                 }
             }
             HttpRequest request = requestBuilder.build();
-            logger.info("Executing test: name={}, url={}, method={}, headers={}", name, finalUrl, methodType, headers);
-            System.out.println("Executing test with URL: " + finalUrl);
+            logger.info("Executing test: name={}, url={}, method={}, headers={}", name, url, methodType, headers);
+            System.out.println("Executing test with URL: " + url);
             // Execute request
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             // Store response data
@@ -322,6 +305,7 @@ public class Screen3Frame extends javax.swing.JFrame {
                     name, response.statusCode(), response.body());
             // Log response headers
             System.out.println("Response Headers: " + response.headers().map());
+            System.out.println("RequestHaders: "+request.headers().toString());
         } catch (IllegalArgumentException e) {
             JOptionPane.showMessageDialog(this, "Invalid URL format: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             logger.error("Invalid URL: {}", e.getMessage(), e);
@@ -548,11 +532,12 @@ public class Screen3Frame extends javax.swing.JFrame {
             otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(otherComponentsPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(urlLabel)
-                    .addComponent(protocolValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pathValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(baseUrlTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(baseUrlTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(urlLabel)
+                        .addComponent(protocolValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(pathValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(methodLabel)

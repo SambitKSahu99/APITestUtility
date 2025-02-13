@@ -492,6 +492,11 @@ public class Screen1 extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_exitBtnActionPerformed
 
+    /**
+     * Handles the action when the "Back" button is clicked.
+     *
+     * @param evt
+     */
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
         // TODO add your handling code here:
          logger.debug("Back button clicked");

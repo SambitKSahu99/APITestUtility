@@ -68,6 +68,22 @@ public class Screen3Frame extends javax.swing.JFrame {
         populateResultTable(testScenarios);
     }
 
+    /**
+     * Constructs the Screen3Frame.
+     *
+     * Initializes the UI components.
+     * Extracts and processes the provided URL, method type, headers, and test cases.
+     * Parses headers from a comma-separated string into a key-value map.
+     * Extracts the name from the filename.
+     * Calls methods to set up the URL, method type, headers, and populate the result table.
+     *
+     * @param previosuFrame The previous JFrame instance (Screen 2).
+     * @param url The API endpoint to be tested.
+     * @param method The HTTP method (GET, POST, etc.).
+     * @param headers The request headers in a comma-separated string format.
+     * @param testCases The test cases represented as a 2D Object array.
+     * @param fileName The name of the test file, which contains the test name.
+     */
     public Screen3Frame(JFrame previosuFrame, String url, String method, String headers, Object[][] testCases, String fileName) {
         initComponents();
         setupFrame(MAXIMIZED_BOTH);
@@ -91,6 +107,9 @@ public class Screen3Frame extends javax.swing.JFrame {
         populateResultTable(testCases);
     }
 
+    /**
+     * Extracts and sets up the URL, method type, and headers in the UI.
+     */
     private void setUpUrlMethodAndHeaders() {
         logger.debug("Setting up URL, Method, and Headers for Screen 3.");
         try {
@@ -120,6 +139,11 @@ public class Screen3Frame extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Adds a listener to track changes in the headers text area.
+     *
+     * This listener updates the `updatedHeaders` map whenever the user modifies the headers.
+     */
     private void addHeadersChangeListener() {
         headersTextArea.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -139,6 +163,13 @@ public class Screen3Frame extends javax.swing.JFrame {
         });
     }
 
+    /**
+     * Extracts headers from the text area and updates the `updatedHeaders` map.
+     *
+     * Clears existing headers before adding new ones.
+     * Splits each line by ":" to separate header keys and values.
+     * Ignores invalid header formats.
+     */
     private void updateHeadersFromTextArea() {
         headers.clear();
         String[] lines = headersTextArea.getText().split("\n");
@@ -150,6 +181,10 @@ public class Screen3Frame extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Adds a listener to track changes in the base URL text field.
+     * Updates the 'URL' whenever the user_modifies the URL.
+     */
     private void addBaseUrlChangeListener() {
         baseUrlTextField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -168,7 +203,15 @@ public class Screen3Frame extends javax.swing.JFrame {
             }
         });
     }
-    
+
+    /**
+     * Constructs a complete URL by combining the protocol, updated base URL, and path.
+     * Ensures the path starts with a forward slash ("/") before combining the components.
+     * @param protocol The protocol to use in the URL (e.g., "http" or "https").
+     * @param path The path to append to the URL. If it doesn't start with "/", one is added.
+     * @param updatedUrl The base URL to which the path will be appended.
+     * @return A complete URL in the format: `protocol://updatedUrl/path.
+     */
     private String updateUrl(String protocol,String path,String updatedUrl){
         if (!path.startsWith("/")) {
                 path = "/" + path;
@@ -601,6 +644,10 @@ public class Screen3Frame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_backBtnActionPerformed
 
+    /**
+     *  Handles the action when the Exit button is clicked.
+     * @param evt
+     */
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         logger.info("Exit button clicked.");
         int confirm = JOptionPane.showConfirmDialog(null, "Are you sure want to exit?");
@@ -612,6 +659,12 @@ public class Screen3Frame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    /**
+     * Handles mouse click events on the result table.
+     * If the user clicks on columns 2 (Request Body) or 4 (Response Body),
+     * a popup dialog is shown displaying the full JSON content in a formatted view.
+     * @param evt
+     */
     private void resultTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_resultTableMouseClicked
         // TODO add your handling code here:
         int row = resultTable.rowAtPoint(evt.getPoint());
@@ -638,6 +691,10 @@ public class Screen3Frame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_resultTableMouseClicked
 
+    /**
+     * Handles mouse movement over the result table.
+     * @param evt
+     */
     private void resultTableMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_resultTableMouseMoved
         // TODO add your handling code here:
         int col = resultTable.columnAtPoint(evt.getPoint());
@@ -652,6 +709,15 @@ public class Screen3Frame extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_resultTableFocusLost
 
+    /**
+     * Handles the action when the "Execute Test" button is clicked.
+     * Retrieves the selected row from the result table.
+     * Extracts the request body JSON from the selected row.
+     * Shows a loading dialog while executing the test in a background thread.
+     * Displays an error message if no test is selected.
+     *
+     * @param evt
+     */
     private void executeTestBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_executeTestBtnActionPerformed
         // TODO add your handling code here:
         int selectedRow = resultTable.getSelectedRow();
@@ -705,6 +771,15 @@ public class Screen3Frame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_executeTestBtnActionPerformed
 
+    /**
+     * Handles the action when the "Export" button is clicked.
+     * Generates a timestamp-based filename for the exported Excel file.
+     * Calls `ExcelExporter.exportDataToExcel()` to export test results.
+     * Displays a success message upon completion.
+     * Logs an error and shows an error dialog if the export fails.
+     *
+     * @param evt
+     */
     private void exportBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportBtnActionPerformed
         try {
             // Generate timestamp for the filename

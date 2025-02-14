@@ -558,13 +558,25 @@ public class Screen2 extends javax.swing.JFrame {
         logger.info("Successfully replaced value for field: {}", fieldName);
     }
 
+    /**
+     * Replaces the value of a specified key in a given JSON field.
+     *
+     * If the key refers to a **JSON array element** (e.g., "values[0]").
+     * it updates the value at the specified index within the array.
+     * If the key refers to a **regular JSON field**, it replaces the entire field value.
+     * @param json
+     * @param key
+     * @param value
+     */
     private void replaceFinalKey(JSONObject json, String key, Object value) {
+        logger.debug("Replacing key '{}' with value: {}", key, value);
         if (key.contains("[")) {
             // Handle array element replacement (e.g., "values[0]")
             int arrayIndex = Integer.parseInt(key.substring(key.indexOf("[") + 1, key.indexOf("]")));
             key = key.substring(0, key.indexOf("["));
             JSONArray array = json.optJSONArray(key);
             if (array == null || arrayIndex >= array.length()) {
+                logger.error("Invalid array index for key: {}", key);
                 throw new IllegalArgumentException("Invalid array index for key: " + key);
             }
             array.put(arrayIndex, value);  // Replace specific array element
@@ -724,6 +736,10 @@ public class Screen2 extends javax.swing.JFrame {
         logger.info("Table values updated successfully for row: {}", deleteValueSelectedRow);
     }
 
+    /**
+     * Displays an error dialog with the given exception message.
+     * @param exception
+     */
     public static void showErrorDialog(Exception exception) {
         String message = "An error occured: " + exception.toString();
         JOptionPane.showMessageDialog(

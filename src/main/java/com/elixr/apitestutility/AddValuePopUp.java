@@ -282,7 +282,6 @@ public class AddValuePopUp extends javax.swing.JDialog {
             }
         }
         logger.info("Values saved successfully.");
-        JOptionPane.showMessageDialog(this, "Values saved successfully!");
         this.dispose();
     }
 

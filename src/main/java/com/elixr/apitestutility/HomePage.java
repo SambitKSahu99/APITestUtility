@@ -48,7 +48,6 @@ public class HomePage extends javax.swing.JFrame {
     }
 
     private void setUpFrame() {
-        setExtendedState(MAXIMIZED_BOTH);
         setLocationRelativeTo(this);
     }
 
@@ -73,6 +72,7 @@ public class HomePage extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setLocation(new java.awt.Point(0, 0));
         setMinimumSize(getPreferredSize());
+        setUndecorated(true);
         setResizable(false);
 
         jPanel1.setLayout(new java.awt.GridBagLayout());
@@ -89,10 +89,14 @@ public class HomePage extends javax.swing.JFrame {
         jLabel1.setText("API Test Utility");
         jPanel2.add(jLabel1);
 
-        createTest.setText("Create Test");
+        jMenuBar1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, java.awt.Color.lightGray, java.awt.Color.lightGray, java.awt.Color.lightGray));
+
+        createTest.setText("Test");
         createTest.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        createTest.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         createTest.setMargin(new java.awt.Insets(10, 6, 3, 6));
 
+        existingTest.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         existingTest.setText("Use Existing Test");
         existingTest.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -101,6 +105,7 @@ public class HomePage extends javax.swing.JFrame {
         });
         createTest.add(existingTest);
 
+        newTest.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         newTest.setText("Create New Test");
         newTest.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -120,17 +125,18 @@ public class HomePage extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 401, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 397, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addContainerGap(81, Short.MAX_VALUE)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(80, 80, 80)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(16, 16, 16))
+                .addContainerGap())
         );
 
         pack();

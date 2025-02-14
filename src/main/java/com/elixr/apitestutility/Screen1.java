@@ -501,7 +501,6 @@ public class Screen1 extends javax.swing.JFrame {
         // TODO add your handling code here:
          logger.debug("Back button clicked");
         if (previousFrame != null) {
-            previousFrame.setExtendedState(this.getExtendedState());
             previousFrame.setVisible(true);
         }
         this.dispose();

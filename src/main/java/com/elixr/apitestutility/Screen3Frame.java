@@ -18,7 +18,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -255,7 +254,8 @@ public class Screen3Frame extends javax.swing.JFrame {
      */
     private void populateResultTable(Object[][] tableData) {
         logger.info("Populating result table with data.");
-        Object[][] updatedTableData = new Object[tableData.length][6]; // 6 columns now
+        Object[][] updatedTableData = new Object[tableData.length][7]; // 7 columns now
+
         for (int i = 0; i < tableData.length; i++) {
             updatedTableData[i][0] = i + 1; // SL column with serial numbers starting from 1
             updatedTableData[i][1] = tableData[i][0]; // Test Name
@@ -264,7 +264,7 @@ public class Screen3Frame extends javax.swing.JFrame {
 
         DefaultTableModel model = new DefaultTableModel(
                 updatedTableData,
-                new String[]{"SL", "Test Name", "Request Body", "Response Code", "Response Body", "Test Result"}
+                new String[]{"SL", "Test Name", "Request Body", "Response Code", "Response Body", "Response Time", "Test Result"}
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -283,7 +283,7 @@ public class Screen3Frame extends javax.swing.JFrame {
                 if (c instanceof JLabel) {
                     ((JLabel) c).setVerticalAlignment(SwingConstants.TOP); // Set vertical alignment to top
                 }
-                // Apply border
+                // Adds a black border around the cell.
                 ((JLabel) c).setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
                 return c;
             }
@@ -317,14 +317,14 @@ public class Screen3Frame extends javax.swing.JFrame {
      *
      */
     private Object[] executeTest(String name, JSONObject requestBody) {
-        Object[] resultData = new Object[2]; // To store test details
+        Object[] resultData = new Object[3]; // To store test details
 
         try {
             // Debugging: Check headers before building the request
             if (headers == null || headers.isEmpty()) {
-                System.out.println("🚨 No custom headers set. Only default headers will be used!");
+                System.out.println("No custom headers set. Only default headers will be used!");
             } else {
-                System.out.println("✅ Headers before request: " + headers);
+                System.out.println("Headers before request: " + headers);
             }
             // Build HTTP request
             HttpClient client = HttpClient.newHttpClient();
@@ -341,28 +341,45 @@ public class Screen3Frame extends javax.swing.JFrame {
             }
             HttpRequest request = requestBuilder.build();
             logger.info("Executing test: name={}, url={}, method={}, headers={}", name, url, methodType, headers);
-            System.out.println("Executing test with URL: " + url);
+           // System.out.println("Executing test with URL: " + url);
+
+            // capture the start time
+            long startTime = System.currentTimeMillis();
+            logger.info("Start time: {} ms", startTime);
+
             // Execute request
+            logger.info("Sending API Request...");
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            // Store response data
+
+            // capture the end time.
+            long endTime = System.currentTimeMillis();
+            logger.info("End Time: {} ms", endTime);
+
+            //calculate the response time
+            long responceTime = endTime - startTime;
+            logger.info("Total Response Time: {} ms", responceTime);
+
             resultData[0] = response.statusCode(); // Response Code
             resultData[1] = response.body(); // Response Body
-            logger.info("Test executed: name={}, responseCode={}, responseBody={}",
-                    name, response.statusCode(), response.body());
+            resultData[2] = responceTime + "ms"; //Response Time in milliseconds
+
+            logger.info("Test executed: name={}, responseCode={}, responseBody={}, responceTime={} ms",
+                    name, response.statusCode(), responceTime, response.body());
+
             // Log response headers
             System.out.println("Response Headers: " + response.headers().map());
-            System.out.println("RequestHaders: " + request.headers().toString());
+            System.out.println("Request Headers: " + request.headers().toString());
+
         } catch (IllegalArgumentException e) {
             JOptionPane.showMessageDialog(this, "Invalid URL format: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             logger.error("Invalid URL: {}", e.getMessage(), e);
-            return new Object[]{"Error", "Invalid URL format"};
+            return new Object[]{"Error", "Invalid URL format", "-"};
 
         } catch (Exception ex) {
             showErrorDialog(ex);
             logger.error("Exception during test execution", ex);
-            return new Object[]{"Error", ex.getMessage()};
+            return new Object[]{"Error", ex.getMessage(), "-"};
         }
-
         return resultData;
     }
 
@@ -780,6 +797,7 @@ public class Screen3Frame extends javax.swing.JFrame {
                             loadingDialog.dispose();
                             resultTable.setValueAt(responseData[0], selectedRow, 3);
                             resultTable.setValueAt(responseData[1], selectedRow, 4);
+                            resultTable.setValueAt(responseData[2], selectedRow, 5);
                             resultTable.clearSelection();
                         });
                     } catch (Exception ex) {

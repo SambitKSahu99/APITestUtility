@@ -18,7 +18,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -71,11 +70,11 @@ public class Screen3Frame extends javax.swing.JFrame {
     /**
      * Constructs the Screen3Frame.
      *
-     * Initializes the UI components.
-     * Extracts and processes the provided URL, method type, headers, and test cases.
-     * Parses headers from a comma-separated string into a key-value map.
-     * Extracts the name from the filename.
-     * Calls methods to set up the URL, method type, headers, and populate the result table.
+     * Initializes the UI components. Extracts and processes the provided URL,
+     * method type, headers, and test cases. Parses headers from a
+     * comma-separated string into a key-value map. Extracts the name from the
+     * filename. Calls methods to set up the URL, method type, headers, and
+     * populate the result table.
      *
      * @param previosuFrame The previous JFrame instance (Screen 2).
      * @param url The API endpoint to be tested.
@@ -114,9 +113,9 @@ public class Screen3Frame extends javax.swing.JFrame {
         logger.debug("Setting up URL, Method, and Headers for Screen 3.");
         try {
             URL fullUrlObj = new URL(url);
-            String protocol = fullUrlObj.getProtocol();  
+            String protocol = fullUrlObj.getProtocol();
             String host = fullUrlObj.getHost();
-            String fullPath = fullUrlObj.getPath();      
+            String fullPath = fullUrlObj.getPath();
             protocolValueLabel.setText(protocol);
             baseUrlTextField.setText(host);
             pathValueLabel.setText(fullPath);
@@ -142,7 +141,8 @@ public class Screen3Frame extends javax.swing.JFrame {
     /**
      * Adds a listener to track changes in the headers text area.
      *
-     * This listener updates the `updatedHeaders` map whenever the user modifies the headers.
+     * This listener updates the `updatedHeaders` map whenever the user modifies
+     * the headers.
      */
     private void addHeadersChangeListener() {
         headersTextArea.getDocument().addDocumentListener(new DocumentListener() {
@@ -166,9 +166,8 @@ public class Screen3Frame extends javax.swing.JFrame {
     /**
      * Extracts headers from the text area and updates the `updatedHeaders` map.
      *
-     * Clears existing headers before adding new ones.
-     * Splits each line by ":" to separate header keys and values.
-     * Ignores invalid header formats.
+     * Clears existing headers before adding new ones. Splits each line by ":"
+     * to separate header keys and values. Ignores invalid header formats.
      */
     private void updateHeadersFromTextArea() {
         headers.clear();
@@ -182,40 +181,43 @@ public class Screen3Frame extends javax.swing.JFrame {
     }
 
     /**
-     * Adds a listener to track changes in the base URL text field.
-     * Updates the 'URL' whenever the user_modifies the URL.
+     * Adds a listener to track changes in the base URL text field. Updates the
+     * 'URL' whenever the user_modifies the URL.
      */
     private void addBaseUrlChangeListener() {
         baseUrlTextField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                url = updateUrl(protocolValueLabel.getText(),pathValueLabel.getText(),baseUrlTextField.getText());
+                url = updateUrl(protocolValueLabel.getText(), pathValueLabel.getText(), baseUrlTextField.getText());
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                url = updateUrl(protocolValueLabel.getText(),pathValueLabel.getText(),baseUrlTextField.getText());
+                url = updateUrl(protocolValueLabel.getText(), pathValueLabel.getText(), baseUrlTextField.getText());
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                url = updateUrl(protocolValueLabel.getText(),pathValueLabel.getText(),baseUrlTextField.getText());
+                url = updateUrl(protocolValueLabel.getText(), pathValueLabel.getText(), baseUrlTextField.getText());
             }
         });
     }
 
     /**
-     * Constructs a complete URL by combining the protocol, updated base URL, and path.
-     * Ensures the path starts with a forward slash ("/") before combining the components.
+     * Constructs a complete URL by combining the protocol, updated base URL,
+     * and path. Ensures the path starts with a forward slash ("/") before
+     * combining the components.
+     *
      * @param protocol The protocol to use in the URL (e.g., "http" or "https").
-     * @param path The path to append to the URL. If it doesn't start with "/", one is added.
+     * @param path The path to append to the URL. If it doesn't start with "/",
+     * one is added.
      * @param updatedUrl The base URL to which the path will be appended.
      * @return A complete URL in the format: `protocol://updatedUrl/path.
      */
-    private String updateUrl(String protocol,String path,String updatedUrl){
+    private String updateUrl(String protocol, String path, String updatedUrl) {
         if (!path.startsWith("/")) {
-                path = "/" + path;
-            }
+            path = "/" + path;
+        }
         return protocol + "://" + updatedUrl + path;
     }
 
@@ -252,7 +254,8 @@ public class Screen3Frame extends javax.swing.JFrame {
      */
     private void populateResultTable(Object[][] tableData) {
         logger.info("Populating result table with data.");
-        Object[][] updatedTableData = new Object[tableData.length][6]; // 6 columns now
+        Object[][] updatedTableData = new Object[tableData.length][7]; // 7 columns now
+
         for (int i = 0; i < tableData.length; i++) {
             updatedTableData[i][0] = i + 1; // SL column with serial numbers starting from 1
             updatedTableData[i][1] = tableData[i][0]; // Test Name
@@ -261,7 +264,7 @@ public class Screen3Frame extends javax.swing.JFrame {
 
         DefaultTableModel model = new DefaultTableModel(
                 updatedTableData,
-                new String[]{"SL", "Test Name", "Request Body", "Response Code", "Response Body", "Test Result"}
+                new String[]{"SL", "Test Name", "Request Body", "Response Code", "Response Body", "Response Time", "Test Result"}
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -280,7 +283,7 @@ public class Screen3Frame extends javax.swing.JFrame {
                 if (c instanceof JLabel) {
                     ((JLabel) c).setVerticalAlignment(SwingConstants.TOP); // Set vertical alignment to top
                 }
-                // Apply border
+                // Adds a black border around the cell.
                 ((JLabel) c).setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
                 return c;
             }
@@ -314,14 +317,14 @@ public class Screen3Frame extends javax.swing.JFrame {
      *
      */
     private Object[] executeTest(String name, JSONObject requestBody) {
-        Object[] resultData = new Object[2]; // To store test details
+        Object[] resultData = new Object[3]; // To store test details
 
         try {
             // Debugging: Check headers before building the request
             if (headers == null || headers.isEmpty()) {
-                System.out.println("🚨 No custom headers set. Only default headers will be used!");
+                System.out.println("No custom headers set. Only default headers will be used!");
             } else {
-                System.out.println("✅ Headers before request: " + headers);
+                System.out.println("Headers before request: " + headers);
             }
             // Build HTTP request
             HttpClient client = HttpClient.newHttpClient();
@@ -338,28 +341,45 @@ public class Screen3Frame extends javax.swing.JFrame {
             }
             HttpRequest request = requestBuilder.build();
             logger.info("Executing test: name={}, url={}, method={}, headers={}", name, url, methodType, headers);
-            System.out.println("Executing test with URL: " + url);
+           // System.out.println("Executing test with URL: " + url);
+
+            // capture the start time
+            long startTime = System.currentTimeMillis();
+            logger.info("Start time: {} ms", startTime);
+
             // Execute request
+            logger.info("Sending API Request...");
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            // Store response data
+
+            // capture the end time.
+            long endTime = System.currentTimeMillis();
+            logger.info("End Time: {} ms", endTime);
+
+            //calculate the response time
+            long responceTime = endTime - startTime;
+            logger.info("Total Response Time: {} ms", responceTime);
+
             resultData[0] = response.statusCode(); // Response Code
             resultData[1] = response.body(); // Response Body
-            logger.info("Test executed: name={}, responseCode={}, responseBody={}",
-                    name, response.statusCode(), response.body());
+            resultData[2] = responceTime + "ms"; //Response Time in milliseconds
+
+            logger.info("Test executed: name={}, responseCode={}, responseBody={}, responceTime={} ms",
+                    name, response.statusCode(), responceTime, response.body());
+
             // Log response headers
             System.out.println("Response Headers: " + response.headers().map());
-            System.out.println("RequestHaders: "+request.headers().toString());
+            System.out.println("Request Headers: " + request.headers().toString());
+
         } catch (IllegalArgumentException e) {
             JOptionPane.showMessageDialog(this, "Invalid URL format: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             logger.error("Invalid URL: {}", e.getMessage(), e);
-            return new Object[]{"Error", "Invalid URL format"};
+            return new Object[]{"Error", "Invalid URL format", "-"};
 
         } catch (Exception ex) {
             showErrorDialog(ex);
             logger.error("Exception during test execution", ex);
-            return new Object[]{"Error", ex.getMessage()};
+            return new Object[]{"Error", ex.getMessage(), "-"};
         }
-
         return resultData;
     }
 
@@ -645,7 +665,8 @@ public class Screen3Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_backBtnActionPerformed
 
     /**
-     *  Handles the action when the Exit button is clicked.
+     * Handles the action when the Exit button is clicked.
+     *
      * @param evt
      */
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -660,9 +681,10 @@ public class Screen3Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
-     * Handles mouse click events on the result table.
-     * If the user clicks on columns 2 (Request Body) or 4 (Response Body),
-     * a popup dialog is shown displaying the full JSON content in a formatted view.
+     * Handles mouse click events on the result table. If the user clicks on
+     * columns 2 (Request Body) or 4 (Response Body), a popup dialog is shown
+     * displaying the full JSON content in a formatted view.
+     *
      * @param evt
      */
     private void resultTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_resultTableMouseClicked
@@ -693,6 +715,7 @@ public class Screen3Frame extends javax.swing.JFrame {
 
     /**
      * Handles mouse movement over the result table.
+     *
      * @param evt
      */
     private void resultTableMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_resultTableMouseMoved
@@ -710,11 +733,10 @@ public class Screen3Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_resultTableFocusLost
 
     /**
-     * Handles the action when the "Execute Test" button is clicked.
-     * Retrieves the selected row from the result table.
-     * Extracts the request body JSON from the selected row.
-     * Shows a loading dialog while executing the test in a background thread.
-     * Displays an error message if no test is selected.
+     * Handles the action when the "Execute Test" button is clicked. Retrieves
+     * the selected row from the result table. Extracts the request body JSON
+     * from the selected row. Shows a loading dialog while executing the test in
+     * a background thread. Displays an error message if no test is selected.
      *
      * @param evt
      */
@@ -755,6 +777,7 @@ public class Screen3Frame extends javax.swing.JFrame {
                             loadingDialog.dispose();
                             resultTable.setValueAt(responseData[0], selectedRow, 3);
                             resultTable.setValueAt(responseData[1], selectedRow, 4);
+                            resultTable.setValueAt(responseData[2], selectedRow, 5);
                             resultTable.clearSelection();
                         });
                     } catch (Exception ex) {
@@ -772,11 +795,11 @@ public class Screen3Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_executeTestBtnActionPerformed
 
     /**
-     * Handles the action when the "Export" button is clicked.
-     * Generates a timestamp-based filename for the exported Excel file.
-     * Calls `ExcelExporter.exportDataToExcel()` to export test results.
-     * Displays a success message upon completion.
-     * Logs an error and shows an error dialog if the export fails.
+     * Handles the action when the "Export" button is clicked. Generates a
+     * timestamp-based filename for the exported Excel file. Calls
+     * `ExcelExporter.exportDataToExcel()` to export test results. Displays a
+     * success message upon completion. Logs an error and shows an error dialog
+     * if the export fails.
      *
      * @param evt
      */

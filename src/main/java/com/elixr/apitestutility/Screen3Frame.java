@@ -428,7 +428,6 @@ public class Screen3Frame extends javax.swing.JFrame {
         headersTextArea = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(689, 494));
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel1.setText("Result");
@@ -603,9 +602,9 @@ public class Screen3Frame extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(resultTableScrollPane, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 619, Short.MAX_VALUE)
+                    .addComponent(resultTableScrollPane, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 625, Short.MAX_VALUE)
                     .addComponent(otherComponentsPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(37, 37, 37))
+                .addGap(31, 31, 31))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -637,7 +636,7 @@ public class Screen3Frame extends javax.swing.JFrame {
         if (previousFrame != null) {
             logger.debug("Navigating back to previous frame.");
             previousFrame.setVisible(true);
-            this.dispose();
+            dispose();
         } else {
             logger.warn("No previous frame available to navigate back to.");
             JOptionPane.showMessageDialog(this, "No previous screen to navigate to!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -726,7 +725,7 @@ public class Screen3Frame extends javax.swing.JFrame {
             logger.debug("Test selected: {}", resultTable.getSelectedRow());
             Object requestBody = resultTable.getValueAt(selectedRow, 2);
 
-            if (requestBody == null || requestBody.toString().equalsIgnoreCase("Empty Request Body")) {
+            if (requestBody == null || requestBody.toString().equalsIgnoreCase("Empty Request Body") || requestBody.toString().equalsIgnoreCase("")) {
                 jsonBody = null;
             } else {
                 jsonBody = (JSONObject) requestBody;

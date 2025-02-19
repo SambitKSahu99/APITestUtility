@@ -6,18 +6,40 @@ package com.elixr.apitestutility;
 
 import static com.elixr.apitestutility.Screen2.showErrorDialog;
 import java.awt.BorderLayout;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
-import javax.swing.JFrame;
-import javax.swing.JList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTree;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import org.apache.poi.ss.usermodel.Cell;
 import static org.apache.poi.ss.usermodel.CellType.BOOLEAN;
 import static org.apache.poi.ss.usermodel.CellType.FORMULA;
@@ -38,17 +60,40 @@ import org.slf4j.LoggerFactory;
 public class HomePage extends javax.swing.JFrame {
 
     private static final Logger logger = LoggerFactory.getLogger(HomePage.class);
+    private JTree fileTree;
+    private DefaultTreeModel treeModel;
+    private String url = "";
+    private String method = "";
+    private String headers = "";
+    private List<Object[]> testCases;
+    private String fileName = "";
+    private Screen3Frame screen3Instance;
 
     /**
      * Creates new form HomePage
      */
     public HomePage() {
         initComponents();
+        fileBrowser();
         setUpFrame();
     }
 
     private void setUpFrame() {
+        setExtendedState(MAXIMIZED_BOTH);
         setLocationRelativeTo(this);
+        setScrollPane();
+
+    }
+
+    private void setScrollPane() {
+        existingTestListScrollPane.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createEtchedBorder(), "Select Test",
+                TitledBorder.LEADING, TitledBorder.TOP,
+                new Font("Arial", Font.BOLD, 14)));
+        existingTestDeatilsScrollPane.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createEtchedBorder(), "Selected Test Details",
+                TitledBorder.LEADING, TitledBorder.TOP,
+                new Font("Arial", Font.BOLD, 14)));
     }
 
     /**
@@ -60,148 +105,258 @@ public class HomePage extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
-        exitBtn = new javax.swing.JButton();
-        jPanel2 = new javax.swing.JPanel();
+        topPanel = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jMenuBar1 = new javax.swing.JMenuBar();
-        createTest = new javax.swing.JMenu();
-        existingTest = new javax.swing.JMenuItem();
-        newTest = new javax.swing.JMenuItem();
+        testBtn = new javax.swing.JButton();
+        jPanel2 = new javax.swing.JPanel();
+        submitBtn = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
+        existingTestListScrollPane = new javax.swing.JScrollPane();
+        existingTestDeatilsScrollPane = new javax.swing.JScrollPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setLocation(new java.awt.Point(0, 0));
         setMinimumSize(getPreferredSize());
-        setUndecorated(true);
-        setResizable(false);
 
-        jPanel1.setLayout(new java.awt.GridBagLayout());
-
-        exitBtn.setText("EXIT");
-        exitBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exitBtnActionPerformed(evt);
-            }
-        });
-        jPanel1.add(exitBtn, new java.awt.GridBagConstraints());
-
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel1.setText("API Test Utility");
-        jPanel2.add(jLabel1);
 
-        jMenuBar1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, java.awt.Color.lightGray, java.awt.Color.lightGray, java.awt.Color.lightGray));
-
-        createTest.setText("Test");
-        createTest.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        createTest.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        createTest.setMargin(new java.awt.Insets(10, 6, 3, 6));
-
-        existingTest.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        existingTest.setText("Use Existing Test");
-        existingTest.addActionListener(new java.awt.event.ActionListener() {
+        testBtn.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        testBtn.setText("Test");
+        testBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                existingTestActionPerformed(evt);
+                testBtnActionPerformed(evt);
             }
         });
-        createTest.add(existingTest);
 
-        newTest.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        newTest.setText("Create New Test");
-        newTest.addActionListener(new java.awt.event.ActionListener() {
+        javax.swing.GroupLayout topPanelLayout = new javax.swing.GroupLayout(topPanel);
+        topPanel.setLayout(topPanelLayout);
+        topPanelLayout.setHorizontalGroup(
+                topPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(topPanelLayout.createSequentialGroup()
+                                .addGap(12, 12, 12)
+                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(testBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(22, 22, 22))
+        );
+        topPanelLayout.setVerticalGroup(
+                topPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(topPanelLayout.createSequentialGroup()
+                                .addGroup(topPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(jLabel1)
+                                        .addComponent(testBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGap(0, 0, Short.MAX_VALUE))
+        );
+
+        submitBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        submitBtn.setText("Submit Test");
+        submitBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                newTestActionPerformed(evt);
+                submitBtnActionPerformed(evt);
             }
         });
-        createTest.add(newTest);
+        jPanel2.add(submitBtn);
 
-        jMenuBar1.add(createTest);
-
-        setJMenuBar(jMenuBar1);
+        jButton1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButton1.setText("EXIT");
+        jPanel2.add(jButton1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 401, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addContainerGap())
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGap(32, 32, 32)
+                                .addComponent(existingTestListScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 312, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(existingTestDeatilsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 310, Short.MAX_VALUE)
+                                .addGap(26, 26, 26))
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(topPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addContainerGap())
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(81, Short.MAX_VALUE)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(80, 80, 80)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addGap(18, 18, 18)
+                                .addComponent(topPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(existingTestListScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 359, Short.MAX_VALUE)
+                                        .addComponent(existingTestDeatilsScrollPane))
+                                .addGap(18, 18, 18)
+                                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(14, 14, 14))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
+    private void submitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitBtnActionPerformed
         // TODO add your handling code here:
-        logger.info("Exit button clicked.");
-        int confirm = JOptionPane.showConfirmDialog(null, "Are you sure want to exit?");
-        if (confirm == 0) {
-            logger.info("User confirmed exit. Exiting application.");
-            System.exit(0);
-        } else {
-            logger.info("User canceled exit.");
+        if (url.equals("") || method.equals("")) {
+            logger.warn("Some mandatory fields are missing");
+            JOptionPane.showMessageDialog(this, "Some mandatory fields are missing", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
         }
-    }//GEN-LAST:event_exitBtnActionPerformed
-
-    private void newTestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newTestActionPerformed
-        // TODO add your handling code here:
-        Screen1 screen1 = new Screen1(this);
-        screen1.setVisible(true);
-        this.dispose();
-    }//GEN-LAST:event_newTestActionPerformed
-
-    private void existingTestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_existingTestActionPerformed
-        // TODO add your handling code here:
-        openFileChooser();
-    }//GEN-LAST:event_existingTestActionPerformed
-
-    private void openFileChooser() {
-        JFrame frame = new JFrame("Choose Test File");
-        File currentDir = new File(System.getProperty("user.dir"));
-
-        // Filter to show only Excel files (.xls and .xlsx)
-        String[] excelFiles = currentDir.list((File dir, String name1) -> name1.toLowerCase().endsWith(".xls") || name1.toLowerCase().endsWith(".xlsx"));
-
-        // Display message if no Excel files are found
-        if (excelFiles == null || excelFiles.length == 0) {
-            excelFiles = new String[]{"No Excel files found in this directory."};
+        Object[][] testScenarios = testCases.toArray(new Object[0][0]);
+        if (screen3Instance != null) {
+            screen3Instance.dispose();
         }
+        screen3Instance = new Screen3Frame(this, url, method, headers, testScenarios, fileName);
+        screen3Instance.setVisible(true);
+        dispose();
+    }//GEN-LAST:event_submitBtnActionPerformed
 
-        // Display the filtered Excel files in the JList
-        JList<String> fileList = new JList<>(excelFiles);
-        JScrollPane scrollPane = new JScrollPane(fileList);
-
-        // Action when an item is selected
-        fileList.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting() && !fileList.getSelectedValue().equals("No Excel files found in this directory.")) {
-                String selectedFile = fileList.getSelectedValue();
-                processFile(selectedFile);
-                frame.dispose();
-            }
+    private void testBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testBtnActionPerformed
+        // TODO add your handling code here:
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem createTest = new JMenuItem("Create New Test");
+        JMenuItem importTest = new JMenuItem("Import");
+        popupMenu.add(createTest);
+        popupMenu.add(importTest);
+        popupMenu.show(testBtn, -popupMenu.getPreferredSize().width, testBtn.getHeight());
+        createTest.addActionListener((ActionEvent e) -> {
+            Screen1 screen1 = new Screen1(this);
+            screen1.setVisible(true);
+            this.dispose();
         });
-        frame.add(scrollPane, BorderLayout.CENTER);
-        frame.setSize(400, 300);
-        frame.setLocationRelativeTo(this);
-        frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        frame.setVisible(true);
+        importTest.addActionListener((ActionEvent e) -> {
+            openImportTest();
+        });
+    }//GEN-LAST:event_testBtnActionPerformed
+
+    private void openImportTest() {
+        JPanel panel = new JPanel(new BorderLayout());
+        JLabel label = new JLabel("Enter cURL Command:");
+        JTextArea textArea = new JTextArea(5, 40);  // Multi-line input field
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        panel.add(label, BorderLayout.NORTH);
+        panel.add(scrollPane, BorderLayout.CENTER);
+        // Show input dialog
+        int result = JOptionPane.showConfirmDialog(
+                null, panel, "Import Test", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE
+        );
+        // If user presses OK, process the entered cURL command
+        if (result == JOptionPane.OK_OPTION) {
+            String curlCommand = textArea.getText().trim();
+            if (!curlCommand.isEmpty()) {
+                processCurlCommand(curlCommand); // Call the method to process cURL
+            } else {
+                JOptionPane.showMessageDialog(null, "Please enter a valid cURL command!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
-    private void processFile(String fileName) {
-        String url = "";
-        String method = "";
-        String headers = "";
-        List<Object[]> testCaseList = new ArrayList<>();
+    private void processCurlCommand(String curlCommand) {
+        curlCommand = curlCommand.replace("\\\n", "");  // Remove line breaks for better parsing
+
+        // Extract URL
+        Pattern urlPattern = Pattern.compile("curl.*?['\"]?(https?://[^\\s'\"]+)['\"]?");
+        Matcher urlMatcher = urlPattern.matcher(curlCommand);
+        String curlURL = urlMatcher.find() ? urlMatcher.group(1) : "Not Found";
+
+        // Extract HTTP Method
+        Pattern methodPattern = Pattern.compile("-X\\s+(\\w+)");
+        Matcher methodMatcher = methodPattern.matcher(curlCommand);
+        String httpMethod;
+
+        if (methodMatcher.find()) {
+            httpMethod = methodMatcher.group(1); // Extract method if found
+        } else if (curlCommand.contains("--data") || curlCommand.contains("--data-binary")) {
+            httpMethod = "POST"; // If --data is present, assume POST
+        } else {
+            httpMethod = "GET"; // Default to GET
+        }
+        Map<String, String> curlHeaders = new LinkedHashMap<>();
+        Pattern headerPattern = Pattern.compile("--header\\s+['\"]?([^:]+):\\s*([^'\"]*)['\"]?");
+        Matcher headerMatcher = headerPattern.matcher(curlCommand);
+        while (headerMatcher.find()) {
+            curlHeaders.put(headerMatcher.group(1), headerMatcher.group(2));
+        }
+
+        // Extract Request Body (Handles multi-line JSON)
+        Pattern bodyPattern = Pattern.compile("--data(?:-raw)?\\s+['\"](.*)['\"]", Pattern.DOTALL);
+        Matcher bodyMatcher = bodyPattern.matcher(curlCommand);
+        String requestBody = bodyMatcher.find() ? bodyMatcher.group(1).replace("\n", "") : "No Body";
+
+        // Format JSON body (if applicable)
+        try {
+            requestBody = new JSONObject(requestBody).toString(4);  // Pretty print JSON
+        } catch (Exception e) {
+            // Ignore if it's not a valid JSON
+        }
+        Screen1 screen1 = new Screen1(this,curlURL,httpMethod,curlHeaders,requestBody);
+        screen1.setVisible(true);
+        dispose();
+    }
+
+    private void fileBrowser() {
+        File rootFile = new File(System.getProperty("user.dir"));
+        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(rootFile.getName());
+        treeModel = new DefaultTreeModel(rootNode);
+        populateFileTree(rootFile, rootNode);
+        fileTree = new JTree(treeModel);
+        fileTree.setRootVisible(true);
+        fileTree.setShowsRootHandles(true);
+        fileTree.setBackground(existingTestListScrollPane.getBackground());
+        existingTestListScrollPane.setViewportView(fileTree);
+        existingTestListScrollPane.revalidate();
+        existingTestListScrollPane.repaint();
+        fileTree.addTreeSelectionListener((TreeSelectionEvent e) -> {
+            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) fileTree.getLastSelectedPathComponent();
+            if (selectedNode != null) {
+                System.out.println("Selected: " + selectedNode.getUserObject());
+                TreePath treePath = fileTree.getSelectionPath();
+                if (treePath != null) {
+                    String fullPath = buildFullPath(treePath);
+                    File selectedFile = new File(fullPath);
+                    if (selectedFile.isFile()) {
+                        processFile(selectedFile);
+                    }
+                }
+            }
+        });
+    }
+
+    private String buildFullPath(TreePath treePath) {
+        StringBuilder fullPath = new StringBuilder(System.getProperty("user.dir")); // Root directory
+        Object[] pathElements = treePath.getPath();
+        for (int i = 1; i < pathElements.length; i++) { // Skip root node
+            fullPath.append(File.separator).append(pathElements[i].toString());
+        }
+        return fullPath.toString();
+    }
+
+    private void populateFileTree(File file, DefaultMutableTreeNode node) {
+        if (file.isDirectory()) {
+            File[] files = file.listFiles((dir, name) -> {
+                return new File(dir, name).isDirectory()
+                        || name.toLowerCase().endsWith(".xls")
+                        || name.toLowerCase().endsWith(".xlsx")
+                        || name.toLowerCase().endsWith(".csv");
+            });
+
+            if (files != null) {
+                for (File f : files) {
+                    DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(f.getName());
+                    node.add(childNode);
+
+                    // ✅ Recursively add folders only (not files)
+                    if (f.isDirectory()) {
+                        populateFileTree(f, childNode);
+                    }
+                }
+            }
+        }
+    }
+
+    private void processFile(File fileName) {
+        testCases = new ArrayList<>();
         try (FileInputStream file = new FileInputStream(fileName); Workbook workBook = new XSSFWorkbook(file)) {
             Sheet sheet = workBook.getSheetAt(0);
             Iterator<Row> rowIterator = sheet.iterator();
@@ -222,16 +377,14 @@ public class HomePage extends javax.swing.JFrame {
                 String requestBodyStr = getCellValue(row.getCell(4));
                 JSONObject requestBody;
                 if (requestBodyStr.equalsIgnoreCase("Empty Request Body") || requestBodyStr.trim().isEmpty()) {
-                    testCaseList.add(new Object[]{testName, requestBodyStr});
+                    testCases.add(new Object[]{testName, requestBodyStr});
                 } else {
                     requestBody = new JSONObject(requestBodyStr);
-                    testCaseList.add(new Object[]{testName, requestBody});
+                    testCases.add(new Object[]{testName, requestBody});
                 }
             }
-            Object[][] testScenarios = testCaseList.toArray(new Object[0][0]);
-            Screen3Frame screen3 = new Screen3Frame(this, url, method, headers, testScenarios, fileName);
-            screen3.setVisible(true);
-            dispose();
+            this.fileName = fileName.toString();
+            showFileValues();
         } catch (FileNotFoundException ex) {
             showErrorDialog(ex);
             java.util.logging.Logger.getLogger(Screen1.class.getName()).log(Level.SEVERE, null, ex);
@@ -242,6 +395,33 @@ public class HomePage extends javax.swing.JFrame {
             showErrorDialog(ex);
             java.util.logging.Logger.getLogger(HomePage.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    private void showFileValues() {
+        JTextArea textArea = new JTextArea();
+        textArea.setEditable(false);  // Make read-only
+        textArea.setFont(new Font("Monospaced", Font.PLAIN, 14));  // Improve readability
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+        StringBuilder content = new StringBuilder();
+        content.append("URL: ").append(url).append("\n");
+        content.append("Method: ").append(method).append("\n");
+        if (!headers.equals("")) {
+            content.append("Headers: ").append(headers).append("\n\n");
+        }
+        if (!testCases.isEmpty()) {
+            content.append("Test Cases:\n");
+            testCases.stream().map((Object[] testCase) -> {
+                content.append("Test Name: ").append(testCase[0]).append("\n");
+                return testCase;
+            }).forEachOrdered(testCase -> {
+                content.append("Request Body: ").append(testCase[1].toString()).append("\n\n");
+            });
+        }
+        textArea.setText(content.toString());
+        existingTestDeatilsScrollPane.setViewportView(textArea);
+        existingTestDeatilsScrollPane.revalidate();
+        existingTestDeatilsScrollPane.repaint();
     }
 
     private static String getCellValue(Cell cell) {
@@ -298,13 +478,13 @@ public class HomePage extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenu createTest;
-    private javax.swing.JMenuItem existingTest;
-    private javax.swing.JButton exitBtn;
+    private javax.swing.JScrollPane existingTestDeatilsScrollPane;
+    private javax.swing.JScrollPane existingTestListScrollPane;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JMenuItem newTest;
+    private javax.swing.JButton submitBtn;
+    private javax.swing.JButton testBtn;
+    private javax.swing.JPanel topPanel;
     // End of variables declaration//GEN-END:variables
 }

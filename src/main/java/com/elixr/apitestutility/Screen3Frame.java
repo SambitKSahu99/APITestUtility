@@ -434,7 +434,6 @@ public class Screen3Frame extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         backBtn = new javax.swing.JButton();
         executeTestBtn = new javax.swing.JButton();
-        exportBtn = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
         otherComponentsPanel = new javax.swing.JPanel();
         urlLabel = new javax.swing.JLabel();
@@ -446,9 +445,12 @@ public class Screen3Frame extends javax.swing.JFrame {
         headersLabel = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         headersTextArea = new javax.swing.JTextArea();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        exportMenubar = new javax.swing.JMenu();
+        cUrlConversionBtn = new javax.swing.JMenuItem();
+        allTesttoExcel = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(689, 494));
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel1.setText("Result");
@@ -498,15 +500,6 @@ public class Screen3Frame extends javax.swing.JFrame {
             }
         });
         jPanel1.add(executeTestBtn);
-
-        exportBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        exportBtn.setText("Export To Excel");
-        exportBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exportBtnActionPerformed(evt);
-            }
-        });
-        jPanel1.add(exportBtn);
 
         jButton1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButton1.setText("Exit");
@@ -608,9 +601,37 @@ public class Screen3Frame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(otherComponentsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(headersLabel)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 69, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 58, Short.MAX_VALUE))
                 .addGap(15, 15, 15))
         );
+
+        exportMenubar.setText("Export");
+        exportMenubar.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        exportMenubar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportMenubarActionPerformed(evt);
+            }
+        });
+
+        cUrlConversionBtn.setText("Selected Test To cURL");
+        cUrlConversionBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cUrlConversionBtnActionPerformed(evt);
+            }
+        });
+        exportMenubar.add(cUrlConversionBtn);
+
+        allTesttoExcel.setText("All Test To Excel");
+        allTesttoExcel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                allTesttoExcelActionPerformed(evt);
+            }
+        });
+        exportMenubar.add(allTesttoExcel);
+
+        jMenuBar1.add(exportMenubar);
+
+        setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -623,9 +644,9 @@ public class Screen3Frame extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(resultTableScrollPane, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 619, Short.MAX_VALUE)
+                    .addComponent(resultTableScrollPane, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 621, Short.MAX_VALUE)
                     .addComponent(otherComponentsPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(37, 37, 37))
+                .addGap(31, 31, 31))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -635,7 +656,7 @@ public class Screen3Frame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(resultTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 233, Short.MAX_VALUE)
+                .addComponent(resultTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -748,7 +769,7 @@ public class Screen3Frame extends javax.swing.JFrame {
             logger.debug("Test selected: {}", resultTable.getSelectedRow());
             Object requestBody = resultTable.getValueAt(selectedRow, 2);
 
-            if (requestBody == null || requestBody.toString().equalsIgnoreCase("Empty Request Body")) {
+            if (requestBody == null || requestBody.toString().equalsIgnoreCase("Empty Request Body") || requestBody.toString().equalsIgnoreCase("")) {
                 jsonBody = null;
             } else {
                 jsonBody = (JSONObject) requestBody;
@@ -768,7 +789,6 @@ public class Screen3Frame extends javax.swing.JFrame {
                     }
                     return responseResult;
                 }
-
                 @Override
                 protected void done() {
                     try {
@@ -794,16 +814,58 @@ public class Screen3Frame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_executeTestBtnActionPerformed
 
-    /**
-     * Handles the action when the "Export" button is clicked. Generates a
-     * timestamp-based filename for the exported Excel file. Calls
-     * `ExcelExporter.exportDataToExcel()` to export test results. Displays a
-     * success message upon completion. Logs an error and shows an error dialog
-     * if the export fails.
-     *
-     * @param evt
-     */
-    private void exportBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportBtnActionPerformed
+    private void baseUrlTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_baseUrlTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_baseUrlTextFieldActionPerformed
+
+    private void exportMenubarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportMenubarActionPerformed
+        // TODO add your handling code here:
+
+    }//GEN-LAST:event_exportMenubarActionPerformed
+
+    private void cUrlConversionBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cUrlConversionBtnActionPerformed
+        // TODO add your handling code here:
+        // TODO add your handling code here:
+        int selectedRow = resultTable.getSelectedRow();
+        String jsonBody ;
+        if (selectedRow != -1) {
+            logger.debug("Test selected: {}", resultTable.getSelectedRow());
+            Object requestBody = resultTable.getValueAt(selectedRow, 2);
+            if (requestBody == null || requestBody.toString().equalsIgnoreCase("Empty Request Body")) {
+                jsonBody = "";
+            } else {
+                jsonBody = requestBody.toString();
+            }
+        } else {
+            logger.warn("No test selected for converting to cURL");
+            JOptionPane.showMessageDialog(this, "Please Select a Test", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        String cUrlCommand = "";
+        try {
+            cUrlCommand = generateCurlCommand(jsonBody);
+        } catch (Exception e) {
+            showErrorDialog(e);
+            logger.error("Some error occured", e);
+        }
+        if (!cUrlCommand.equals("")) {
+            JFrame displayCurl = new JFrame("Generated cURL Command");
+            displayCurl.setSize(600, 400);
+            JTextArea textArea = new JTextArea(cUrlCommand);
+            textArea.setEditable(false);  // Make text area non-editable
+            textArea.setFont(new Font("Monospaced", Font.PLAIN, 14));  // Use monospaced font for better readability
+            textArea.setLineWrap(true);
+            textArea.setWrapStyleWord(true);
+            JScrollPane scrollPane = new JScrollPane(textArea);
+            scrollPane.setPreferredSize(new Dimension(600, 250));
+            displayCurl.getContentPane().add(scrollPane, BorderLayout.CENTER);
+            displayCurl.setLocationRelativeTo(this);
+            displayCurl.setVisible(true);
+        }
+    }//GEN-LAST:event_cUrlConversionBtnActionPerformed
+
+    private void allTesttoExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_allTesttoExcelActionPerformed
+        // TODO add your handling code here:
         try {
             // Generate timestamp for the filename
             String timestamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
@@ -811,18 +873,32 @@ public class Screen3Frame extends javax.swing.JFrame {
             // Call the export function
             ExcelExporter.exportDataToExcel(url, methodType, headers, jsonTableBody, fileName);
             JOptionPane.showMessageDialog(this, "Data exported successfully to " + fileName);
+        } catch (HeadlessException e) {
+            showErrorDialog(e);
+            logger.error("Error exporting data", e);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error exporting data: " + e.getMessage());
+            showErrorDialog(e);
             logger.error("Error exporting data", e);
         }
-    }//GEN-LAST:event_exportBtnActionPerformed
+    }//GEN-LAST:event_allTesttoExcelActionPerformed
 
-    private void baseUrlTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_baseUrlTextFieldActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_baseUrlTextFieldActionPerformed
+    private String generateCurlCommand(String jsonBody) {
+        StringBuilder curlCommand = new StringBuilder("curl -X " + methodType.toUpperCase());
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            curlCommand.append(" -H \"").append(entry.getKey()).append(": ").append(entry.getValue()).append("\"");
+        }
+        // Add Request Body (only for methods like POST, PUT, PATCH)
+        if (jsonBody != null && (methodType.equalsIgnoreCase("POST") || methodType.equalsIgnoreCase("PUT") || methodType.equalsIgnoreCase("PATCH"))) {
+            curlCommand.append(" -d '").append(jsonBody).append("'");
+        }
+        curlCommand.append(" \"").append(url).append("\"");
+        return curlCommand.toString();
+    }
 
     /**
      * Creates and returns a non-modal loading dialog with a progress bar.
+     * @param name to show on the loading dialog
+     * @return Returns a loading dialog
      */
     public JDialog createLoadingDialog(String name) {
         JDialog dialog = new JDialog(this, "Processing", false); // Set modal to false
@@ -880,14 +956,17 @@ public class Screen3Frame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem allTesttoExcel;
     private javax.swing.JButton backBtn;
     private javax.swing.JTextField baseUrlTextField;
+    private javax.swing.JMenuItem cUrlConversionBtn;
     private javax.swing.JButton executeTestBtn;
-    private javax.swing.JButton exportBtn;
+    private javax.swing.JMenu exportMenubar;
     private javax.swing.JLabel headersLabel;
     private javax.swing.JTextArea headersTextArea;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel methodLabel;

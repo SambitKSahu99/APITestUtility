@@ -3,16 +3,23 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package com.elixr.apitestutility;
+
+import static com.elixr.apitestutility.Screen2.showErrorDialog;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -30,7 +37,7 @@ public class Screen1 extends javax.swing.JFrame {
     private static final Logger logger = LoggerFactory.getLogger(Screen1.class);
     private DefaultTableModel tableModel;
     private JTable headersTable;
-    private JFrame previousFrame ;
+    private JFrame previousFrame;
 
     /**
      * Default constructor for Screen1. Initializes the UI components and sets
@@ -51,8 +58,14 @@ public class Screen1 extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         logger.info("Screen1 Initialized Successfully.");
     }
-    
-    public Screen1(){}
+
+    public Screen1(JFrame previousFrame,String url, String method, Map<String, String> headers, String requestBody) {
+        this(previousFrame);
+        setUpCurlElements(url, method, headers, requestBody);
+    }
+
+    public Screen1() {
+    }
 
     /**
      * Sets up the table for HTTP headers, including the column names ("Header
@@ -78,6 +91,26 @@ public class Screen1 extends javax.swing.JFrame {
             headersPanel.repaint();
         }
         logger.debug("Header components set up successfully.");
+    }
+
+    private void setUpCurlElements(String curlUrl, String method, Map<String, String> curlHeaders, String requestBody) {
+        URL fullUrl;
+        try {
+            fullUrl = new URL(curlUrl);
+            protocolComboBox.setSelectedItem(fullUrl.getProtocol());
+            baseUrl.setText(fullUrl.getHost());
+            path.setText(fullUrl.getPath());
+        } catch (MalformedURLException ex) {
+            showErrorDialog(ex);
+            logger.error("Error Occured while extracting url", ex);
+        }
+        methodDropDown.setSelectedItem(method);
+        for(Map.Entry<String,String> headers:curlHeaders.entrySet()){
+            addHeader(headers.getKey(), headers.getValue());
+        }
+        if(!method.equalsIgnoreCase("GET") || method.equalsIgnoreCase("DELETE")){
+           jsonrequestBody1.setText(requestBody);
+        }
     }
 
     /**
@@ -499,14 +532,14 @@ public class Screen1 extends javax.swing.JFrame {
      */
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
         // TODO add your handling code here:
-         logger.debug("Back button clicked");
+        logger.debug("Back button clicked");
         if (previousFrame != null) {
             previousFrame.setVisible(true);
         }
         this.dispose();
         logger.info("Returning to the previous frame");
     }//GEN-LAST:event_backBtnActionPerformed
-    
+
     /**
      * Adds a new header to the headers table.
      *

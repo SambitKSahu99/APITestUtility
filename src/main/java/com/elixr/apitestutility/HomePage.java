@@ -272,24 +272,22 @@ public class HomePage extends javax.swing.JFrame {
         } else {
             httpMethod = "GET"; // Default to GET
         }
-        Map<String, String> curlHeaders = new LinkedHashMap<>();
-        Pattern headerPattern = Pattern.compile("--header\\s+['\"]?([^:]+):\\s*([^'\"]*)['\"]?");
+        Pattern headerPattern = Pattern.compile("(-H|--header)\\s+['\"]?([^:]+):\\s*([^'\"]*)['\"]?");
         Matcher headerMatcher = headerPattern.matcher(curlCommand);
+        Map<String,String> curlHeaders = new LinkedHashMap<>();
         while (headerMatcher.find()) {
-            curlHeaders.put(headerMatcher.group(1), headerMatcher.group(2));
+            curlHeaders.put(headerMatcher.group(2), headerMatcher.group(3));
         }
 
         // Extract Request Body (Handles multi-line JSON)
-        Pattern bodyPattern = Pattern.compile("--data(?:-raw)?\\s+['\"](.*)['\"]", Pattern.DOTALL);
-        Matcher bodyMatcher = bodyPattern.matcher(curlCommand);
-        String requestBody = bodyMatcher.find() ? bodyMatcher.group(1).replace("\n", "") : "No Body";
+        Pattern pattern = Pattern.compile("(-d|--data|--data-raw)\\s+(['\"])(.*?)\\2", Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(curlCommand);
 
-        // Format JSON body (if applicable)
-        try {
-            requestBody = new JSONObject(requestBody).toString(4);  // Pretty print JSON
-        } catch (Exception e) {
-            // Ignore if it's not a valid JSON
+        String requestBody = "No Body";
+        if (matcher.find()) {
+            requestBody = matcher.group(3); // Extract raw JSON without modifications
         }
+        System.out.println("JSON BODY: " + requestBody);
         Screen1 screen1 = new Screen1(this,curlURL,httpMethod,curlHeaders,requestBody);
         screen1.setVisible(true);
         dispose();

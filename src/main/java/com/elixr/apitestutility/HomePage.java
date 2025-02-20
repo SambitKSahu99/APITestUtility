@@ -160,6 +160,11 @@ public class HomePage extends javax.swing.JFrame {
 
         jButton1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButton1.setText("EXIT");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
         jPanel2.add(jButton1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -230,6 +235,18 @@ public class HomePage extends javax.swing.JFrame {
         });
     }//GEN-LAST:event_testBtnActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        logger.info("Exit button clicked.");
+        int confirm = JOptionPane.showConfirmDialog(null, "Are you sure want to exit?");
+        if (confirm == 0) {
+            logger.info("User confirmed exit. Exiting application.");
+            System.exit(0);
+        } else {
+            logger.info("User canceled exit.");
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     private void openImportTest() {
         JPanel panel = new JPanel(new BorderLayout());
         JLabel label = new JLabel("Enter cURL Command:");
@@ -252,45 +269,51 @@ public class HomePage extends javax.swing.JFrame {
         }
     }
 
-    private void processCurlCommand(String curlCommand) {
-        curlCommand = curlCommand.replace("\\\n", "");  // Remove line breaks for better parsing
-
-        // Extract URL
-        Pattern urlPattern = Pattern.compile("curl.*?['\"]?(https?://[^\\s'\"]+)['\"]?");
-        Matcher urlMatcher = urlPattern.matcher(curlCommand);
-        String curlURL = urlMatcher.find() ? urlMatcher.group(1) : "Not Found";
-
-        // Extract HTTP Method
-        Pattern methodPattern = Pattern.compile("-X\\s+(\\w+)");
-        Matcher methodMatcher = methodPattern.matcher(curlCommand);
-        String httpMethod;
-
-        if (methodMatcher.find()) {
-            httpMethod = methodMatcher.group(1); // Extract method if found
-        } else if (curlCommand.contains("--data") || curlCommand.contains("--data-binary")) {
-            httpMethod = "POST"; // If --data is present, assume POST
-        } else {
-            httpMethod = "GET"; // Default to GET
-        }
+    private void processCurlCommand(String curlCommand) {   
+        curlCommand = curlCommand.replace("\\\\\"", "\"");
+        String curlURL = parseURl(curlCommand);
+        String httpMethod = parseHttpMethod(curlCommand);
+        Map<String,String> curlHeaders = new LinkedHashMap<>();
         Pattern headerPattern = Pattern.compile("(-H|--header)\\s+['\"]?([^:]+):\\s*([^'\"]*)['\"]?");
         Matcher headerMatcher = headerPattern.matcher(curlCommand);
-        Map<String,String> curlHeaders = new LinkedHashMap<>();
         while (headerMatcher.find()) {
             curlHeaders.put(headerMatcher.group(2), headerMatcher.group(3));
         }
-
-        // Extract Request Body (Handles multi-line JSON)
+        String requestBody = "";
         Pattern pattern = Pattern.compile("(-d|--data|--data-raw)\\s+(['\"])(.*?)\\2", Pattern.DOTALL);
         Matcher matcher = pattern.matcher(curlCommand);
-
-        String requestBody = "No Body";
         if (matcher.find()) {
             requestBody = matcher.group(3); // Extract raw JSON without modifications
         }
-        System.out.println("JSON BODY: " + requestBody);
-        Screen1 screen1 = new Screen1(this,curlURL,httpMethod,curlHeaders,requestBody);
+        Screen1 screen1 = new Screen1(this, curlURL, httpMethod, curlHeaders, requestBody);
         screen1.setVisible(true);
         dispose();
+    }
+    
+    private String parseURl(String cURLCommand){
+        Pattern urlPattern = Pattern.compile("curl.*?['\"](https?://[^'\"\\s]+)['\"]");
+        Matcher urlMatcher = urlPattern.matcher(cURLCommand);
+        if (urlMatcher.find()) {
+            return urlMatcher.group(1);
+        }
+        return "";
+    }
+
+    private String parseHttpMethod(String cURLCommand) {
+        Pattern methodPattern = Pattern.compile("(?:-X|--request)\\s+([A-Z]+)");
+        Matcher methodMatcher = methodPattern.matcher(cURLCommand);
+
+        if (methodMatcher.find()) {
+            return methodMatcher.group(1).toUpperCase();
+        }
+        boolean hasDataFlag = cURLCommand.contains("--data") || cURLCommand.contains("-d");
+        Pattern emptyDataPattern = Pattern.compile("(--data|-d)\\s+(['\"]?)\\s*\\2");
+        Matcher emptyDataMatcher = emptyDataPattern.matcher(cURLCommand);
+        boolean isDataEmpty = emptyDataMatcher.find();
+        if (hasDataFlag && !isDataEmpty) {
+            return "POST"; // If data exists and is not empty, assume POST
+        }
+        return "GET";
     }
 
     private void fileBrowser() {
@@ -305,6 +328,30 @@ public class HomePage extends javax.swing.JFrame {
         existingTestListScrollPane.setViewportView(fileTree);
         existingTestListScrollPane.revalidate();
         existingTestListScrollPane.repaint();
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem refreshItem = new JMenuItem("Refresh");
+        popupMenu.add(refreshItem);
+
+        fileTree.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    showPopup(e);
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    showPopup(e);
+                }
+            }
+
+            private void showPopup(MouseEvent e) {
+                popupMenu.show(e.getComponent(), e.getX(), e.getY());
+            }
+        });
+        refreshItem.addActionListener(e -> refreshTree());
         fileTree.addTreeSelectionListener((TreeSelectionEvent e) -> {
             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) fileTree.getLastSelectedPathComponent();
             if (selectedNode != null) {
@@ -321,8 +368,16 @@ public class HomePage extends javax.swing.JFrame {
         });
     }
 
+    private void refreshTree() {
+        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new File(System.getProperty("user.dir")).getName());
+        treeModel.setRoot(rootNode);
+        populateFileTree(new File(System.getProperty("user.dir")), rootNode);
+        treeModel.reload();
+        System.out.println("File tree refreshed!");
+    }
+
     private String buildFullPath(TreePath treePath) {
-        StringBuilder fullPath = new StringBuilder(System.getProperty("user.dir")); // Root directory
+        StringBuilder fullPath = new StringBuilder(System.getProperty("user.dir"));
         Object[] pathElements = treePath.getPath();
         for (int i = 1; i < pathElements.length; i++) { // Skip root node
             fullPath.append(File.separator).append(pathElements[i].toString());
@@ -332,19 +387,15 @@ public class HomePage extends javax.swing.JFrame {
 
     private void populateFileTree(File file, DefaultMutableTreeNode node) {
         if (file.isDirectory()) {
-            File[] files = file.listFiles((dir, name) -> {
-                return new File(dir, name).isDirectory()
-                        || name.toLowerCase().endsWith(".xls")
-                        || name.toLowerCase().endsWith(".xlsx")
-                        || name.toLowerCase().endsWith(".csv");
-            });
+            File[] files = file.listFiles((dir, name) -> new File(dir, name).isDirectory()
+                    || name.toLowerCase().endsWith(".xls")
+                    || name.toLowerCase().endsWith(".xlsx")
+                    || name.toLowerCase().endsWith(".csv"));
 
             if (files != null) {
                 for (File f : files) {
                     DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(f.getName());
                     node.add(childNode);
-
-                    // ✅ Recursively add folders only (not files)
                     if (f.isDirectory()) {
                         populateFileTree(f, childNode);
                     }

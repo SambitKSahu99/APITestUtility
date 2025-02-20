@@ -768,11 +768,10 @@ public class Screen3Frame extends javax.swing.JFrame {
         if (selectedRow != -1) {
             logger.debug("Test selected: {}", resultTable.getSelectedRow());
             Object requestBody = resultTable.getValueAt(selectedRow, 2);
-
             if (requestBody == null || requestBody.toString().equalsIgnoreCase("Empty Request Body") || requestBody.toString().equalsIgnoreCase("")) {
                 jsonBody = null;
             } else {
-                jsonBody = (JSONObject) requestBody;
+                jsonBody = new JSONObject(requestBody);
             }
             String testName = (String) resultTable.getValueAt(selectedRow, 1);
             JDialog loadingDialog = createLoadingDialog("Executing Test,Please Wait");

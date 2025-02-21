@@ -59,7 +59,7 @@ public class Screen1 extends javax.swing.JFrame {
         logger.info("Screen1 Initialized Successfully.");
     }
 
-    public Screen1(JFrame previousFrame,String url, String method, Map<String, String> headers, String requestBody) {
+    public Screen1(JFrame previousFrame, String url, String method, Map<String, String> headers, String requestBody) {
         this(previousFrame);
         setUpCurlElements(url, method, headers, requestBody);
     }
@@ -104,12 +104,15 @@ public class Screen1 extends javax.swing.JFrame {
             showErrorDialog(ex);
             logger.error("Error Occured while extracting url", ex);
         }
+        if (method.equalsIgnoreCase("POST") && requestBody.isEmpty()) {
+            method = "GET";
+        }
         methodDropDown.setSelectedItem(method);
-        for(Map.Entry<String,String> headers:curlHeaders.entrySet()){
+        for (Map.Entry<String, String> headers : curlHeaders.entrySet()) {
             addHeader(headers.getKey(), headers.getValue());
         }
-        if(!method.equalsIgnoreCase("GET") || method.equalsIgnoreCase("DELETE")){
-           jsonrequestBody1.setText(requestBody);
+        if (!method.equalsIgnoreCase("GET") || method.equalsIgnoreCase("DELETE")) {
+            jsonrequestBody1.setText(requestBody);
         }
     }
 

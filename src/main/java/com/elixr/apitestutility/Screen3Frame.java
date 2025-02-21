@@ -771,7 +771,7 @@ public class Screen3Frame extends javax.swing.JFrame {
             if (requestBody == null || requestBody.toString().equalsIgnoreCase("Empty Request Body") || requestBody.toString().equalsIgnoreCase("")) {
                 jsonBody = null;
             } else {
-                jsonBody = new JSONObject(requestBody);
+                jsonBody = (JSONObject)requestBody;
             }
             String testName = (String) resultTable.getValueAt(selectedRow, 1);
             JDialog loadingDialog = createLoadingDialog("Executing Test,Please Wait");

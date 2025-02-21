@@ -269,10 +269,11 @@ public class HomePage extends javax.swing.JFrame {
         }
     }
 
-    private void processCurlCommand(String curlCommand) {   
+    private void processCurlCommand(String curlCommand) {
         curlCommand = curlCommand.replace("\\\\\"", "\"");
         String curlURL = parseURl(curlCommand);
         String httpMethod = parseHttpMethod(curlCommand);
+        System.out.println("HttpMethod: "+httpMethod);
         Map<String,String> curlHeaders = new LinkedHashMap<>();
         Pattern headerPattern = Pattern.compile("(-H|--header)\\s+['\"]?([^:]+):\\s*([^'\"]*)['\"]?");
         Matcher headerMatcher = headerPattern.matcher(curlCommand);
@@ -283,7 +284,7 @@ public class HomePage extends javax.swing.JFrame {
         Pattern pattern = Pattern.compile("(-d|--data|--data-raw)\\s+(['\"])(.*?)\\2", Pattern.DOTALL);
         Matcher matcher = pattern.matcher(curlCommand);
         if (matcher.find()) {
-            requestBody = matcher.group(3); // Extract raw JSON without modifications
+            requestBody = matcher.group(3);
         }
         Screen1 screen1 = new Screen1(this, curlURL, httpMethod, curlHeaders, requestBody);
         screen1.setVisible(true);
@@ -299,19 +300,15 @@ public class HomePage extends javax.swing.JFrame {
         return "";
     }
 
-    private String parseHttpMethod(String cURLCommand) {
+    private String parseHttpMethod(String cURLCommand) {      
         Pattern methodPattern = Pattern.compile("(?:-X|--request)\\s+([A-Z]+)");
         Matcher methodMatcher = methodPattern.matcher(cURLCommand);
-
         if (methodMatcher.find()) {
             return methodMatcher.group(1).toUpperCase();
         }
         boolean hasDataFlag = cURLCommand.contains("--data") || cURLCommand.contains("-d");
-        Pattern emptyDataPattern = Pattern.compile("(--data|-d)\\s+(['\"]?)\\s*\\2");
-        Matcher emptyDataMatcher = emptyDataPattern.matcher(cURLCommand);
-        boolean isDataEmpty = emptyDataMatcher.find();
-        if (hasDataFlag && !isDataEmpty) {
-            return "POST"; // If data exists and is not empty, assume POST
+        if(hasDataFlag){
+            return "POST";
         }
         return "GET";
     }

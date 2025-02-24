@@ -4,10 +4,9 @@
  */
 package com.elixr.apitestutility;
 
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +59,17 @@ public class ExcelExporter {
 
                 // Writing test data
                 row.createCell(3).setCellValue(testCase[0].toString()); // Test Name
-                row.createCell(4).setCellValue(testCase[1].toString()); // Request Body
+
+                String requestBody = testCase[1].toString();
+                String formattedJson = formatJson(requestBody);
+                Cell requestBodyCell = row.createCell(4);
+                requestBodyCell.setCellValue(formattedJson);
+
+                // Apply cell style for wrapping text
+                CellStyle wrapStyle = workbook.createCellStyle();
+                wrapStyle.setWrapText(true);
+                requestBodyCell.setCellStyle(wrapStyle);
+
             }
             logger.info("{} test cases written to Excel", testCases.length);
 
@@ -79,6 +88,20 @@ public class ExcelExporter {
 
         } catch (IOException exception) {
             logger.error("Error occurred while writing Excel file: {}", fileName, exception);
+        }
+    }
+    /**
+     * Formats JSON string with proper indentation.
+     *
+     * @param jsonString Raw JSON string
+     * @return Formatted JSON string
+     */
+    private static String formatJson(String jsonString) {
+        try {
+            JSONObject jsonObject = new JSONObject(jsonString);
+            return jsonObject.toString(4); // Pretty print JSON with 4 spaces
+        } catch (Exception e) {
+            return jsonString; // Return original if not valid JSON
         }
     }
 }

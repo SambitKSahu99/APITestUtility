@@ -254,21 +254,29 @@ public class Screen3Frame extends javax.swing.JFrame {
      */
     private void populateResultTable(Object[][] tableData) {
         logger.info("Populating result table with data.");
-        Object[][] updatedTableData = new Object[tableData.length][7]; // 7 columns now
+        Object[][] updatedTableData = new Object[tableData.length][7]; // 8 columns now
 
         for (int i = 0; i < tableData.length; i++) {
-            updatedTableData[i][0] = i + 1; // SL column with serial numbers starting from 1
+            updatedTableData[i][0] = true; // SL column with serial numbers starting from 1
             updatedTableData[i][1] = tableData[i][0]; // Test Name
             updatedTableData[i][2] = tableData[i][1]; // Request Body
         }
 
         DefaultTableModel model = new DefaultTableModel(
                 updatedTableData,
-                new String[]{"SL", "Test Name", "Request Body", "Response Code", "Response Body", "Response Time", "Test Result"}
+                new String[]{"Select", "Test Name", "Request Body", "Response Code", "Response Body", "Response Time", "Test Result"}
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return true; // Make the table cells non-editable.
+                return column == 7; // Only allow editing the checkbox coloum.
+            }
+
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                if (columnIndex == 0) {
+                    return Boolean.class; // Set the checkbox column to Boolean type
+                }
+                return super.getColumnClass(columnIndex);
             }
         };
         resultTable.setModel(model);
@@ -341,7 +349,7 @@ public class Screen3Frame extends javax.swing.JFrame {
             }
             HttpRequest request = requestBuilder.build();
             logger.info("Executing test: name={}, url={}, method={}, headers={}", name, url, methodType, headers);
-           // System.out.println("Executing test with URL: " + url);
+            // System.out.println("Executing test with URL: " + url);
 
             // capture the start time
             long startTime = System.currentTimeMillis();
@@ -771,7 +779,7 @@ public class Screen3Frame extends javax.swing.JFrame {
             if (requestBody == null || requestBody.toString().equalsIgnoreCase("Empty Request Body") || requestBody.toString().equalsIgnoreCase("")) {
                 jsonBody = null;
             } else {
-                jsonBody = (JSONObject)requestBody;
+                jsonBody = (JSONObject) requestBody;
             }
             String testName = (String) resultTable.getValueAt(selectedRow, 1);
             JDialog loadingDialog = createLoadingDialog("Executing Test,Please Wait");
@@ -788,6 +796,7 @@ public class Screen3Frame extends javax.swing.JFrame {
                     }
                     return responseResult;
                 }
+
                 @Override
                 protected void done() {
                     try {
@@ -826,7 +835,7 @@ public class Screen3Frame extends javax.swing.JFrame {
         // TODO add your handling code here:
         // TODO add your handling code here:
         int selectedRow = resultTable.getSelectedRow();
-        String jsonBody ;
+        String jsonBody;
         if (selectedRow != -1) {
             logger.debug("Test selected: {}", resultTable.getSelectedRow());
             Object requestBody = resultTable.getValueAt(selectedRow, 2);
@@ -896,6 +905,7 @@ public class Screen3Frame extends javax.swing.JFrame {
 
     /**
      * Creates and returns a non-modal loading dialog with a progress bar.
+     *
      * @param name to show on the loading dialog
      * @return Returns a loading dialog
      */

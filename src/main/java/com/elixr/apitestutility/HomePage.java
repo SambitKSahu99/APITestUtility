@@ -5,11 +5,11 @@
 package com.elixr.apitestutility;
 
 import static com.elixr.apitestutility.Screen2.showErrorDialog;
-import java.awt.BorderLayout;
-import java.awt.Cursor;
-import java.awt.Font;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -24,27 +24,19 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTree;
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.TableModelEvent;
 import javax.swing.event.TreeSelectionEvent;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import java.util.Arrays;
+import java.util.Properties;
 import org.apache.poi.ss.usermodel.Cell;
-import static org.apache.poi.ss.usermodel.CellType.BOOLEAN;
-import static org.apache.poi.ss.usermodel.CellType.FORMULA;
-import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
-import static org.apache.poi.ss.usermodel.CellType.STRING;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -64,10 +56,12 @@ public class HomePage extends javax.swing.JFrame {
     private DefaultTreeModel treeModel;
     private String url = "";
     private String method = "";
-    private String headers = "";
+    private Map<String, String> headers = new LinkedHashMap<>();
     private List<Object[]> testCases;
+    private String requestBody;
     private String fileName = "";
     private Screen3Frame screen3Instance;
+    private DefaultTableModel headersTableModel = new DefaultTableModel();
 
     /**
      * Creates new form HomePage
@@ -79,10 +73,9 @@ public class HomePage extends javax.swing.JFrame {
     }
 
     private void setUpFrame() {
-        setExtendedState(MAXIMIZED_BOTH);
         setLocationRelativeTo(this);
         setScrollPane();
-
+        setUpEnvironmentTab();
     }
 
     private void setScrollPane() {
@@ -90,10 +83,19 @@ public class HomePage extends javax.swing.JFrame {
                 BorderFactory.createEtchedBorder(), "Select Test",
                 TitledBorder.LEADING, TitledBorder.TOP,
                 new Font("Arial", Font.BOLD, 14)));
-        existingTestDeatilsScrollPane.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(), "Selected Test Details",
+        resultResponseScrollPane.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createEtchedBorder(), "Response",
                 TitledBorder.LEADING, TitledBorder.TOP,
                 new Font("Arial", Font.BOLD, 14)));
+    }
+
+    private void resetAllValues() {
+        logger.info("Resetting all value");
+        urlTextField.setText("");
+        methodDropDown.setSelectedItem("GET");
+        headersTableModel.setRowCount(0);
+        headersTableModel.addRow(new Object[]{"", ""});
+        bodyTextArea.setText("");
     }
 
     /**
@@ -111,10 +113,33 @@ public class HomePage extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         submitBtn = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
+        jTabbedPane1 = new javax.swing.JTabbedPane();
+        jPanel1 = new javax.swing.JPanel();
         existingTestListScrollPane = new javax.swing.JScrollPane();
+        jSplitPane2 = new javax.swing.JSplitPane();
+        jTabbedPane3 = new javax.swing.JTabbedPane();
+        headersScrollPane = new javax.swing.JScrollPane();
+        headersTable = new javax.swing.JTable();
         existingTestDeatilsScrollPane = new javax.swing.JScrollPane();
+        bodyTextArea = new javax.swing.JTextArea();
+        ParamsScrollPane = new javax.swing.JScrollPane();
+        scriptScrollPane = new javax.swing.JScrollPane();
+        scriptTextArea = new javax.swing.JTextArea();
+        resultResponseScrollPane = new javax.swing.JScrollPane();
+        jTextArea2 = new javax.swing.JTextArea();
+        jPanel4 = new javax.swing.JPanel();
+        methodDropDown = new javax.swing.JComboBox<>();
+        urlTextField = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jPanel3 = new javax.swing.JPanel();
+        jSplitPane1 = new javax.swing.JSplitPane();
+        envPropFileListScrollPane = new javax.swing.JScrollPane();
+        variableTableScrollPane = new javax.swing.JScrollPane();
+        variablesTable = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setExtendedState(MAXIMIZED_BOTH);
         setLocation(new java.awt.Point(0, 0));
         setMinimumSize(getPreferredSize());
 
@@ -132,21 +157,21 @@ public class HomePage extends javax.swing.JFrame {
         javax.swing.GroupLayout topPanelLayout = new javax.swing.GroupLayout(topPanel);
         topPanel.setLayout(topPanelLayout);
         topPanelLayout.setHorizontalGroup(
-                topPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(topPanelLayout.createSequentialGroup()
-                                .addGap(12, 12, 12)
-                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(testBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(22, 22, 22))
+            topPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(topPanelLayout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(testBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         topPanelLayout.setVerticalGroup(
-                topPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(topPanelLayout.createSequentialGroup()
-                                .addGroup(topPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jLabel1)
-                                        .addComponent(testBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGap(0, 0, Short.MAX_VALUE))
+            topPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(topPanelLayout.createSequentialGroup()
+                .addGroup(topPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(testBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         submitBtn.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -167,43 +192,215 @@ public class HomePage extends javax.swing.JFrame {
         });
         jPanel2.add(jButton1);
 
+        jTabbedPane1.setTabPlacement(javax.swing.JTabbedPane.LEFT);
+
+        jSplitPane2.setDividerLocation(200);
+        jSplitPane2.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+
+        headersScrollPane.setColumnHeaderView(null);
+
+        headersTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null}
+            },
+            new String [] {
+                "Header Key", "Header Value"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        headersScrollPane.setViewportView(headersTable);
+
+        jTabbedPane3.addTab("Headers", headersScrollPane);
+
+        bodyTextArea.setColumns(20);
+        bodyTextArea.setRows(5);
+        existingTestDeatilsScrollPane.setViewportView(bodyTextArea);
+
+        jTabbedPane3.addTab("Body", existingTestDeatilsScrollPane);
+        jTabbedPane3.addTab("Params", ParamsScrollPane);
+
+        scriptTextArea.setColumns(20);
+        scriptTextArea.setRows(5);
+        scriptScrollPane.setViewportView(scriptTextArea);
+
+        jTabbedPane3.addTab("Script", scriptScrollPane);
+
+        jSplitPane2.setLeftComponent(jTabbedPane3);
+
+        jTextArea2.setColumns(20);
+        jTextArea2.setRows(5);
+        resultResponseScrollPane.setViewportView(jTextArea2);
+
+        jSplitPane2.setRightComponent(resultResponseScrollPane);
+
+        methodDropDown.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "GET", "POST", "PUT", "DELETE","PATCH" }));
+        methodDropDown.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                methodDropDownActionPerformed(evt);
+            }
+        });
+
+        urlTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                urlTextFieldActionPerformed(evt);
+            }
+        });
+
+        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel3.setText("URL :");
+
+        jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel4.setText("Method :");
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel3)
+                    .addComponent(jLabel4))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addComponent(methodDropDown, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 316, Short.MAX_VALUE))
+                    .addComponent(urlTextField))
+                .addContainerGap())
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(urlTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(methodDropDown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addComponent(existingTestListScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSplitPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 516, Short.MAX_VALUE)
+                .addContainerGap())
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                    .addGap(283, 283, 283)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addContainerGap()))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(existingTestListScrollPane)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(74, 74, 74)
+                        .addComponent(jSplitPane2)))
+                .addContainerGap())
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(0, 565, Short.MAX_VALUE)))
+        );
+
+        jTabbedPane1.addTab("Test", jPanel1);
+
+        jSplitPane1.setDividerLocation(280);
+        jSplitPane1.setLeftComponent(envPropFileListScrollPane);
+
+        variablesTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Variable", "Value"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        variableTableScrollPane.setViewportView(variablesTable);
+        if (variablesTable.getColumnModel().getColumnCount() > 0) {
+            variablesTable.getColumnModel().getColumn(1).setResizable(false);
+        }
+
+        jSplitPane1.setRightComponent(variableTableScrollPane);
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 793, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 621, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        jTabbedPane1.addTab("Environment", jPanel3);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addContainerGap())
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addGap(32, 32, 32)
-                                .addComponent(existingTestListScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 312, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(existingTestDeatilsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 310, Short.MAX_VALUE)
-                                .addGap(26, 26, 26))
-                        .addGroup(layout.createSequentialGroup()
-                                .addComponent(topPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addContainerGap())
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(topPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+            .addComponent(jTabbedPane1)
         );
         layout.setVerticalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addGap(18, 18, 18)
-                                .addComponent(topPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(existingTestListScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 359, Short.MAX_VALUE)
-                                        .addComponent(existingTestDeatilsScrollPane))
-                                .addGap(18, 18, 18)
-                                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(14, 14, 14))
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addComponent(topPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jTabbedPane1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(14, 14, 14))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void submitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitBtnActionPerformed
-        // TODO add your handling code here:
+        try {
         if (url.equals("") || method.equals("")) {
             logger.warn("Some mandatory fields are missing");
             JOptionPane.showMessageDialog(this, "Some mandatory fields are missing", "ERROR MESSAGE", JOptionPane.ERROR_MESSAGE);
@@ -215,6 +412,10 @@ public class HomePage extends javax.swing.JFrame {
         screen3Instance = new Screen3Frame(this, url, method, headers, testScenarios, fileName);
         screen3Instance.setVisible(true);
         dispose();
+            getSelectedProperties();
+        } catch (IOException ex) {
+            java.util.logging.Logger.getLogger(HomePage.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_submitBtnActionPerformed
 
     private void testBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testBtnActionPerformed
@@ -247,6 +448,14 @@ public class HomePage extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void methodDropDownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_methodDropDownActionPerformed
+
+    }//GEN-LAST:event_methodDropDownActionPerformed
+
+    private void urlTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_urlTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_urlTextFieldActionPerformed
+
     private void openImportTest() {
         JPanel panel = new JPanel(new BorderLayout());
         JLabel label = new JLabel("Enter cURL Command:");
@@ -271,27 +480,26 @@ public class HomePage extends javax.swing.JFrame {
 
     private void processCurlCommand(String curlCommand) {
         curlCommand = curlCommand.replace("\\\\\"", "\"");
-        String curlURL = parseURl(curlCommand);
-        String httpMethod = parseHttpMethod(curlCommand);
-        System.out.println("HttpMethod: "+httpMethod);
-        Map<String,String> curlHeaders = new LinkedHashMap<>();
+        url = parseURl(curlCommand);
+        method = parseHttpMethod(curlCommand);
         Pattern headerPattern = Pattern.compile("(-H|--header)\\s+['\"]?([^:]+):\\s*([^'\"]*)['\"]?");
         Matcher headerMatcher = headerPattern.matcher(curlCommand);
+        this.headers = new LinkedHashMap<>();
         while (headerMatcher.find()) {
-            curlHeaders.put(headerMatcher.group(2), headerMatcher.group(3));
+            headers.put(headerMatcher.group(2), headerMatcher.group(3));
         }
-        String requestBody = "";
         Pattern pattern = Pattern.compile("(-d|--data|--data-raw)\\s+(['\"])(.*?)\\2", Pattern.DOTALL);
         Matcher matcher = pattern.matcher(curlCommand);
         if (matcher.find()) {
             requestBody = matcher.group(3);
         }
-        Screen1 screen1 = new Screen1(this, curlURL, httpMethod, curlHeaders, requestBody);
-        screen1.setVisible(true);
-        dispose();
+        showFileValues(1);
+//        Screen1 screen1 = new Screen1(this, url, method, headers, requestBody);
+//        screen1.setVisible(true);
+//        dispose();
     }
-    
-    private String parseURl(String cURLCommand){
+
+    private String parseURl(String cURLCommand) {
         Pattern urlPattern = Pattern.compile("curl.*?['\"](https?://[^'\"\\s]+)['\"]");
         Matcher urlMatcher = urlPattern.matcher(cURLCommand);
         if (urlMatcher.find()) {
@@ -300,14 +508,14 @@ public class HomePage extends javax.swing.JFrame {
         return "";
     }
 
-    private String parseHttpMethod(String cURLCommand) {      
+    private String parseHttpMethod(String cURLCommand) {
         Pattern methodPattern = Pattern.compile("(?:-X|--request)\\s+([A-Z]+)");
         Matcher methodMatcher = methodPattern.matcher(cURLCommand);
         if (methodMatcher.find()) {
             return methodMatcher.group(1).toUpperCase();
         }
         boolean hasDataFlag = cURLCommand.contains("--data") || cURLCommand.contains("-d");
-        if(hasDataFlag){
+        if (hasDataFlag) {
             return "POST";
         }
         return "GET";
@@ -325,11 +533,29 @@ public class HomePage extends javax.swing.JFrame {
         existingTestListScrollPane.setViewportView(fileTree);
         existingTestListScrollPane.revalidate();
         existingTestListScrollPane.repaint();
-        JPopupMenu popupMenu = new JPopupMenu();
-        JMenuItem refreshItem = new JMenuItem("Refresh");
-        popupMenu.add(refreshItem);
+        JMenuItem refreshItem = rightClickAction(fileTree, "Refresh");
+        refreshItem.addActionListener(e -> refreshTree());
+        fileTree.addTreeSelectionListener((TreeSelectionEvent e) -> {
+            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) fileTree.getLastSelectedPathComponent();
+            if (selectedNode != null) {
+                System.out.println("Selected: " + selectedNode.getUserObject());
+                TreePath treePath = fileTree.getSelectionPath();
+                if (treePath != null) {
+                    String fullPath = buildFullPath(treePath);
+                    File selectedFile = new File(fullPath);
+                    if (selectedFile.isFile()) {
+                        processFile(selectedFile);
+                    }
+                }
+            }
+        });
+    }
 
-        fileTree.addMouseListener(new MouseAdapter() {
+    private JMenuItem rightClickAction(Component component, String name) {
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem menuItem = new JMenuItem(name);
+        popupMenu.add(menuItem);
+        component.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.isPopupTrigger()) {
@@ -348,21 +574,7 @@ public class HomePage extends javax.swing.JFrame {
                 popupMenu.show(e.getComponent(), e.getX(), e.getY());
             }
         });
-        refreshItem.addActionListener(e -> refreshTree());
-        fileTree.addTreeSelectionListener((TreeSelectionEvent e) -> {
-            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) fileTree.getLastSelectedPathComponent();
-            if (selectedNode != null) {
-                System.out.println("Selected: " + selectedNode.getUserObject());
-                TreePath treePath = fileTree.getSelectionPath();
-                if (treePath != null) {
-                    String fullPath = buildFullPath(treePath);
-                    File selectedFile = new File(fullPath);
-                    if (selectedFile.isFile()) {
-                        processFile(selectedFile);
-                    }
-                }
-            }
-        });
+        return menuItem;
     }
 
     private void refreshTree() {
@@ -388,7 +600,6 @@ public class HomePage extends javax.swing.JFrame {
                     || name.toLowerCase().endsWith(".xls")
                     || name.toLowerCase().endsWith(".xlsx")
                     || name.toLowerCase().endsWith(".csv"));
-
             if (files != null) {
                 for (File f : files) {
                     DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(f.getName());
@@ -409,28 +620,30 @@ public class HomePage extends javax.swing.JFrame {
             if (rowIterator.hasNext()) {
                 rowIterator.next();
             }
+            String headers = "";
             if (rowIterator.hasNext()) {
                 Row firstRowData = rowIterator.next();
                 url = getCellValue(firstRowData.getCell(0));
                 method = getCellValue(firstRowData.getCell(1));
-                headers = getCellValue(firstRowData.getCell(2));
+                headers = getCellValue(firstRowData.getCell(2)).trim();
             }
+            addHeaderValueToHeaderMap(headers);
             rowIterator = sheet.iterator();
             rowIterator.next();
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
                 String testName = getCellValue(row.getCell(3));
                 String requestBodyStr = getCellValue(row.getCell(4));
-                JSONObject requestBody;
+                JSONObject body;
                 if (requestBodyStr.equalsIgnoreCase("Empty Request Body") || requestBodyStr.trim().isEmpty()) {
                     testCases.add(new Object[]{testName, requestBodyStr});
                 } else {
-                    requestBody = new JSONObject(requestBodyStr);
-                    testCases.add(new Object[]{testName, requestBody});
+                    body = new JSONObject(requestBodyStr);
+                    testCases.add(new Object[]{testName, body});
                 }
             }
             this.fileName = fileName.toString();
-            showFileValues();
+            showFileValues(0);
         } catch (FileNotFoundException ex) {
             showErrorDialog(ex);
             java.util.logging.Logger.getLogger(Screen1.class.getName()).log(Level.SEVERE, null, ex);
@@ -443,19 +656,31 @@ public class HomePage extends javax.swing.JFrame {
         }
     }
 
-    private void showFileValues() {
-        JTextArea textArea = new JTextArea();
-        textArea.setEditable(false);  // Make read-only
-        textArea.setFont(new Font("Monospaced", Font.PLAIN, 14));  // Improve readability
-        textArea.setLineWrap(true);
-        textArea.setWrapStyleWord(true);
-        StringBuilder content = new StringBuilder();
-        content.append("URL: ").append(url).append("\n");
-        content.append("Method: ").append(method).append("\n");
-        if (!headers.equals("")) {
-            content.append("Headers: ").append(headers).append("\n\n");
+    private void addHeaderValueToHeaderMap(String headers) {
+        System.out.println("File headers: " + headers);
+        if (!headers.isEmpty()) {
+            this.headers = new LinkedHashMap<>();
+            String[] pairs = headers.split("\\s*,\\s*");
+            for (String pair : pairs) {
+                String[] keyValue = pair.split("\\s*:\\s*", 2);
+                if (keyValue.length == 2) {
+                    this.headers.put(keyValue[0], keyValue[1]);
+                }
+            }
+        } else {
+            this.headers = null;
         }
-        if (!testCases.isEmpty()) {
+    }
+
+    private void showFileValues(int value) {
+        resetAllValues();
+        urlTextField.setText(url);
+        methodDropDown.setSelectedItem(method);
+        setHeaders();
+        StringBuilder content = new StringBuilder();
+        boolean isFile = (value == 0 && testCases != null && !testCases.isEmpty());
+        boolean isCurlCommand = (value == 1 && this.requestBody != null && !this.requestBody.isEmpty());
+        if (isFile) {
             content.append("Test Cases:\n");
             testCases.stream().map((Object[] testCase) -> {
                 content.append("Test Name: ").append(testCase[0]).append("\n");
@@ -463,11 +688,135 @@ public class HomePage extends javax.swing.JFrame {
             }).forEachOrdered(testCase -> {
                 content.append("Request Body: ").append(testCase[1].toString()).append("\n\n");
             });
+            bodyTextArea.setText(content.toString());
+        } else if (isCurlCommand) {
+            String formattedData = formatRequestBody();
+            bodyTextArea.setText(formattedData);
         }
-        textArea.setText(content.toString());
-        existingTestDeatilsScrollPane.setViewportView(textArea);
+        existingTestDeatilsScrollPane.setViewportView(bodyTextArea);
         existingTestDeatilsScrollPane.revalidate();
         existingTestDeatilsScrollPane.repaint();
+    }
+
+    private String formatRequestBody() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        XmlMapper xmlMapper = new XmlMapper();
+        try {
+            JsonNode jsonNode = objectMapper.readTree(requestBody);
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
+        } catch (Exception ignored) {
+        }
+        try {
+            Object xmlObject = xmlMapper.readValue(requestBody, Object.class);
+            return xmlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(xmlObject);
+        } catch (Exception ignored) {
+        }
+        return requestBody.trim();
+    }
+
+    private void setHeaders() {
+        if (this.headers == null) {
+            return;
+        }
+        Object[][] updatedHeadersData = new Object[headers.size() + 1][2];
+        int i = 0;
+        for (Map.Entry<String, String> header : headers.entrySet()) {
+            updatedHeadersData[i][0] = header.getKey();
+            updatedHeadersData[i][1] = header.getValue();
+            i++;
+        }
+        headersTableModel = new DefaultTableModel(
+                updatedHeadersData,
+                new String[]{"Header Key", "Header Value"}
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return true;
+            }
+        };
+        headersTable.setToolTipText("Right Click on Header To Delete");
+        addNewRowToTable(headersTableModel);
+        headersTable.setModel(headersTableModel);
+        deleteRowPopUp(headersTable);
+        headersTable.revalidate();
+        headersTable.repaint();
+    }
+
+    private void deleteRowPopUp(JTable table) {
+        JPopupMenu popupMenu = getjPopupMenu(table);
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                showPopup(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                showPopup(e);
+            }
+
+            private void showPopup(MouseEvent e) {
+                if (e.isPopupTrigger()) { // Detect right-click (platform-dependent)
+                    int row = table.rowAtPoint(e.getPoint());
+                    if (row >= 0) {
+                        table.setRowSelectionInterval(row, row); // Select row
+                        popupMenu.show(table, e.getX(), e.getY()); // Show popup menu
+                    }
+                }
+            }
+        });
+    }
+
+    private JPopupMenu getjPopupMenu(JTable table) {
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem deleteItem = new JMenuItem("Delete");
+        DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
+        deleteItem.addActionListener(e -> {
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow >= 0) {
+                String key = (String) tableModel.getValueAt(selectedRow, 0);
+                String value = (String) tableModel.getValueAt(selectedRow, 1);
+                if (key != null && !key.trim().isEmpty() && value != null && !value.trim().isEmpty()) {
+                    tableModel.removeRow(selectedRow);
+                } else {
+                    JOptionPane.showMessageDialog(table, "Cannot delete an empty row!", "Warning", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
+        popupMenu.add(deleteItem);
+        return popupMenu;
+    }
+
+    private void addNewRowToTable(DefaultTableModel tableModel) {
+        tableModel.addTableModelListener(e -> {
+            if (e.getType() == TableModelEvent.UPDATE) {
+                int rowCount = tableModel.getRowCount();
+                int editedRow = e.getFirstRow();
+                if (editedRow == rowCount - 1) {
+                    boolean isRowEmpty = true;
+                    for (int col = 0; col < tableModel.getColumnCount(); col++) {
+                        Object value = tableModel.getValueAt(editedRow, col);
+                        if (value instanceof String string) {
+                            if (!string.trim().isEmpty()) {
+                                isRowEmpty = false;
+                                break;
+                            }
+                        } else if (value instanceof Boolean) {
+                            if ((Boolean) value) { // If the boolean is true, the row is not empty
+                                isRowEmpty = false;
+                                break;
+                            }
+                        } else if (value != null) { // Catch any other non-null values
+                            isRowEmpty = false;
+                            break;
+                        }
+                    }
+                    if (!isRowEmpty) {
+                        tableModel.addRow(new Object[]{});
+                    }
+                }
+            }
+        });
     }
 
     private static String getCellValue(Cell cell) {
@@ -486,6 +835,105 @@ public class HomePage extends javax.swing.JFrame {
             default ->
                 "";
         };
+    }
+
+    private void setUpEnvironmentTab() {
+        File propertiesDir = new File(System.getProperty("user.dir"));
+        if (!propertiesDir.exists() || !propertiesDir.isDirectory()) {
+            logger.error("Invalid properties directory: " + propertiesDir.getAbsolutePath());
+            return;
+        }
+        refreshFileList(propertiesDir);
+//        JButton newFileButton = new JButton("New File");
+//        newFileButton.addActionListener(e -> createNewPropertiesFile(propertiesDir));
+    }
+
+    private void refreshFileList(File propertiesDir) {
+        File[] propertiesFiles = propertiesDir.listFiles((dir, name) -> name.endsWith(".properties"));
+        String[] fileNames = propertiesFiles == null ? new String[0]
+                : Arrays.stream(propertiesFiles).map(File::getName).toArray(String[]::new);
+        JList<String> fileList = new JList<>(fileNames);
+        fileList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        fileList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int selectedIndex = fileList.getSelectedIndex();
+                if (selectedIndex != -1) {
+                    File selectedFile = propertiesFiles[selectedIndex];
+                    processPropertyFile(selectedFile);
+                }
+            }
+        });
+        envPropFileListScrollPane.setViewportView(fileList);
+        envPropFileListScrollPane.revalidate();
+        envPropFileListScrollPane.repaint();
+    }
+
+    private void processPropertyFile(File file) {
+        Properties properties = new Properties();
+        try (FileInputStream fis = new FileInputStream(file)) {
+            properties.load(fis);
+        } catch (IOException ex) {
+            logger.error("Error reading properties file: " + file.getAbsolutePath(), ex);
+            JOptionPane.showMessageDialog(null, "Failed to read file!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Select", "Property Key", "Property Value"}, 0) {
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                return (columnIndex == 0) ? Boolean.class : String.class;
+            }
+
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return true; // Allow checkbox and value editing
+            }
+        };
+        for (String key : properties.stringPropertyNames()) {
+            tableModel.addRow(new Object[]{true, key, properties.getProperty(key)});
+        }
+        tableModel.addRow(new Object[]{});
+        variablesTable.setToolTipText("Right Click to Delete");
+        variablesTable.setModel(tableModel);
+        variablesTable.getColumnModel().getColumn(0).setMaxWidth(50);
+        addNewRowToTable(tableModel);
+        variablesTable.revalidate();
+        variablesTable.repaint();
+    }
+
+    private Properties getSelectedProperties() throws IOException {
+        Properties selectedProperties = new Properties();
+        DefaultTableModel model = (DefaultTableModel) variablesTable.getModel();
+        for (int i = 0; i < model.getRowCount(); i++) {
+            boolean isSelected = (Boolean) model.getValueAt(i, 0);
+            if (isSelected) {
+                String key = (String) model.getValueAt(i, 1);
+                String value = (String) model.getValueAt(i, 2);
+                selectedProperties.setProperty(key, value);
+            }
+        }
+        selectedProperties.store(System.out, "Properties Output");
+        return selectedProperties;
+    }
+
+    private void createNewPropertiesFile(File propertiesDir) {
+        String fileName = JOptionPane.showInputDialog(null, "Enter new file name:", "New Properties File", JOptionPane.PLAIN_MESSAGE);
+        if (fileName != null && !fileName.trim().isEmpty()) {
+            if (!fileName.endsWith(".properties")) {
+                fileName += ".properties";
+            }
+            File newFile = new File(propertiesDir, fileName);
+            try {
+                if (newFile.createNewFile()) {
+                    logger.info("File created: " + newFile.getAbsolutePath());
+                    refreshFileList(propertiesDir);
+                } else {
+                    JOptionPane.showMessageDialog(null, "File already exists!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (IOException ex) {
+                logger.error("Failed to create file: " + ex.getMessage());
+                JOptionPane.showMessageDialog(null, "Error creating file!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     /**
@@ -524,13 +972,35 @@ public class HomePage extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JScrollPane ParamsScrollPane;
+    private javax.swing.JTextArea bodyTextArea;
+    private javax.swing.JScrollPane envPropFileListScrollPane;
     private javax.swing.JScrollPane existingTestDeatilsScrollPane;
     private javax.swing.JScrollPane existingTestListScrollPane;
+    private javax.swing.JScrollPane headersScrollPane;
+    private javax.swing.JTable headersTable;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JSplitPane jSplitPane1;
+    private javax.swing.JSplitPane jSplitPane2;
+    private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JTabbedPane jTabbedPane3;
+    private javax.swing.JTextArea jTextArea2;
+    private javax.swing.JComboBox<String> methodDropDown;
+    private javax.swing.JScrollPane resultResponseScrollPane;
+    private javax.swing.JScrollPane scriptScrollPane;
+    private javax.swing.JTextArea scriptTextArea;
     private javax.swing.JButton submitBtn;
     private javax.swing.JButton testBtn;
     private javax.swing.JPanel topPanel;
+    private javax.swing.JTextField urlTextField;
+    private javax.swing.JScrollPane variableTableScrollPane;
+    private javax.swing.JTable variablesTable;
     // End of variables declaration//GEN-END:variables
 }

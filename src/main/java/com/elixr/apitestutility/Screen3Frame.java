@@ -83,21 +83,14 @@ public class Screen3Frame extends javax.swing.JFrame {
      * @param testCases The test cases represented as a 2D Object array.
      * @param fileName The name of the test file, which contains the test name.
      */
-    public Screen3Frame(JFrame previosuFrame, String url, String method, String headers, Object[][] testCases, String fileName) {
+    public Screen3Frame(JFrame previosuFrame, String url, String method, Map<String, String> headers, Object[][] testCases, String fileName) {
         initComponents();
         setupFrame(MAXIMIZED_BOTH);
         this.previousFrame = previosuFrame;
         this.url = url;
         this.methodType = method;
-        if (!headers.equals("")) {
-            String[] headerPairs = headers.split(",");
-            for (String header : headerPairs) {
-                // Split each header pair by colon to separate key and value
-                String[] keyValue = header.split(":", 2);  // Limit to 2 parts in case the value contains ":"
-                if (keyValue.length == 2) {
-                    this.headers.put(keyValue[0].trim(), keyValue[1].trim());
-                }
-            }
+        if (!headers.isEmpty()) {
+            this.headers = headers;
         }
         this.jsonTableBody = testCases;
         String[] name = fileName.split("_");
@@ -288,7 +281,6 @@ public class Screen3Frame extends javax.swing.JFrame {
                 return c;
             }
         };
-        // Apply the bordered renderer to all columns except "Request Body"
         for (int col = 0; col < resultTable.getColumnCount(); col++) {
             if (col != 2 && col != 4) { // Skip JSON column to preserve its special rendering
                 resultTable.getColumnModel().getColumn(col).setCellRenderer(borderedCellRenderer);
